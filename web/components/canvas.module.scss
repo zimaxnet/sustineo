@@ -1,0 +1,11 @@
+@use "../app/defaults.scss" as *;
+
+.container {
+  border: solid 1px $color-red-300;
+  width: 100vw;
+  height: 100vh;
+  z-index: 500;
+  position: fixed;
+  top: 0;
+  left: 0;
+}

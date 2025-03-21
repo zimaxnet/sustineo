@@ -1,0 +1,110 @@
+import os
+import json
+import asyncio
+from pathlib import Path
+from pydantic import BaseModel
+from rtclient import RTLowLevelClient  # type: ignore
+from contextlib import asynccontextmanager
+from jinja2 import Environment, FileSystemLoader
+from fastapi.middleware.cors import CORSMiddleware
+from azure.core.credentials import AzureKeyCredential
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+
+from api.voice.realtime import RealtimeVoiceClient
+from api.voice.session import Message, RealtimeSession
+
+from dotenv import load_dotenv
+load_dotenv()
+
+AZURE_VOICE_ENDPOINT = os.getenv("AZURE_VOICE_ENDPOINT")
+AZURE_VOICE_KEY = os.getenv("AZURE_VOICE_KEY", "fake_key")
+
+base_path = Path(__file__).parent
+
+# jinja2 template environment
+env = Environment(loader=FileSystemLoader(base_path / "voice"))
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        # manage lifetime scope
+        yield
+    finally:
+        # remove all stray sockets
+        pass
+
+
+app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+class SimpleMessage(BaseModel):
+    name: str
+    text: str
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
+@app.post("/api/message")
+async def message(message: SimpleMessage):
+    return {
+        "message": f"Hello {message.name}, you sent: {message.text}"
+    }
+
+
+@app.websocket("/api/voice")
+async def voice_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        async with RTLowLevelClient(
+            url=AZURE_VOICE_ENDPOINT,
+            key_credential=AzureKeyCredential(AZURE_VOICE_KEY),
+            azure_deployment="gpt-4o-realtime-preview",
+        ) as rt:
+
+            # get current messages for instructions
+            #chat_items = await websocket.receive_json()
+            #message = Message(**chat_items)
+
+            # get current username and receive any parameters
+            user_message = await websocket.receive_json()
+            user = Message(**user_message)
+
+            settings = json.loads(user.payload)
+            print(
+                "Starting voice session with settings:\n",
+                json.dumps(settings, indent=2),
+            )
+
+            # create voice system message
+            system_message = env.get_template("script.jinja2").render(
+                customer=settings["user"] if "user" in settings else "Seth"
+            )
+
+            session = RealtimeSession(RealtimeVoiceClient(rt, verbose=True), websocket)
+            await session.send_realtime_instructions(
+                system_message,
+                threshold=settings["threshold"] if "threshold" in settings else 0.8,
+                silence_duration_ms=(
+                    settings["silence"] if "silence" in settings else 500
+                ),
+                prefix_padding_ms=(settings["prefix"] if "prefix" in settings else 300),
+            )
+            tasks = [
+                asyncio.create_task(session.receive_realtime()),
+                asyncio.create_task(session.receive_client()),
+            ]
+            await asyncio.gather(*tasks)
+
+    except WebSocketDisconnect as e:
+        print("Voice Socket Disconnected", e)

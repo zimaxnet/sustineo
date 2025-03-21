@@ -1,0 +1,14 @@
+@use "../app/defaults.scss" as *;
+
+.container {
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  z-index: 1000;
+  height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 0.5rem;
+}

@@ -1,0 +1,12 @@
+pydantic
+websockets
+python-dotenv
+fastapi[standard]
+azure-identity
+openai
+azure-ai-inference
+opentelemetry-instrumentation
+azure-monitor-opentelemetry-exporter
+opentelemetry-instrumentation-fastapi
+https://github.com/Azure-Samples/aoai-realtime-audio-sdk/releases/download/py%2Fv0.5.3/rtclient-0.5.3.tar.gz
+./whl/prompty-0.0.1.dev1+g5c2f7c7-py3-none-any.whl
