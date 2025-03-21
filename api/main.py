@@ -72,10 +72,6 @@ async def voice_endpoint(websocket: WebSocket):
             azure_deployment="gpt-4o-realtime-preview",
         ) as rt:
 
-            # get current messages for instructions
-            #chat_items = await websocket.receive_json()
-            #message = Message(**chat_items)
-
             # get current username and receive any parameters
             user_message = await websocket.receive_json()
             user = Message(**user_message)

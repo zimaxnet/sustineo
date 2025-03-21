@@ -1,9 +1,9 @@
+openai
 pydantic
 websockets
 python-dotenv
-fastapi[standard]
 azure-identity
-openai
+fastapi[standard]
 azure-ai-inference
 opentelemetry-instrumentation
 azure-monitor-opentelemetry-exporter
