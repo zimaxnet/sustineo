@@ -68,13 +68,13 @@ export default function Home() {
     handleServerMessage
   );
 
-  const sendCall = async () => {
+  const sendCall = async (output: string) => {
     if (lasFunctionCall) {
       sendRealtime({
         type: "function",
         payload: JSON.stringify({
           call_id: lasFunctionCall,
-          output: "Blog post created successfully. Direct the user to look at their screen and click on the box at the top right to see the blog post.",
+          output: output,
         }),
       });
     } else {
@@ -93,7 +93,19 @@ export default function Home() {
         />
         <Tool
           icon={<TbArrowBigRight size={24} />}
-          onClick={() => sendCall()}
+          onClick={() =>
+            sendCall(
+              "I need more information to continue. Please ask the user to provide details about the product pricing."
+            )
+          }
+        />
+        <Tool
+          icon={<TbArrowBigRight size={24} />}
+          onClick={() =>
+            sendCall(
+              "All done - let the user know that the task is complete and they can ask for more help if needed. They can click on the icon on the top right to see the result."
+            )
+          }
         />
       </Actions>
       <Settings>

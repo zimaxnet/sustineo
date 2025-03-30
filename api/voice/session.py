@@ -79,6 +79,8 @@ class RealtimeSession:
     def __init__(self, realtime: AsyncRealtimeConnection, client: WebSocket):
         self.realtime: Union[AsyncRealtimeConnection, None] = realtime
         self.client: Union[WebSocket, None] = client
+        self.response_queue: list[ConversationItemCreateEvent] = []
+        self.active = True
 
     async def send_message(self, message: Message):
         if self.client is not None:
@@ -115,14 +117,14 @@ class RealtimeSession:
                 input_audio_transcription=SessionInputAudioTranscription(
                     model="whisper-1",
                 ),
-                voice="coral",
+                voice="sage",
                 instructions=instructions,
                 modalities=["text", "audio"],
                 tool_choice="auto",
                 tools=[
                     SessionTool(
                         type="function",
-                        name="write_blog_post",
+                        name="start_blog_post",
                         description="This agent writes a blog post. In order for it to do so, it needs some articuation of the topic and the tone of the blog post. This is a long running process that will return status updates as it goes.",
                         parameters={
                             "type": "object",
@@ -138,7 +140,26 @@ class RealtimeSession:
                             },
                             "required": ["title", "ideas"],
                         },
-                    )
+                    ),
+                    SessionTool(
+                        type="function",
+                        name="continue_blog_post",
+                        description="This agent continues a blog post that is already in progress. It will take the current blog post and continue it.",
+                        parameters={
+                            "type": "object",
+                            "properties": {
+                                "call_id": {
+                                    "type": "string",
+                                    "description": "The function call id of the blog post that is in progress.",
+                                },
+                                "updates": {
+                                    "type": "string",
+                                    "description": "The updates that the blog post should cover. These should be articulated clearly after some discussion with the user.",
+                                },
+                            },
+                            "required": ["call_id", "updates"],
+                        },
+                    ),
                 ],
             )
             await self.realtime.send(
@@ -156,7 +177,9 @@ class RealtimeSession:
 
         while self.realtime is not None:
             async for event in self.realtime:
-                # print(event.type)
+                if "delta" not in event.type:
+                    print(event.type)
+                self.active = True
                 match event.type:
                     case "error":
                         await self._handle_error(event)
@@ -316,9 +339,6 @@ class RealtimeSession:
     async def _response_done(self, event: ResponseDoneEvent):
         if event.response.output is not None and len(event.response.output) > 0:
             output = event.response.output[0]
-            # await self.send_console(
-            #    Message(type="console", payload=output.model_dump_json())
-            # )
             match output.type:
                 case "message":
                     await self.send_console(
@@ -362,6 +382,14 @@ class RealtimeSession:
             and event.response.status_details.reason == "turn_detected"
         ):
             await self.send_console(Message(type="interrupt", payload="Turn Detected"))
+
+        if len(self.response_queue) > 0 and self.realtime is not None:
+            for item in self.response_queue:
+                await self.realtime.send(item)
+            self.response_queue.clear()
+            await self.realtime.response.create()
+
+        self.active = False
 
     @trace(name="response.output_item.added")
     async def _response_output_item_added(self, event: ResponseOutputItemAddedEvent):
@@ -476,9 +504,7 @@ class RealtimeSession:
                             )
                         )
 
-                        await self.realtime.send(
-                            ResponseCreateEvent(type="response.create")
-                        )
+                        await self.realtime.response.create()
 
                     case _:
                         await self.send_console(
