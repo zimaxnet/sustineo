@@ -1,5 +1,3 @@
-import { API_ENDPOINT, WS_ENDPOINT } from "store/endpoint";
-
 import type { Route } from "./+types/home";
 import Settings from "components/settings";
 import Setting from "components/setting";
@@ -7,7 +5,7 @@ import {
   TbSettingsPause,
   TbSettingsBolt,
   TbUserHexagon,
-  TbEngine,
+  TbArrowBigRight,
 } from "react-icons/tb";
 import VoiceSettings from "components/voice/voicesettings";
 import Actions from "components/actions";
@@ -15,12 +13,12 @@ import Tool from "components/tool";
 import Canvas from "components/canvas";
 import { version } from "store/version";
 import Title from "components/title";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Message } from "store/voice/voice-client";
-import VoiceClient from "store/voice/voice-client";
-import { useLocalStorage } from "store/uselocalstorage";
-import { defaultConfiguration, type VoiceConfiguration } from "store/voice";
 import useUser from "store/useuser";
+import { useRealtime } from "components/voice/userealtime";
+
+import styles from "./home.module.scss";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -30,78 +28,72 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const [user, isLoading, error] = useUser();
+  const { user, error } = useUser();
   useEffect(() => {
     if (error) {
       console.error("Error fetching user data:", error);
     }
   }, [error]);
 
-  const [settings, setSettings, resetSettings] =
-    useLocalStorage<VoiceConfiguration>("voice-settings", defaultConfiguration);
-
-  const [callState, setCallState] = useState<"idle" | "call">("idle");
-  const voiceRef = useRef<VoiceClient | null>(null);
+  const [lasFunctionCall, setLastFunctionCall] = useState<string | null>(null);
 
   const handleServerMessage = async (serverEvent: Message) => {
-    console.log("serverEvent", serverEvent);
-  };
+    if (serverEvent.type === "function") {
+      // handle function call
+      const func = JSON.parse(serverEvent.payload);
+      sendRealtime({
+        type: "function",
+        payload: JSON.stringify({
+          call_id: func.call_id,
+          name: func.name,
+          output: "Working on it - will continue to update as I go. Feel free to work on other tasks in the meantime. Make sure to let the user know you are working on it and can do other tasks."
+        }),
+      });
+      setLastFunctionCall(func.call_id);
 
-  const startRealtime = async () => {
-    if (voiceRef.current) {
-      await voiceRef.current.stop();
-      voiceRef.current = null;
-    }
-
-    if (!voiceRef.current) {
-      const endpoint = WS_ENDPOINT.endsWith("/")
-        ? WS_ENDPOINT.slice(0, -1)
-        : WS_ENDPOINT;
-
-      voiceRef.current = new VoiceClient(
-        `${endpoint}/api/voice`,
-        handleServerMessage
+      console.log("Function call:", func);
+    } else {
+      console.log(
+        "serverEvent",
+        serverEvent.type,
+        serverEvent.payload.startsWith("{")
+          ? JSON.parse(serverEvent.payload)
+          : serverEvent.payload
       );
-
-      await voiceRef.current.start(settings.inputDeviceId);
-      const message = {
-        user: user!.name,
-        threshold: settings.threshold,
-        silence: settings.silence,
-        prefix: settings.prefix,
-      };
-
-      await voiceRef.current.sendUserMessage(JSON.stringify(message));
-      await voiceRef.current.sendCreateResponse();
-      setCallState("call");
     }
   };
 
-  const stopRealtime = async () => {
-    if (voiceRef.current) {
-      await voiceRef.current.stop();
-      voiceRef.current = null;
-      setCallState("idle");
-    }
-  };
+  const { toggleRealtime, talking, sendRealtime } = useRealtime(
+    user,
+    handleServerMessage
+  );
 
-  const toggleRealtime = async () => {
-    if (callState === "idle") {
-      await startRealtime();
-    }
-    if (callState === "call") {
-      await stopRealtime();
+  const sendCall = async () => {
+    if (lasFunctionCall) {
+      sendRealtime({
+        type: "function",
+        payload: JSON.stringify({
+          call_id: lasFunctionCall,
+          output: "Blog post created successfully. Direct the user to look at their screen and click on the box at the top right to see the blog post.",
+        }),
+      });
+    } else {
+      console.log("No function call to send.");
     }
   };
 
   return (
     <main>
-      <Title text="Contoso Social" version={version} user={user} />
+      <Title text="sustineō" version={version} user={user} />
       <Canvas />
       <Actions>
         <Tool
           icon={<TbUserHexagon size={24} />}
           onClick={() => toggleRealtime()}
+        />
+        <Tool
+          icon={<TbArrowBigRight size={24} />}
+          onClick={() => sendCall()}
         />
       </Actions>
       <Settings>
@@ -112,6 +104,7 @@ export default function Home() {
           <div>Other Settings</div>
         </Setting>
       </Settings>
+      {talking && <div>!!!!!!!!!!!!!!!</div>}
     </main>
   );
 }

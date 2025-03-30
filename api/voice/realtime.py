@@ -144,7 +144,7 @@ class RealtimeVoiceClient:
                 prefix_padding_ms=prefix_padding_ms,
             ),
             input_audio_transcription=InputAudioTranscription(model="whisper-1"),
-            voice="shimmer",
+            voice="sage",
             instructions=instructions,
             modalities={"audio", "text"},
         )
@@ -362,7 +362,7 @@ class RealtimeVoiceClient:
                     print(f"  ItemPart Id: {message.item_id}")
 
             case "response.text.delta":
-                if self.verbose:
+                if False:
                     print("Response Text Delta Message")
                     print(f"  Response Id: {message.response_id}")
                     print(f"  Text: {message.delta}")
@@ -374,7 +374,7 @@ class RealtimeVoiceClient:
                     print(f"  Text: {message.text}")
 
             case "response.audio_transcript.delta":
-                if self.verbose:
+                if False:
                     print("Response Audio Transcript Delta Message")
                     print(f"  Response Id: {message.response_id}")
                     print(f"  Item Id: {message.item_id}")
@@ -396,7 +396,7 @@ class RealtimeVoiceClient:
                     )
 
             case "response.audio.delta":
-                if self.verbose:
+                if False:
                     print("Response Audio Delta Message")
                     print(f"  Response Id: {message.response_id}")
                     print(f"  Item Id: {message.item_id}")
@@ -414,7 +414,7 @@ class RealtimeVoiceClient:
                     print(f"  Item Id: {message.item_id}")
 
             case "response.function_call_arguments.delta":
-                if self.verbose:
+                if False:
                     print("Response Function Call Arguments Delta Message")
                     print(f"  Response Id: {message.response_id}")
                     print(f"  Arguments: {message.delta}")

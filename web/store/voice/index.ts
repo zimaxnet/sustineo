@@ -14,6 +14,11 @@ export const defaultConfiguration: VoiceConfiguration = {
 
 export class Player {
   private playbackNode: AudioWorkletNode | null = null;
+  setTalking: (talking: boolean) => void;
+
+  constructor(setTalking: (talking: boolean) => void) {
+    this.setTalking = setTalking;
+  }
 
   async init(sampleRate: number) {
     const audioContext = new AudioContext({ sampleRate });
@@ -21,16 +26,20 @@ export class Player {
 
     this.playbackNode = new AudioWorkletNode(audioContext, "playback-worklet");
     this.playbackNode.connect(audioContext.destination);
+    
   }
 
   play(buffer: Int16Array) {
     if (this.playbackNode) {
+      this.setTalking(true);
       this.playbackNode.port.postMessage(buffer);
+      this.setTalking(false);
     }
   }
 
   clear() {
     if (this.playbackNode) {
+      this.setTalking(false);
       this.playbackNode.port.postMessage(null);
     }
   }

@@ -5,8 +5,14 @@ import styles from "./voicesettings.module.scss";
 import { defaultConfiguration, type VoiceConfiguration } from "store/voice";
 
 const VoiceSettings = () => {
-  const [settings, setSettings, resetSettings] =
-    useLocalStorage<VoiceConfiguration>("voice-settings", defaultConfiguration);
+  const {
+    storedValue: settings,
+    setValue: setSettings,
+    reset: resetSettings,
+  } = useLocalStorage<VoiceConfiguration>(
+    "voice-settings",
+    defaultConfiguration
+  );
   const { devices, error, isLoading } = useMediaDevices(true);
 
   return (

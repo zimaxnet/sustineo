@@ -3,7 +3,7 @@ import { Player, Recorder } from ".";
 import { WebSocketClient } from "./websocket-client";
 
 export interface Message {
-  type: "user" | "assistant" | "audio" | "console" | "interrupt" | "messages";
+  type: "user" | "assistant" | "audio" | "console" | "interrupt" | "messages" | "function";
   payload: string;
 }
 
@@ -18,13 +18,16 @@ class VoiceClient {
   player: Player | null;
   recorder: Recorder | null;
   handleServerMessage: (message: Message) => Promise<void>;
+  setTalking: (talking: boolean) => void;
 
   constructor(
     url: string | URL,
-    handleServerMessage: (message: Message) => Promise<void>
+    handleServerMessage: (message: Message) => Promise<void>,
+    setTalking: (talking: boolean) => void
   ) {
     this.url = url;
     this.handleServerMessage = handleServerMessage;
+    this.setTalking = setTalking;
     this.socket = null;
     this.player = null;
     this.recorder = null;
@@ -34,7 +37,7 @@ class VoiceClient {
     console.log("Starting voice client");
     this.socket = new WebSocketClient<Message, Message>(this.url);
 
-    this.player = new Player();
+    this.player = new Player(this.setTalking);
 
     await this.player.init(24000);
 

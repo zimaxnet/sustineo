@@ -2,22 +2,21 @@ import os
 import json
 import asyncio
 from pathlib import Path
+from openai import AsyncAzureOpenAI
 from pydantic import BaseModel
-from rtclient import RTLowLevelClient  # type: ignore
 from contextlib import asynccontextmanager
 from jinja2 import Environment, FileSystemLoader
 from fastapi.middleware.cors import CORSMiddleware
-from azure.core.credentials import AzureKeyCredential
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from api.voice.realtime import RealtimeVoiceClient
 from api.voice.session import Message, RealtimeSession
 
 from dotenv import load_dotenv
 load_dotenv()
 
-AZURE_VOICE_ENDPOINT = os.getenv("AZURE_VOICE_ENDPOINT")
+AZURE_VOICE_ENDPOINT = os.getenv("AZURE_VOICE_ENDPOINT") or ""
 AZURE_VOICE_KEY = os.getenv("AZURE_VOICE_KEY", "fake_key")
+LOCAL_TRACING_ENABLED = os.getenv("LOCAL_TRACING_ENABLED", "false").lower() == "true"
 
 base_path = Path(__file__).parent
 
@@ -61,16 +60,18 @@ async def message(message: SimpleMessage):
         "message": f"Hello {message.name}, you sent: {message.text}"
     }
 
-
 @app.websocket("/api/voice")
 async def voice_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
-        async with RTLowLevelClient(
-            url=AZURE_VOICE_ENDPOINT,
-            key_credential=AzureKeyCredential(AZURE_VOICE_KEY),
-            azure_deployment="gpt-4o-realtime-preview",
-        ) as rt:
+        client = AsyncAzureOpenAI(
+            azure_endpoint=AZURE_VOICE_ENDPOINT,
+            api_key=AZURE_VOICE_KEY,
+            api_version="2024-10-01-preview",
+        )
+        async with client.beta.realtime.connect(
+            model="gpt-4o-realtime-preview",
+        ) as realtime_client:
 
             # get current username and receive any parameters
             user_message = await websocket.receive_json()
@@ -84,11 +85,15 @@ async def voice_endpoint(websocket: WebSocket):
 
             # create voice system message
             system_message = env.get_template("script.jinja2").render(
-                customer=settings["user"] if "user" in settings else "Seth"
+                customer=settings["user"] if "user" in settings else "unnamed user"
             )
 
-            session = RealtimeSession(RealtimeVoiceClient(rt, verbose=True), websocket)
-            await session.send_realtime_instructions(
+            session = RealtimeSession(
+                realtime=realtime_client,
+                client=websocket,
+            )
+
+            await session.update_realtime_session(
                 system_message,
                 threshold=settings["threshold"] if "threshold" in settings else 0.8,
                 silence_duration_ms=(
@@ -96,6 +101,7 @@ async def voice_endpoint(websocket: WebSocket):
                 ),
                 prefix_padding_ms=(settings["prefix"] if "prefix" in settings else 300),
             )
+
             tasks = [
                 asyncio.create_task(session.receive_realtime()),
                 asyncio.create_task(session.receive_client()),

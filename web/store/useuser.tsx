@@ -17,8 +17,9 @@ const availableUsers: { [key: string]: string } = {
 };
 
 const defaultUser: User = {
-  name: "Sara Lee",
-  email: "sara.lee@microsoft.com",
+  name: "Seth Juarez",
+  email: "seth.juarez@microsoft.com",
+  avatar: "/images/people/seth-juarez.jpg",
 };
 
 const getUser = async (): Promise<User> => {
@@ -56,7 +57,7 @@ const getUser = async (): Promise<User> => {
 export const useUser = () => {
   const [user, setUser] = useState<User>({
     name: "",
-    email: ""
+    email: "",
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -69,7 +70,6 @@ export const useUser = () => {
         setUser(userData);
       } catch (err) {
         setError(err as Error);
-        setLoading(false);
         // on error, set user to default user
         setUser(defaultUser);
       } finally {
@@ -80,7 +80,7 @@ export const useUser = () => {
     fetchUser();
   }, []);
 
-  return [user, loading, error] as const;
+  return { user, loading, error } as const;
 };
 
 export default useUser;

@@ -27,7 +27,7 @@ const Title: React.FC<Props> = ({ text, version, user }: Props) => {
             <img
               alt={user.name}
               className={styles.avatar}
-              src="/images/people/seth-juarez.jpg"
+              src={user.avatar}
             />
           )}
           {!user.avatar && (
