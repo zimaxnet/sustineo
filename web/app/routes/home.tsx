@@ -2,10 +2,10 @@ import type { Route } from "./+types/home";
 import Settings from "components/settings";
 import Setting from "components/setting";
 import {
-  TbSettingsPause,
-  TbSettingsBolt,
+  TbArticle,
   TbUserHexagon,
   TbArrowBigRight,
+  TbSettingsCog,
 } from "react-icons/tb";
 import VoiceSettings from "components/voice/voicesettings";
 import Actions from "components/actions";
@@ -15,10 +15,11 @@ import { version } from "store/version";
 import Title from "components/title";
 import { useEffect, useState } from "react";
 import type { Message } from "store/voice/voice-client";
-import useUser from "store/useuser";
+import { useUser } from "store/useuser";
 import { useRealtime } from "components/voice/userealtime";
-
+import Editor from "@monaco-editor/react";
 import styles from "./home.module.scss";
+import Monaco from "components/monaco";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -46,7 +47,8 @@ export default function Home() {
         payload: JSON.stringify({
           call_id: func.call_id,
           name: func.name,
-          output: "Working on it - will continue to update as I go. Feel free to work on other tasks in the meantime. Make sure to let the user know you are working on it and can do other tasks."
+          output:
+            "Working on it - will continue to update as I go. Feel free to work on other tasks in the meantime. Make sure to let the user know you are working on it and can do other tasks.",
         }),
       });
       setLastFunctionCall(func.call_id);
@@ -109,11 +111,15 @@ export default function Home() {
         />
       </Actions>
       <Settings>
-        <Setting id={"voice-settings"} icon={<TbSettingsPause size={24} />}>
+        <Setting id={"voice-settings"} icon={<TbSettingsCog size={24} />}>
           <VoiceSettings />
         </Setting>
-        <Setting id={"other-settings"} icon={<TbSettingsBolt size={24} />}>
-          <div>Other Settings</div>
+        <Setting
+          id={"voice-agent-settings"}
+          icon={<TbArticle size={24} />}
+          className={styles.editor}
+        >
+          <Monaco />
         </Setting>
       </Settings>
       {talking && <div>!!!!!!!!!!!!!!!</div>}

@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import styles from "./setting.module.scss";
 import Tool from "./tool";
+import clsx from "clsx";
 
 interface Props {
   id: string;
   icon: React.ReactNode;
   children?: React.ReactNode;
+  className?: string;
 }
 
-const Setting: React.FC<Props> = ({ id, icon, children }: Props) => {
+const Setting: React.FC<Props> = ({ id, icon, children, className }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
-
   const toggleOpen = () => {
     setIsOpen((prev) => !prev);
   };
@@ -44,11 +45,7 @@ const Setting: React.FC<Props> = ({ id, icon, children }: Props) => {
 
   return (
     <div id={id} className={styles.settings}>
-      {isOpen && (
-        <div className={styles.content}>
-          {children}
-        </div>
-      )}
+      {isOpen && <div className={clsx(styles.content, className)}>{children}</div>}
       <Tool icon={icon} onClick={toggleOpen} />
     </div>
   );

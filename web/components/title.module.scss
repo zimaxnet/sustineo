@@ -8,14 +8,14 @@
   z-index: 1500;
   color: $color-zinc-400;
   background-color: color.change(white, $alpha: 0.6);
-  /*border: solid 1px $color-red-300;*/
+  height: 50px;
   width: 100vw;
   padding: 0.25rem 0.25rem 0;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .grow {

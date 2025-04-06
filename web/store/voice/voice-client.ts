@@ -12,7 +12,7 @@ export interface SimpleMessage {
   text: string;
 }
 
-class VoiceClient {
+export class VoiceClient {
   url: string | URL;
   socket: WebSocketClient<Message, Message> | null;
   player: Player | null;

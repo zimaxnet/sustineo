@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { WS_ENDPOINT } from "store/endpoint";
 import { useLocalStorage } from "store/uselocalstorage";
 import type { User } from "store/useuser";
 import { defaultConfiguration, type VoiceConfiguration } from "store/voice";
 import type { Message } from "store/voice/voice-client";
-import VoiceClient from "store/voice/voice-client";
+import { VoiceClient } from "store/voice/voice-client";
 
 export const useRealtime = (
   user: User,

@@ -83,4 +83,3 @@ export const useUser = () => {
   return { user, loading, error } as const;
 };
 
-export default useUser;
