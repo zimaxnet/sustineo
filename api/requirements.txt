@@ -8,5 +8,6 @@ opentelemetry-instrumentation
 azure-monitor-opentelemetry-exporter
 opentelemetry-instrumentation-fastapi
 openai[realtime]
-https://github.com/Azure-Samples/aoai-realtime-audio-sdk/releases/download/py%2Fv0.5.3/rtclient-0.5.3.tar.gz
+azure-cosmos
+aiohttp
 ./whl/prompty-0.1.2.dev0-py3-none-any.whl

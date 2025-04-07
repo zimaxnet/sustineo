@@ -9,19 +9,23 @@ from jinja2 import Environment, FileSystemLoader
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
+from api.voice.configuration import VoiceConfiguration
 from api.voice.session import Message, RealtimeSession
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 AZURE_VOICE_ENDPOINT = os.getenv("AZURE_VOICE_ENDPOINT") or ""
 AZURE_VOICE_KEY = os.getenv("AZURE_VOICE_KEY", "fake_key")
 LOCAL_TRACING_ENABLED = os.getenv("LOCAL_TRACING_ENABLED", "false").lower() == "true"
+COSMOSDB_CONNECTION = os.getenv("COSMOSDB_CONNECTION", "fake_connection")
 
 base_path = Path(__file__).parent
 
 # jinja2 template environment
 env = Environment(loader=FileSystemLoader(base_path / "voice"))
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -56,9 +60,17 @@ async def root():
 
 @app.post("/api/message")
 async def message(message: SimpleMessage):
-    return {
-        "message": f"Hello {message.name}, you sent: {message.text}"
-    }
+    return {"message": f"Hello {message.name}, you sent: {message.text}"}
+
+
+@app.get("/api/configurations")
+async def configurations():
+    configs = VoiceConfiguration(
+        connection_string=COSMOSDB_CONNECTION
+    )
+
+    return await configs.get_configurations()
+
 
 @app.websocket("/api/voice")
 async def voice_endpoint(websocket: WebSocket):
