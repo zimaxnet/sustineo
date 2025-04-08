@@ -1,5 +1,6 @@
 import json
 from typing import Literal, Union
+import typing
 from fastapi import WebSocket
 from prompty.tracer import trace
 from fastapi import WebSocketDisconnect
@@ -63,6 +64,54 @@ from openai.types.beta.realtime.conversation_item import (
     ConversationItemContent,
 )
 
+import prompty
+from prompty.core import ToolProperty
+
+
+def convert_function_tools(tools: list[ToolProperty]) -> list[dict[str, typing.Any]]:
+    """Convert the tools to a list of dictionaries
+    Parameters
+    ----------
+    tools : list[ToolProperty]
+        The tools to convert
+    Returns
+    -------
+    list[dict[str, typing.Any]]
+        The converted tools
+    """
+    if tools:
+        return [
+            {
+                "type": "function",
+                "function": {
+                    "name": tool.id,
+                    "description": tool.description,
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            p.name: {
+                                "type": p.type,
+                                **(
+                                    {"description": p.description}
+                                    if p.description
+                                    else {}
+                                ),
+                                **({"enum": p.enum} if p.enum else {}),
+                            }
+                            for p in tool.parameters
+                        },
+                        "required": [p.name for p in tool.parameters if p.required],
+                    },
+                },
+            }
+            for tool in tools
+            if tool.type == "function"
+        ]
+    return []
+
+
+travel_prompty = prompty.load("travel.prompty")
+
 
 class Message(BaseModel):
     type: Literal[
@@ -104,8 +153,26 @@ class RealtimeSession:
         threshold: float = 0.8,
         silence_duration_ms: int = 500,
         prefix_padding_ms: int = 300,
+        customer: str = "Seth",
     ):
         if self.realtime is not None:
+            msgs = await prompty.prepare_async(
+                travel_prompty,
+                inputs={"name": customer},
+            )
+
+            tls = []
+            tools = convert_function_tools(travel_prompty.tools)
+            for tool in tools:
+                tls.append(
+                    SessionTool(
+                        type="function",
+                        name=tool["function"]["name"],
+                        description=tool["function"]["description"],
+                        parameters=tool["function"]["parameters"],
+                    )
+                )
+
             session: Session = Session(
                 input_audio_format="pcm16",
                 turn_detection=SessionTurnDetection(
@@ -118,49 +185,10 @@ class RealtimeSession:
                     model="whisper-1",
                 ),
                 voice="sage",
-                instructions=instructions,
+                instructions=msgs[0]["content"],
                 modalities=["text", "audio"],
                 tool_choice="auto",
-                tools=[
-                    SessionTool(
-                        type="function",
-                        name="start_blog_post",
-                        description="This agent writes a blog post. In order for it to do so, it needs some articuation of the topic and the tone of the blog post. This is a long running process that will return status updates as it goes.",
-                        parameters={
-                            "type": "object",
-                            "properties": {
-                                "title": {
-                                    "type": "string",
-                                    "description": "The title of the blog post.",
-                                },
-                                "ideas": {
-                                    "type": "string",
-                                    "description": "The ideas that the blog post should cover. These should be articulated clearly after some discussion with the user.",
-                                },
-                            },
-                            "required": ["title", "ideas"],
-                        },
-                    ),
-                    SessionTool(
-                        type="function",
-                        name="continue_blog_post",
-                        description="This agent continues a blog post that is already in progress. It will take the current blog post and continue it.",
-                        parameters={
-                            "type": "object",
-                            "properties": {
-                                "call_id": {
-                                    "type": "string",
-                                    "description": "The function call id of the blog post that is in progress.",
-                                },
-                                "updates": {
-                                    "type": "string",
-                                    "description": "The updates that the blog post should cover. These should be articulated clearly after some discussion with the user.",
-                                },
-                            },
-                            "required": ["call_id", "updates"],
-                        },
-                    ),
-                ],
+                tools=tls,
             )
             await self.realtime.send(
                 SessionUpdateEvent(

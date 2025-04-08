@@ -112,6 +112,7 @@ async def voice_endpoint(websocket: WebSocket):
                     settings["silence"] if "silence" in settings else 500
                 ),
                 prefix_padding_ms=(settings["prefix"] if "prefix" in settings else 300),
+                customer=settings["user"] if "user" in settings else "Seth",
             )
 
             tasks = [

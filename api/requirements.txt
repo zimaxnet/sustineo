@@ -10,4 +10,7 @@ opentelemetry-instrumentation-fastapi
 openai[realtime]
 azure-cosmos
 aiohttp
+aiofiles
+types-aiofiles
+mypy
 ./whl/prompty-0.1.2.dev0-py3-none-any.whl
