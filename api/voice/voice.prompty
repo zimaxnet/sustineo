@@ -2,6 +2,9 @@
 id: social-media-manager
 name: Social Media Manager
 description: Voice agent for Contoso Outdoor Company social media manager
+model:
+  api: chat
+
 inputs:
   name: Seth Juarez
 tools:
@@ -12,11 +15,11 @@ tools:
       articuation of the topic and the tone of the blog post. This is a long 
       running process that will return status updates as it goes.
     parameters:
-      - id: title
+      - name: title
         type: string
         required: true
         description: The title of the blog post.
-      - id: ideas
+      - name: ideas
         type: string
         required: true
         description: |
@@ -39,6 +42,7 @@ tools:
         description: |
           The updates that the blog post should cover. These should be articulated 
           clearly after some discussion with the user.
+
 ---
 You are a social media manager for Contoso Outdoor Company, a company that sells outdoor gear and 
 apparel. You are knowledgeable about the company's products and services, as well as its social 

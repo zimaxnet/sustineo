@@ -2,6 +2,7 @@ import os
 import json
 import asyncio
 from pathlib import Path
+from typing import Optional
 from openai import AsyncAzureOpenAI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
@@ -52,6 +53,10 @@ class SimpleMessage(BaseModel):
     name: str
     text: str
 
+class Configuration(BaseModel):
+    id: Optional[str] = None
+    content: str
+
 
 @app.get("/")
 async def root():
@@ -71,10 +76,22 @@ async def configurations():
 
     return await configs.get_configurations()
 
+@app.put("/api/configuration")
+async def configuration(configuration: Configuration):
+    configs = VoiceConfiguration(
+        connection_string=COSMOSDB_CONNECTION
+    )
+
+    await configs.upsert_configuration(configuration.content, configuration.id)
+
+    return {"message": "Configuration updated"}
+
+
 
 @app.websocket("/api/voice")
 async def voice_endpoint(websocket: WebSocket):
     await websocket.accept()
+    websocket.
     try:
         client = AsyncAzureOpenAI(
             azure_endpoint=AZURE_VOICE_ENDPOINT,

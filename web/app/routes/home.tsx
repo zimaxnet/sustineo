@@ -17,9 +17,8 @@ import { useEffect, useState } from "react";
 import type { Message } from "store/voice/voice-client";
 import { useUser } from "store/useuser";
 import { useRealtime } from "components/voice/userealtime";
-import Editor from "@monaco-editor/react";
 import styles from "./home.module.scss";
-import Monaco from "components/monaco";
+import AgentEditor from "components/voice/agenteditor";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -111,7 +110,11 @@ export default function Home() {
         />
       </Actions>
       <Settings>
-        <Setting id={"voice-settings"} icon={<TbSettingsCog size={24} />}>
+        <Setting
+          id={"voice-settings"}
+          icon={<TbSettingsCog size={24} />}
+          className={styles.voice}
+        >
           <VoiceSettings />
         </Setting>
         <Setting
@@ -119,7 +122,7 @@ export default function Home() {
           icon={<TbArticle size={24} />}
           className={styles.editor}
         >
-          <Monaco />
+          <AgentEditor />
         </Setting>
       </Settings>
       {talking && <div>!!!!!!!!!!!!!!!</div>}

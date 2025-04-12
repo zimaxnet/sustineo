@@ -110,7 +110,7 @@ def convert_function_tools(tools: list[ToolProperty]) -> list[dict[str, typing.A
     return []
 
 
-travel_prompty = prompty.load("travel.prompty")
+travel_prompty = prompty.load("voice.prompty")
 
 
 class Message(BaseModel):

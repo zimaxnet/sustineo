@@ -1,9 +1,4 @@
-@use "../app/defaults.scss" as *;
-
-.container {
-  height: 80vh;
-
-}
+@use "../../app/defaults.scss" as *;
 
 .toolbar {
   display: flex;

@@ -4,6 +4,11 @@
 }
 
 .editor {
-  left: calc(50% - 480px);
-  width: 960px;
+  width: calc(100vw - 10rem);
+  left: 5rem;
+}
+
+.voice {
+  width: 640px;
+  left: calc(50% - 320px);
 }
