@@ -2,7 +2,6 @@ import os
 import json
 import asyncio
 from pathlib import Path
-from typing import Optional
 from openai import AsyncAzureOpenAI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
@@ -10,8 +9,8 @@ from jinja2 import Environment, FileSystemLoader
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from api.voice.configuration import VoiceConfiguration
 from api.voice.session import Message, RealtimeSession
+from api.voice.configuration import router as voice_configuration_router
 
 from dotenv import load_dotenv
 
@@ -40,6 +39,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.include_router(voice_configuration_router, tags=["voice"])
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -53,9 +53,7 @@ class SimpleMessage(BaseModel):
     name: str
     text: str
 
-class Configuration(BaseModel):
-    id: Optional[str] = None
-    content: str
+
 
 
 @app.get("/")
@@ -66,26 +64,6 @@ async def root():
 @app.post("/api/message")
 async def message(message: SimpleMessage):
     return {"message": f"Hello {message.name}, you sent: {message.text}"}
-
-
-@app.get("/api/configurations")
-async def configurations():
-    configs = VoiceConfiguration(
-        connection_string=COSMOSDB_CONNECTION
-    )
-
-    return await configs.get_configurations()
-
-@app.put("/api/configuration")
-async def configuration(configuration: Configuration):
-    configs = VoiceConfiguration(
-        connection_string=COSMOSDB_CONNECTION
-    )
-
-    await configs.upsert_configuration(configuration.content, configuration.id)
-
-    return {"message": "Configuration updated"}
-
 
 
 @app.websocket("/api/voice")
