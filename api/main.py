@@ -91,7 +91,6 @@ async def configuration(configuration: Configuration):
 @app.websocket("/api/voice")
 async def voice_endpoint(websocket: WebSocket):
     await websocket.accept()
-    websocket.
     try:
         client = AsyncAzureOpenAI(
             azure_endpoint=AZURE_VOICE_ENDPOINT,

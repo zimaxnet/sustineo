@@ -16,7 +16,7 @@ from openai.types.beta.realtime.session_update_event import (
     SessionInputAudioTranscription,
     SessionTool,
 )
-from openai.types.beta.realtime.realtime_server_event import (
+from openai.types.beta.realtime import (
     ErrorEvent,
     SessionCreatedEvent,
     SessionUpdatedEvent,
@@ -24,6 +24,7 @@ from openai.types.beta.realtime.realtime_server_event import (
     ConversationItemCreatedEvent,
     ConversationItemInputAudioTranscriptionCompletedEvent,
     ConversationItemInputAudioTranscriptionFailedEvent,
+    ConversationItemInputAudioTranscriptionDeltaEvent,
     ConversationItemTruncatedEvent,
     ConversationItemDeletedEvent,
     InputAudioBufferCommittedEvent,
@@ -47,7 +48,7 @@ from openai.types.beta.realtime.realtime_server_event import (
     RateLimitsUpdatedEvent,
 )
 
-from openai.types.beta.realtime.realtime_client_event import (
+from openai.types.beta.realtime import (
     SessionUpdateEvent,
     InputAudioBufferAppendEvent,
     # InputAudioBufferCommitEvent,
@@ -59,7 +60,7 @@ from openai.types.beta.realtime.realtime_client_event import (
     # ResponseCancelEvent,
 )
 
-from openai.types.beta.realtime.conversation_item import (
+from openai.types.beta.realtime import (
     ConversationItem,
     ConversationItemContent,
 )
@@ -319,7 +320,7 @@ class RealtimeSession:
 
     @trace(name="conversation.item.input_audio_transcription.delta")
     async def _conversation_item_input_audio_transcription_delta(
-        self, event: ConversationItemInputAudioTranscriptionCompletedEvent
+        self, event: ConversationItemInputAudioTranscriptionDeltaEvent
     ):
         pass
 
@@ -404,12 +405,6 @@ class RealtimeSession:
                     await self.send_console(
                         Message(type="console", payload=output.model_dump_json())
                     )
-        if (
-            event.response.status_details is not None
-            and event.response.status_details.type == "cancelled"
-            and event.response.status_details.reason == "turn_detected"
-        ):
-            await self.send_console(Message(type="interrupt", payload="Turn Detected"))
 
         if len(self.response_queue) > 0 and self.realtime is not None:
             for item in self.response_queue:
