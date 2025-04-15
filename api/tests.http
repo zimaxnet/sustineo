@@ -1,39 +1,31 @@
-### GET Request Example
+### GET all configurations
 GET http://localhost:8000/api/configuration/
 Accept: application/json
 
-### GET Request with parameters
+### GET configuration by id
+# @name social
 GET http://localhost:8000/api/configuration/social-media-manager
 Accept: application/json
 
-### Basic PUT Request
-PUT http://localhost:8000/api/configuration
+### Set default configuration
+PUT http://localhost:8000/api/configuration/default/social-media-manager
 Content-Type: application/json
 
-{
-  "content": ""
-}
+
+### Delete configuration by id
+DELETE http://localhost:8000/api/configuration/social-media-manager
 
 ### PUT Request with additional headers
-PUT http://localhost:8000/api/items/2
-Content-Type: application/json
-Authorization: Bearer your-auth-token
+POST http://localhost:8000/api/configuration/
+Content-Type: text/plain
 
-{
-  "name": "Another Updated Item",
-  "price": 29.99,
-  "inStock": true
-}
+< ./voice/voice.prompty
 
-### POST Request Example
-POST http://localhost:8000/api/items
-Content-Type: application/json
+### PUT Edit configuration by id
+PUT http://localhost:8000/api/configuration/social-media-manager
+Content-Type: text/plain
 
-{
-  "name": "New Item",
-  "description": "This is a new item",
-  "price": 19.99
-}
+< ./voice/voice.prompty
 
 ### DELETE Request Example
 DELETE http://localhost:8000/api/items/3

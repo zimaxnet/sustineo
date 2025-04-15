@@ -3,6 +3,7 @@ import { Editor } from "@monaco-editor/react";
 import { useEffect, useState } from "react";
 import { VscNewFile, VscSave, VscStarEmpty, VscError } from "react-icons/vsc";
 import {
+  defaultVoiceDocument,
   VoiceConfiguration,
   type Configuration,
 } from "store/voice/configuration";
@@ -28,52 +29,110 @@ const AgentEditor = () => {
     });
   }, []);
 
-  const handleNew = () => {
+  const refreshConfigurations = async () => {
+    const voiceConfig = new VoiceConfiguration();
+    const data = await voiceConfig.fetchConfigurations();
+    setConfigurations(data);
+  };
+
+  const handleNew = async () => {
     const newConfig = {
       id: Date.now().toString(),
       name: "New Configuration",
       default: false,
-      content: "",
+      content: defaultVoiceDocument,
     };
     setConfigurations((prev) => [...prev, newConfig]);
     setSelectedConfig(newConfig.id);
     setEditorValue(newConfig.content);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const config = configurations.find(
       (config) => config.id === selectedConfig
     );
+
     if (config) {
-      console.log("Saving configuration:", config);
-      // Save the configuration to the server or local storage
-      // Example: await saveConfiguration(config.id, editorValue);
+      const voiceConfig = new VoiceConfiguration();
+      let c: Configuration | undefined = undefined;
+      if (config.name === "New Configuration") {
+        c = await voiceConfig.createConfiguration(editorValue);
+        if (!c) {
+          console.error("Error creating configuration");
+          return;
+        }
+        setConfigurations((prev) =>
+          prev.map((cfg) => (cfg.name === "New Configuration" ? c! : cfg))
+        );
+        setSelectedConfig(c.id);
+        setEditorValue(c.content);
+      } else {
+        c = await voiceConfig.updateConfiguration(config.id, editorValue);
+        if (!c) {
+          console.error("Error updating configuration");
+          return;
+        }
+        setConfigurations((prev) =>
+          prev.map((cfg) => (cfg.id === config.id ? c! : cfg))
+        );
+        setSelectedConfig(c.id);
+        setEditorValue(c.content);
+      }
     }
   };
 
-  const handleSetDefault = () => {
+  const handleSetDefault = async () => {
     const config = configurations.find(
       (config) => config.id === selectedConfig
     );
+
     if (config?.default) {
       console.log("Already default configuration:", config);
       return;
     }
 
+    if (config) {
+      const voiceConfig = new VoiceConfiguration();
+      const updatedConfig = await voiceConfig.setDefaultConfiguration(
+        config.id
+      );
+      if (updatedConfig.error) {
+        console.error(
+          "Error setting default configuration:",
+          updatedConfig.error
+        );
+        return;
+      }
+
+      setConfigurations((prev) =>
+        prev.map((cfg) =>
+          cfg.id === config.id
+            ? { ...cfg, default: true }
+            : { ...cfg, default: false }
+        )
+      );
+      setSelectedConfig(updatedConfig.id);
+    }
+
     console.log(config);
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
+    
+    const voiceConfig = new VoiceConfiguration();
+    const action = await voiceConfig.deleteConfiguration(selectedConfig);
+    if (action.error) {
+      console.error("Error deleting configuration:", action.error);
+      return;
+    }
+
     setConfigurations((prev) =>
       prev.filter((config) => config.id !== selectedConfig)
     );
+
     setSelectedConfig(configurations[0].id);
     setEditorValue(configurations[0].content);
   };
-
-  function onEditorValidate(markers: any): void {
-    console.log("Markers:", markers);
-  }
 
   return (
     <>
@@ -127,7 +186,6 @@ const AgentEditor = () => {
         defaultLanguage="markdown"
         value={editorValue}
         onChange={(value) => handleEditorChange(value)}
-        onValidate={onEditorValidate}
       />
     </>
   );

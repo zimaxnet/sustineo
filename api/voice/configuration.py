@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from pydantic import BaseModel
 
 from api.voice.data import (
@@ -55,13 +55,20 @@ async def get_configuration(id: str):
             )
         except Exception as e:
             print(f"Error getting configuration: {e}")
-            return {}
+            return Configuration(
+                id=id,
+                name="error",
+                default=False,
+                content=str(e),
+            )
 
 
 @router.post("/")
-async def upsert_configuration(configuration: Config) -> Configuration:
+async def create_configuration(
+    body: str = Body(..., media_type="text/plain")
+) -> Configuration:
     async with get_cosmos_container() as container:
-        config = load_prompty(configuration.content)
+        config = load_prompty(body)
 
         try:
             # Upsert the configuration
@@ -83,16 +90,18 @@ async def upsert_configuration(configuration: Config) -> Configuration:
             print(f"Error upserting configuration: {e}")
             return Configuration(
                 id=config.id,
-                name="Error",
+                name="error",
                 default=False,
                 content=str(e),
             )
 
 
 @router.put("/{id}")
-async def update_configuration(id: str, configuration: Config) -> Configuration:
+async def update_configuration(
+    id: str, body: str = Body(..., media_type="text/plain")
+) -> Configuration:
     async with get_cosmos_container() as container:
-        config = load_prompty(configuration.content)
+        config = load_prompty(body)
 
         # Update the configuration
         item = await container.upsert_item(
@@ -112,18 +121,25 @@ async def update_configuration(id: str, configuration: Config) -> Configuration:
 
 
 @router.delete("/{id}")
-async def delete_configuration(id: str) -> bool:
+async def delete_configuration(id: str) -> dict[str, str]:
     async with get_cosmos_container() as container:
         try:
             await container.delete_item(id, partition_key=id)
-            return True
+            return {
+                "id": id,
+                "action": "delete",
+            }
         except Exception as e:
             print(f"Error deleting configuration: {e}")
-            return False
+            return {
+                "id": id,
+                "action": "delete",
+                "error": str(e),
+            }
 
 
 @router.put("/default/{id}")
-async def set_default_configuration(id: str) -> bool:
+async def set_default_configuration(id: str) -> dict[str, str]:
     async with get_cosmos_container() as container:
         try:
             # set all other configurations to not default
@@ -135,7 +151,14 @@ async def set_default_configuration(id: str) -> bool:
                 else:
                     item["default"] = True
                     await container.upsert_item(item)
-            return True
+            return {
+                "id": id,
+                "action": "default",
+            }
         except Exception as e:
             print(f"Error setting default configuration: {e}")
-            return False
+            return {
+                "id": id,
+                "action": "default",
+                "error": str(e),
+            }

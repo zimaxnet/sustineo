@@ -34,7 +34,7 @@ async def seed_configurations(container: ContainerProxy) -> list[Configuration]:
     # Load default configuration from file
     config = await load_prompty_file("voice.prompty")
     if config:
-        container.upsert_item(
+        await container.upsert_item(
             {
                 "id": config.id,
                 "name": config.name,
@@ -46,7 +46,7 @@ async def seed_configurations(container: ContainerProxy) -> list[Configuration]:
 
     config = await load_prompty_file("travel.prompty", True)
     if config:
-        container.upsert_item(
+        await container.upsert_item(
             {
                 "id": config.id,
                 "name": config.name,
