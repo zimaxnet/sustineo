@@ -2,11 +2,13 @@ from dataclasses import dataclass
 import os
 from pathlib import Path
 from typing import Union
+from prompty import _load_with_slots
 from prompty.utils import parse
 from azure.cosmos import PartitionKey
 from azure.cosmos.aio import CosmosClient, ContainerProxy
 import aiofiles
 import contextlib
+from prompty.core import Prompty
 
 COSMOSDB_CONNECTION = os.getenv("COSMOSDB_CONNECTION", "fake_connection")
 DATABASE_NAME = "sustineo"
@@ -59,7 +61,13 @@ async def seed_configurations(container: ContainerProxy) -> list[Configuration]:
     return configs
 
 
-def load_prompty(contents: str, default: bool = False) -> Configuration:
+def load_prompty(contents: str) -> Prompty:
+    matter = parse(contents)
+    attributes = matter.pop("attributes", {})
+    return _load_with_slots(attributes, matter["body"], {}, Path(__file__).parent)
+
+
+def load_prompty_config(contents: str, default: bool = False) -> Configuration:
     matter = parse(contents)
     atttributes = matter.pop("attributes", {})
     config = Configuration(
@@ -80,7 +88,7 @@ async def load_prompty_file(
         async with aiofiles.open(file, "r", encoding="utf-8") as f:
             file_content = await f.read()
 
-        config = load_prompty(file_content, default=default)
+        config = load_prompty_config(file_content, default=default)
     except Exception as e:
         print(f"Error loading default configuration: {e}")
     finally:
@@ -101,3 +109,17 @@ async def get_cosmos_container():
         yield container
     finally:
         await client.close()
+
+
+async def get_default_configuration() -> Union[Configuration, None]:
+    async with get_cosmos_container() as container:
+        query = "SELECT * FROM c WHERE c.default = true"
+        items = container.query_items(query=query, enable_cross_partition_query=True)
+        async for item in items:
+            return Configuration(
+                id=item["id"],
+                name=item["name"],
+                default=item["default"],
+                content=item["content"],
+            )
+        return None

@@ -54,8 +54,6 @@ class SimpleMessage(BaseModel):
     text: str
 
 
-
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}

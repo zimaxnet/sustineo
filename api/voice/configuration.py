@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from api.voice.data import (
     Configuration,
     get_cosmos_container,
-    load_prompty,
+    load_prompty_config,
     seed_configurations,
 )
 
@@ -31,7 +31,7 @@ async def get_configurations():
                 Configuration(
                     id=item["id"],
                     name=item["name"],
-                    default=item["default"],
+                    default=item["default"] if "default" in item else False,
                     content=item["content"],
                 )
             )
@@ -50,7 +50,7 @@ async def get_configuration(id: str):
             return Configuration(
                 id=item["id"],
                 name=item["name"],
-                default=item["default"],
+                default=item["default"] if "default" in item else False,
                 content=item["content"],
             )
         except Exception as e:
@@ -68,7 +68,7 @@ async def create_configuration(
     body: str = Body(..., media_type="text/plain")
 ) -> Configuration:
     async with get_cosmos_container() as container:
-        config = load_prompty(body)
+        config = load_prompty_config(body)
 
         try:
             # Upsert the configuration
@@ -101,7 +101,7 @@ async def update_configuration(
     id: str, body: str = Body(..., media_type="text/plain")
 ) -> Configuration:
     async with get_cosmos_container() as container:
-        config = load_prompty(body)
+        config = load_prompty_config(body)
 
         # Update the configuration
         item = await container.upsert_item(
@@ -115,7 +115,7 @@ async def update_configuration(
         return Configuration(
             id=item["id"],
             name=item["name"],
-            default=item["default"],
+            default=item["default"] if "default" in item else False,
             content=item["content"],
         )
 

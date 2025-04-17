@@ -155,6 +155,7 @@ class RealtimeSession:
         silence_duration_ms: int = 500,
         prefix_padding_ms: int = 300,
         customer: str = "Seth",
+        #tools: list[SessionTool] = [],
     ):
         if self.realtime is not None:
             msgs = await prompty.prepare_async(
@@ -214,7 +215,7 @@ class RealtimeSession:
                         await self._handle_error(event)
                     case "session.created":
                         await self._session_created(event)
-                    case "session.updated":
+                    case "session.updated": 
                         await self._session_updated(event)
                     case "conversation.created":
                         await self._conversation_created(event)

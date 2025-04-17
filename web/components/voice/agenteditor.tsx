@@ -119,6 +119,11 @@ const AgentEditor = () => {
 
   const handleRemove = async () => {
     
+    const confirmRemove = confirm("Are you sure you want to proceed?");
+    if (!confirmRemove) {
+      return;
+    }
+    
     const voiceConfig = new VoiceConfiguration();
     const action = await voiceConfig.deleteConfiguration(selectedConfig);
     if (action.error) {
@@ -182,7 +187,7 @@ const AgentEditor = () => {
         </button>
       </div>
       <Editor
-        height="80vh"
+        height="75vh"
         defaultLanguage="markdown"
         value={editorValue}
         onChange={(value) => handleEditorChange(value)}
