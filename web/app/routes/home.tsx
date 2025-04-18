@@ -22,8 +22,8 @@ import AgentEditor from "components/voice/agenteditor";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Contoso Social" },
-    { name: "description", content: "Contoso Intelligent Social Application" },
+    { title: "sustineō" },
+    { name: "description", content: "Your Digital Support Agent" },
   ];
 }
 

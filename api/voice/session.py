@@ -1,6 +1,5 @@
 import json
 from typing import Literal, Union
-import typing
 from fastapi import WebSocket
 from prompty.tracer import trace
 from fastapi import WebSocketDisconnect
@@ -66,50 +65,7 @@ from openai.types.beta.realtime import (
 )
 
 import prompty
-from prompty.core import ToolProperty
-
-
-def convert_function_tools(tools: list[ToolProperty]) -> list[dict[str, typing.Any]]:
-    """Convert the tools to a list of dictionaries
-    Parameters
-    ----------
-    tools : list[ToolProperty]
-        The tools to convert
-    Returns
-    -------
-    list[dict[str, typing.Any]]
-        The converted tools
-    """
-    if tools:
-        return [
-            {
-                "type": "function",
-                "function": {
-                    "name": tool.id,
-                    "description": tool.description,
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            p.name: {
-                                "type": p.type,
-                                **(
-                                    {"description": p.description}
-                                    if p.description
-                                    else {}
-                                ),
-                                **({"enum": p.enum} if p.enum else {}),
-                            }
-                            for p in tool.parameters
-                        },
-                        "required": [p.name for p in tool.parameters if p.required],
-                    },
-                },
-            }
-            for tool in tools
-            if tool.type == "function"
-        ]
-    return []
-
+from prompty.common import convert_function_tools
 
 travel_prompty = prompty.load("voice.prompty")
 
@@ -313,7 +269,7 @@ class RealtimeSession:
                     {
                         "id": event.item_id,
                         "role": "user",
-                        "content": event.transcript,
+                        "content": event.transcript.strip(),
                     }
                 ),
             )
@@ -367,6 +323,7 @@ class RealtimeSession:
 
     @trace(name="response.done")
     async def _response_done(self, event: ResponseDoneEvent):
+        print(event.to_json(indent=2))
         if event.response.output is not None and len(event.response.output) > 0:
             output = event.response.output[0]
             match output.type:
@@ -449,7 +406,7 @@ class RealtimeSession:
     async def _response_audio_transcript_done(
         self, event: ResponseAudioTranscriptDoneEvent
     ):
-        # await self.send_console(Message(type="console", payload=event.transcript))
+        await self.send_console(Message(type="console", payload=event.transcript.strip()))
         pass
 
     @trace(name="response.audio.delta")
