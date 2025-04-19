@@ -1,7 +1,9 @@
+import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import styles from "./agenteditor.module.scss";
 import { Editor } from "@monaco-editor/react";
-import { useEffect, useState } from "react";
-import { VscNewFile, VscSave, VscStarEmpty, VscError } from "react-icons/vsc";
+import { useState } from "react";
+import { VscNewFile, VscSave, VscStarEmpty } from "react-icons/vsc";
+import { MdDeleteOutline, MdClose } from "react-icons/md";
 import {
   defaultVoiceDocument,
   VoiceConfiguration,
@@ -9,30 +11,30 @@ import {
 } from "store/voice/configuration";
 
 const AgentEditor = () => {
-  const [configurations, setConfigurations] = useState<Configuration[]>([]);
+  const queryClient = useQueryClient();
   const [selectedConfig, setSelectedConfig] = useState<string>("");
   const [editorValue, setEditorValue] = useState("");
+
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["configurations"],
+    queryFn: async () => {
+      const voiceConfig = new VoiceConfiguration();
+      const configs = await voiceConfig.fetchConfigurations();
+      if (selectedConfig === "") {
+        const defaultConfig = configs.find((config) => config.default);
+        if (defaultConfig) {
+          setSelectedConfig(defaultConfig.id);
+          setEditorValue(defaultConfig.content);
+        }
+      }
+      return configs;
+    },
+  });
 
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
       setEditorValue(value);
     }
-  };
-
-  useEffect(() => {
-    const voiceConfig = new VoiceConfiguration();
-    voiceConfig.fetchConfigurations().then((data) => {
-      setConfigurations(data);
-      const defaultId = data.find((config) => config.default);
-      setSelectedConfig(defaultId?.id || data[0].id);
-      setEditorValue(defaultId?.content || data[0].content);
-    });
-  }, []);
-
-  const refreshConfigurations = async () => {
-    const voiceConfig = new VoiceConfiguration();
-    const data = await voiceConfig.fetchConfigurations();
-    setConfigurations(data);
   };
 
   const handleNew = async () => {
@@ -42,101 +44,83 @@ const AgentEditor = () => {
       default: false,
       content: defaultVoiceDocument,
     };
-    setConfigurations((prev) => [...prev, newConfig]);
+    data?.push(newConfig); // Add new config to the data array
     setSelectedConfig(newConfig.id);
     setEditorValue(newConfig.content);
   };
 
-  const handleSave = async () => {
-    const config = configurations.find(
-      (config) => config.id === selectedConfig
-    );
-
-    if (config) {
+  const saveMutation = useMutation({
+    mutationFn: async (config: Configuration) => {
       const voiceConfig = new VoiceConfiguration();
-      let c: Configuration | undefined = undefined;
+      let c: Configuration;
       if (config.name === "New Configuration") {
-        c = await voiceConfig.createConfiguration(editorValue);
-        if (!c) {
-          console.error("Error creating configuration");
-          return;
-        }
-        setConfigurations((prev) =>
-          prev.map((cfg) => (cfg.name === "New Configuration" ? c! : cfg))
-        );
-        setSelectedConfig(c.id);
-        setEditorValue(c.content);
+        // Create new configuration
+        c = await voiceConfig.createConfiguration(config.content);
       } else {
-        c = await voiceConfig.updateConfiguration(config.id, editorValue);
-        if (!c) {
-          console.error("Error updating configuration");
-          return;
-        }
-        setConfigurations((prev) =>
-          prev.map((cfg) => (cfg.id === config.id ? c! : cfg))
-        );
+        // Update existing configuration
+        c = await voiceConfig.updateConfiguration(config);
+      }
+
+      if (c) {
         setSelectedConfig(c.id);
         setEditorValue(c.content);
       }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["configurations"] });
+    },
+  });
+
+  const handleSave = async () => {
+    console.log("Save configuration:", selectedConfig);
+    const c = data?.find((config) => config.id === selectedConfig);
+    if (c) {
+      await saveMutation.mutateAsync({
+        ...c,
+        content: editorValue,
+      });
     }
   };
+
+  const setDefaultMutation = useMutation({
+    mutationFn: async (configId: string) => {
+      const voiceConfig = new VoiceConfiguration();
+      await voiceConfig.setDefaultConfiguration(configId);
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["configurations"] });
+    },
+  });
 
   const handleSetDefault = async () => {
-    const config = configurations.find(
-      (config) => config.id === selectedConfig
-    );
-
-    if (config?.default) {
-      console.log("Already default configuration:", config);
+    console.log("Set as default configuration:", selectedConfig);
+    if (selectedConfig === "") {
       return;
     }
-
-    if (config) {
-      const voiceConfig = new VoiceConfiguration();
-      const updatedConfig = await voiceConfig.setDefaultConfiguration(
-        config.id
-      );
-      if (updatedConfig.error) {
-        console.error(
-          "Error setting default configuration:",
-          updatedConfig.error
-        );
-        return;
-      }
-
-      setConfigurations((prev) =>
-        prev.map((cfg) =>
-          cfg.id === config.id
-            ? { ...cfg, default: true }
-            : { ...cfg, default: false }
-        )
-      );
-      setSelectedConfig(updatedConfig.id);
-    }
-
-    console.log(config);
+    await setDefaultMutation.mutateAsync(selectedConfig);
   };
 
+  const removeMutation = useMutation({
+    mutationFn: async (configId: string) => {
+      const voiceConfig = new VoiceConfiguration();
+      await voiceConfig.deleteConfiguration(configId);
+      setSelectedConfig(data?.[0]?.id || "");
+      setEditorValue(data?.[0]?.content || "");
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ["configurations"] });
+    },
+  });
+
   const handleRemove = async () => {
-    
-    const confirmRemove = confirm("Are you sure you want to proceed?");
-    if (!confirmRemove) {
-      return;
-    }
-    
-    const voiceConfig = new VoiceConfiguration();
-    const action = await voiceConfig.deleteConfiguration(selectedConfig);
-    if (action.error) {
-      console.error("Error deleting configuration:", action.error);
-      return;
-    }
-
-    setConfigurations((prev) =>
-      prev.filter((config) => config.id !== selectedConfig)
+    const accept = confirm(
+      "Are you sure you want to remove this configuration?"
     );
-
-    setSelectedConfig(configurations[0].id);
-    setEditorValue(configurations[0].content);
+    if (!accept) return;
+    await removeMutation.mutateAsync(selectedConfig);
   };
 
   return (
@@ -150,18 +134,22 @@ const AgentEditor = () => {
             title="Select Configuration"
             value={selectedConfig}
             onChange={(e) => {
-              const selectedConfig = configurations.find(
-                (config) => config.id === e.target.value
-              );
-              if (selectedConfig) {
-                setSelectedConfig(selectedConfig.id);
-                setEditorValue(selectedConfig.content);
+              const selectedId = e.target.value;
+              setSelectedConfig(selectedId);
+              if (data) {
+                const selectedConfig = data.find(
+                  (config) => config.id === selectedId
+                );
+                if (selectedConfig) {
+                  setEditorValue(selectedConfig.content);
+                }
               }
             }}
           >
-            {configurations.length === 0 && <option>Loading...</option>}
-            {configurations.length > 0 &&
-              configurations.map((config) => (
+            {isPending && <option>Loading...</option>}
+            {isError && <option>Error: {error.message}</option>}
+            {data &&
+              data.map((config) => (
                 <option key={config.id} value={config.id}>
                   {config.name}
                   {config.default ? " (default)" : ""}
@@ -183,7 +171,7 @@ const AgentEditor = () => {
           <VscStarEmpty size={22} />
         </button>
         <button className={styles.icon} title="Remove" onClick={handleRemove}>
-          <VscError size={22} />
+          <MdDeleteOutline size={22} />
         </button>
       </div>
       <Editor

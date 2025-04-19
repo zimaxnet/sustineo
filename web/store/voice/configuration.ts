@@ -38,7 +38,6 @@ export interface ConfigurationAction {
 
 export class VoiceConfiguration {
   endpoint: string;
-  configurations: Configuration[] = [];
 
   constructor() {
     this.endpoint = API_ENDPOINT;
@@ -49,8 +48,8 @@ export class VoiceConfiguration {
     if (!response.ok) {
       throw new Error("Failed to fetch configurations");
     }
-    this.configurations = await response.json();
-    return this.configurations;
+    const configurations = await response.json();
+    return configurations;
   }
 
   async fetchConfiguration(id: string): Promise<Configuration> {
@@ -75,13 +74,13 @@ export class VoiceConfiguration {
     return await response.json();
   }
 
-  async updateConfiguration(id: string, content: string): Promise<Configuration> {
-    const response = await fetch(`${this.endpoint}/api/configuration/${id}`, {
+  async updateConfiguration(configuration: Configuration): Promise<Configuration> {
+    const response = await fetch(`${this.endpoint}/api/configuration/${configuration.id}`, {
       method: "PUT",
       headers: {
-        "Content-Type": "text/plain",
+        "Content-Type": "application/json",
       },
-      body: content,
+      body: JSON.stringify(configuration),
     });
     if (!response.ok) {
       throw new Error("Failed to update configuration");

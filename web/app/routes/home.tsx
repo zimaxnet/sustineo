@@ -20,6 +20,10 @@ import { useRealtime } from "components/voice/userealtime";
 import styles from "./home.module.scss";
 import AgentEditor from "components/voice/agenteditor";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "sustineō" },
@@ -84,48 +88,50 @@ export default function Home() {
   };
 
   return (
-    <main>
-      <Title text="sustineō" version={version} user={user} />
-      <Canvas />
-      <Actions>
-        <Tool
-          icon={<TbUserHexagon size={24} />}
-          onClick={() => toggleRealtime()}
-        />
-        <Tool
-          icon={<TbArrowBigRight size={24} />}
-          onClick={() =>
-            sendCall(
-              "I need more information to continue. Please ask the user to provide details about the product pricing."
-            )
-          }
-        />
-        <Tool
-          icon={<TbArrowBigRight size={24} />}
-          onClick={() =>
-            sendCall(
-              "All done - let the user know that the task is complete and they can ask for more help if needed. They can click on the icon on the top right to see the result."
-            )
-          }
-        />
-      </Actions>
-      <Settings>
-        <Setting
-          id={"voice-settings"}
-          icon={<TbSettingsCog size={24} />}
-          className={styles.voice}
-        >
-          <VoiceSettings />
-        </Setting>
-        <Setting
-          id={"voice-agent-settings"}
-          icon={<TbArticle size={24} />}
-          className={styles.editor}
-        >
-          <AgentEditor />
-        </Setting>
-      </Settings>
-      {talking && <div>!!!!!!!!!!!!!!!</div>}
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <main>
+        <Title text="sustineō" version={version} user={user} />
+
+        <Actions>
+          <Tool
+            icon={<TbUserHexagon size={24} />}
+            onClick={() => toggleRealtime()}
+          />
+          <Tool
+            icon={<TbArrowBigRight size={24} />}
+            onClick={() =>
+              sendCall(
+                "I need more information to continue. Please ask the user to provide details about the product pricing."
+              )
+            }
+          />
+          <Tool
+            icon={<TbArrowBigRight size={24} />}
+            onClick={() =>
+              sendCall(
+                "All done - let the user know that the task is complete and they can ask for more help if needed. They can click on the icon on the top right to see the result."
+              )
+            }
+          />
+        </Actions>
+        <Settings>
+          <Setting
+            id={"voice-settings"}
+            icon={<TbSettingsCog size={24} />}
+            className={styles.voice}
+          >
+            <VoiceSettings />
+          </Setting>
+          <Setting
+            id={"voice-agent-settings"}
+            icon={<TbArticle size={24} />}
+            className={styles.editor}
+          >
+            <AgentEditor />
+          </Setting>
+        </Settings>
+        {talking && <div>!!!!!!!!!!!!!!!</div>}
+      </main>
+    </QueryClientProvider>
   );
 }
