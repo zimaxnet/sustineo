@@ -1,26 +1,25 @@
 import type { Route } from "./+types/home";
 import Settings from "components/settings";
 import Setting from "components/setting";
-import {
-  TbArticle,
-  TbUserHexagon,
-  TbArrowBigRight,
-  TbSettingsCog,
-} from "react-icons/tb";
+import { TbArticle, TbSettingsCog } from "react-icons/tb";
 import VoiceSettings from "components/voice/voicesettings";
 import Actions from "components/actions";
-import Tool from "components/tool";
-import Canvas from "components/canvas";
 import { version } from "store/version";
 import Title from "components/title";
 import { useEffect, useState } from "react";
 import type { Message } from "store/voice/voice-client";
 import { useUser } from "store/useuser";
 import { useRealtime } from "components/voice/userealtime";
+import { useEffortStore } from "store/effort";
+import usePersistStore from "store/usepersiststore";
 import styles from "./home.module.scss";
 import AgentEditor from "components/voice/agenteditor";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Output from "components/output";
+
+import VoiceTool from "components/voicetool";
+import Effort from "components/effort";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +37,8 @@ export default function Home() {
       console.error("Error fetching user data:", error);
     }
   }, [error]);
+
+  const effort = usePersistStore(useEffortStore, (state) => state);
 
   const [lasFunctionCall, setLastFunctionCall] = useState<string | null>(null);
 
@@ -65,13 +66,31 @@ export default function Home() {
           ? JSON.parse(serverEvent.payload)
           : serverEvent.payload
       );
+      if (serverEvent.type === "user" || serverEvent.type === "assistant") {
+        const msg = JSON.parse(serverEvent.payload);
+        effort?.addEffort({
+          id: msg.id,
+          source: msg.role,
+          type: "message",
+          content: msg.content,
+        });
+      }
     }
   };
 
-  const { toggleRealtime, talking, sendRealtime } = useRealtime(
-    user,
-    handleServerMessage
-  );
+  const {
+    toggleRealtime,
+    talking,
+    sendRealtime,
+    callState,
+  } = useRealtime(user, handleServerMessage);
+
+  const handleVoice = async () => {
+    if (callState === "idle") {
+      effort?.clearEfforts();
+    }
+    toggleRealtime();
+  };
 
   const sendCall = async (output: string) => {
     if (lasFunctionCall) {
@@ -88,50 +107,38 @@ export default function Home() {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <main>
-        <Title text="sustineō" version={version} user={user} />
-
-        <Actions>
-          <Tool
-            icon={<TbUserHexagon size={24} />}
-            onClick={() => toggleRealtime()}
-          />
-          <Tool
-            icon={<TbArrowBigRight size={24} />}
-            onClick={() =>
-              sendCall(
-                "I need more information to continue. Please ask the user to provide details about the product pricing."
-              )
-            }
-          />
-          <Tool
-            icon={<TbArrowBigRight size={24} />}
-            onClick={() =>
-              sendCall(
-                "All done - let the user know that the task is complete and they can ask for more help if needed. They can click on the icon on the top right to see the result."
-              )
-            }
-          />
-        </Actions>
-        <Settings>
-          <Setting
-            id={"voice-settings"}
-            icon={<TbSettingsCog size={24} />}
-            className={styles.voice}
-          >
-            <VoiceSettings />
-          </Setting>
-          <Setting
-            id={"voice-agent-settings"}
-            icon={<TbArticle size={24} />}
-            className={styles.editor}
-          >
+    <main className={styles.home}>
+      <Title text="sustineō" version={version} user={user} />
+      <div className={styles.scratch}>
+        <div className={styles.effort}>
+          <Effort />
+        </div>
+        <div className={styles.output}>
+          <Output />
+        </div>
+      </div>
+      <Actions>
+        <VoiceTool onClick={() => handleVoice()} />
+      </Actions>
+      <Settings>
+        <Setting
+          id={"voice-settings"}
+          icon={<TbSettingsCog size={18} />}
+          className={styles.voice}
+        >
+          <VoiceSettings />
+        </Setting>
+        <Setting
+          id={"voice-agent-settings"}
+          icon={<TbArticle size={18} />}
+          className={styles.editor}
+        >
+          <QueryClientProvider client={queryClient}>
             <AgentEditor />
-          </Setting>
-        </Settings>
-        {talking && <div>!!!!!!!!!!!!!!!</div>}
-      </main>
-    </QueryClientProvider>
+          </QueryClientProvider>
+        </Setting>
+      </Settings>
+      {talking && <div>!!!!!!!!!!!!!!!</div>}
+    </main>
   );
 }

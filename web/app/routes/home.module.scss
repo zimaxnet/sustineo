@@ -1,14 +1,53 @@
+@use "../defaults.scss" as *;
+
+.home {
+  width: 100wv;
+  height: 100vh;
+  background-image: url('/images/background.svg');
+  background-position: top left;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.scratch {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border: solid 1px $color-fuchsia-100;
+  width: calc(100vw - 0.2rem);
+  height: calc(100vh - 0.2rem);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.effort {
+  //border: solid 1px $color-fuchsia-100;
+  width: 20rem;
+  padding-top: 6rem;
+  display: flex;
+  flex-direction: column;
+  margin-left: 2.5rem;
+}
+
+.output {
+  //border: solid 1px $color-fuchsia-200;
+  width: calc(100vw - 22.5rem);
+  padding-top: 6rem;
+  padding-right: 2.5rem;
+}
 
 .talking {
   color: red;
 }
 
 .editor {
-  width: calc(100vw - 10rem);
-  left: 5rem;
+  width: calc(100vw - 20rem);
+  left: 1rem;
 }
 
 .voice {
   width: 640px;
-  left: calc(50% - 320px);
+  left: calc(50px + 2rem);
 }

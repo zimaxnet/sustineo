@@ -1,12 +1,12 @@
 @use "../app/defaults.scss" as *;
 
 .button {
-  background-color:$color-zinc-100;
-  color: $color-zinc-800;
-  border: solid 1px $color-zinc-300;
+  background-color:$color-fuchsia-100;
+  color: $color-zinc-700;
+  border: solid 1px $color-fuchsia-300;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 24px;
+  height: 24px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -16,6 +16,6 @@
 }
 
 .button:hover {
-  background-color: $color-sky-200;
-  border-color: $color-sky-600;
+  background-color: $color-fuchsia-300;
+  border-color: $color-fuchsia-600;
 }

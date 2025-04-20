@@ -1,8 +1,7 @@
 import json
 from typing import Literal, Union
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 from prompty.tracer import trace
-from fastapi import WebSocketDisconnect
 from pydantic import BaseModel
 from fastapi.websockets import WebSocketState
 
@@ -71,7 +70,7 @@ travel_prompty = prompty.load("voice.prompty")
 
 class Message(BaseModel):
     type: Literal[
-        "user", "assistant", "audio", "console", "interrupt", "messages", "function"
+        "user", "assistant", "system", "audio", "console", "interrupt", "function"
     ]
     payload: str
 
@@ -112,23 +111,6 @@ class RealtimeSession:
         tools: list[SessionTool] = [],
     ):
         if self.realtime is not None:
-            # msgs = await prompty.prepare_async(
-            #    travel_prompty,
-            #    inputs={"name": customer},
-            # )
-
-            # tls = []
-            # tools = convert_function_tools(travel_prompty.tools)
-            # for tool in tools:
-            #    tls.append(
-            #        SessionTool(
-            #            type="function",
-            #           name=tool["function"]["name"],
-            #            description=tool["function"]["description"],
-            #            parameters=tool["function"]["parameters"],
-            #        )
-            #    )
-
             session: Session = Session(
                 input_audio_format="pcm16",
                 turn_detection=SessionTurnDetection(
@@ -262,7 +244,7 @@ class RealtimeSession:
     ):
         await self.send_message(
             Message(
-                type="console",
+                type="user",
                 payload=json.dumps(
                     {
                         "id": event.item_id,
@@ -327,7 +309,7 @@ class RealtimeSession:
                 case "message":
                     await self.send_console(
                         Message(
-                            type="console",
+                            type=output.role if output.role else "assistant",
                             payload=json.dumps(
                                 {
                                     "id": output.id,
@@ -335,7 +317,7 @@ class RealtimeSession:
                                     "content": (
                                         output.content[0].transcript
                                         if output.content
-                                        else None
+                                        else ""
                                     ),
                                 }
                             ),
@@ -434,6 +416,7 @@ class RealtimeSession:
     async def receive_client(self):
         if self.client is None or self.realtime is None:
             return
+
         try:
             while self.client.client_state != WebSocketState.DISCONNECTED:
                 message = await self.client.receive_text()

@@ -1,9 +1,10 @@
 import React, { type ReactElement } from "react";
 import Tool from "./tool";
 import styles from "./actions.module.scss";
+import type VoiceTool from "./voicetool";
 
 interface Props {
-  children: ReactElement<typeof Tool> | Array<ReactElement<typeof Tool>>;
+  children: ReactElement<typeof Tool | typeof VoiceTool> | Array<ReactElement<typeof Tool | typeof VoiceTool>>;
 }
 
 const Actions: React.FC<Props> = ({ children }) => {

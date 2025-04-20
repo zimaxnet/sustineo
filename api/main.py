@@ -33,7 +33,11 @@ async def lifespan(app: FastAPI):
     finally:
         # remove all stray sockets
         for connection in connections.values():
-            await connection.close()
+            try:
+                await connection.close()
+            except Exception as e:
+                print("Error closing connection:", e)
+
         connections.clear()
 
 
@@ -68,7 +72,6 @@ async def message(message: SimpleMessage):
 async def voice_endpoint(id: str, websocket: WebSocket):
     # check if the connection is already open
     if id in connections:
-        await connections[id].close()
         del connections[id]
 
     connections[id] = websocket
@@ -131,4 +134,5 @@ async def voice_endpoint(id: str, websocket: WebSocket):
     except WebSocketDisconnect as e:
         if id in connections:
             del connections[id]
+
         print("Voice Socket Disconnected", e)

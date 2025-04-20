@@ -1,30 +1,216 @@
-import { create } from 'zustand'
-import {
-  type Node,
-  type Edge,
-} from '@xyflow/react';
-import { persist, createJSONStorage } from "zustand/middleware";
+import { v4 as uuidv4 } from "uuid";
 
-interface WorkState {
-  nodes: Node[]
-  edges: Edge[]
-  addWork: (node: Node) => void
-  addConnection: (edge: Edge) => void
+export interface DataNode {
+  id: string;
+  title: string;
+  description?: string;
+  value: number;
+  children: DataNode[];
 }
 
-const useWorkStore = create<WorkState>()(
-  persist((set) => ({
-    nodes: [
-      { id: "1", position: { x: 0, y: 0 }, data: { label: "1" } },
-      { id: "2", position: { x: 0, y: 100 }, data: { label: "2" } },
-    ],
-    edges: [{ id: "e1-2", source: "1", target: "2" }],
-    addWork: (node) => set((state) => ({ nodes: [...state.nodes, node] })),
-    addConnection: (edge) => set((state) => ({ edges: [...state.edges, edge] })),
-  }),
+export const data: DataNode = {
+  id: uuidv4(),
+  title: "root",
+  value: 1,
+  children: [
     {
-      name: "work-storage",
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
-);
+      id: uuidv4(),
+      title: "Project A",
+      description: "Description of Project A",
+      value: 1,
+      children: [
+        {
+          id: uuidv4(),
+          title: "Subproject A1",
+          description: "Description of Subproject A1",
+          value: 1,
+          children: [],
+        },
+        {
+          id: uuidv4(),
+          title: "Subproject A2",
+          description: "Description of Subproject A2",
+          value: 1,
+          children: [
+            {
+              id: uuidv4(),
+              title: "Subproject A2.1",
+              description: "Description of Subproject A2.1",
+              value: 1,
+              children: [],
+            },
+            {
+              id: uuidv4(),
+              title: "Subproject A2.2",
+              description: "Description of Subproject A2.2",
+              value: 1,
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: uuidv4(),
+      title: "Project B",
+      description: "Description of Project B",
+      value: 1,
+      children: [
+        {
+          id: uuidv4(),
+          title: "Subproject B1",
+          description: "Description of Subproject B1",
+          value: 1,
+          children: [],
+        },
+        {
+          id: uuidv4(),
+          title: "Subproject B2",
+          description: "Description of Subproject B2",
+          value: 1,
+          children: [],
+        },
+      ],
+    },
+    {
+      id: uuidv4(),
+      title: "Project C",
+      description: "Description of Project C",
+      value: 1,
+      children: [
+        {
+          id: uuidv4(),
+          title: "Subproject C1",
+          description: "Description of Subproject C1",
+          value: 1,
+          children: [],
+        },
+        {
+          id: uuidv4(),
+          title: "Subproject C2",
+          description: "Description of Subproject C2",
+          value: 1,
+          children: [
+            {
+              id: uuidv4(),
+              title: "Subproject C2.1",
+              description: "Description of Subproject C2.1",
+              value: 1,
+              children: [],
+            },
+            {
+              id: uuidv4(),
+              title: "Subproject C2.2",
+              description: "Description of Subproject C2.2",
+              value: 1,
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: uuidv4(),
+      title: "Project D",
+      description: "Description of Project D",
+      value: 1,
+      children: [
+        {
+          id: uuidv4(),
+          title: "Subproject D1",
+          description: "Description of Subproject D1",
+          value: 1,
+          children: [],
+        },
+        {
+          id: uuidv4(),
+          title: "Subproject D2",
+          description: "Description of Subproject D2",
+          value: 1,
+          children: [],
+        },
+        {
+          id: uuidv4(),
+          title: "Subproject D3",
+          description: "Description of Subproject D3",
+          value: 1,
+          children: [],
+        },
+        {
+          id: uuidv4(),
+          title: "Subproject D4",
+          description: "Description of Subproject D4",
+          value: 1,
+          children: [
+            {
+              id: uuidv4(),
+              title: "Subproject D4.1",
+              description: "Description of Subproject D4.1",
+              value: 1,
+              children: [],
+            },
+            {
+              id: uuidv4(),
+              title: "Subproject D4.2",
+              description: "Description of Subproject D4.2",
+              value: 1,
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: uuidv4(),
+      title: "Project E",
+      description: "Description of Project E",
+      value: 1,
+      children: [
+        {
+          id: uuidv4(),
+          title: "Subproject E1",
+          description: "Description of Subproject E1",
+          value: 1,
+          children: [],
+        },
+        {
+          id: uuidv4(),
+          title: "Subproject E2",
+          description: "Description of Subproject E2",
+          value: 1,
+          children: [
+            {
+              id: uuidv4(),
+              title: "Subproject E2.1",
+              description: "Description of Subproject E2.1",
+              value: 1,
+              children: [],
+            },
+            {
+              id: uuidv4(),
+              title: "Subproject E2.2",
+              description: "Description of Subproject E2.2",
+              value: 1,
+              children: [
+                {
+                  id: uuidv4(),
+                  title: "Subproject E2.2.1",
+                  description: "Description of Subproject E2.2.1",
+                  value: 1,
+                  children: [],
+                },
+                {
+                  id: uuidv4(),
+                  title: "Subproject E2.2.2",
+                  description: "Description of Subproject E2.2.2",
+                  value: 1,
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
