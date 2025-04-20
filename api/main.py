@@ -5,10 +5,10 @@ from pathlib import Path
 from openai import AsyncAzureOpenAI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from jinja2 import Environment, FileSystemLoader
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
+from api.voice.common import get_default_configuration_data
 from api.voice.session import Message, RealtimeSession
 from api.voice.configuration import router as voice_configuration_router
 
@@ -23,9 +23,7 @@ COSMOSDB_CONNECTION = os.getenv("COSMOSDB_CONNECTION", "fake_connection")
 
 base_path = Path(__file__).parent
 
-# jinja2 template environment
-env = Environment(loader=FileSystemLoader(base_path / "voice"))
-
+connections: dict[str, WebSocket] = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,7 +32,9 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         # remove all stray sockets
-        pass
+        for connection in connections.values():
+            await connection.close()
+        connections.clear()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -64,8 +64,15 @@ async def message(message: SimpleMessage):
     return {"message": f"Hello {message.name}, you sent: {message.text}"}
 
 
-@app.websocket("/api/voice")
-async def voice_endpoint(websocket: WebSocket):
+@app.websocket("/api/voice/{id}")
+async def voice_endpoint(id: str, websocket: WebSocket):
+    # check if the connection is already open
+    if id in connections:
+        await connections[id].close()
+        del connections[id]
+
+    connections[id] = websocket
+    # accept the connection
     await websocket.accept()
     try:
         client = AsyncAzureOpenAI(
@@ -88,9 +95,17 @@ async def voice_endpoint(websocket: WebSocket):
             )
 
             # create voice system message
-            system_message = env.get_template("script.jinja2").render(
-                customer=settings["user"] if "user" in settings else "unnamed user"
-            )
+            customer = settings["user"] if "user" in settings else "unnamed user"
+            prompt_settings = await get_default_configuration_data(customer=customer)
+            if prompt_settings is None:
+                await websocket.send_json(
+                    {
+                        "error": "No default configuration found.",
+                        "message": "Please contact support.",
+                    }
+                )
+                await websocket.close()
+                return
 
             session = RealtimeSession(
                 realtime=realtime_client,
@@ -98,13 +113,13 @@ async def voice_endpoint(websocket: WebSocket):
             )
 
             await session.update_realtime_session(
-                system_message,
+                instructions=prompt_settings.system_message,
                 threshold=settings["threshold"] if "threshold" in settings else 0.8,
                 silence_duration_ms=(
                     settings["silence"] if "silence" in settings else 500
                 ),
                 prefix_padding_ms=(settings["prefix"] if "prefix" in settings else 300),
-                customer=settings["user"] if "user" in settings else "Seth",
+                tools=prompt_settings.tools,
             )
 
             tasks = [
@@ -114,4 +129,6 @@ async def voice_endpoint(websocket: WebSocket):
             await asyncio.gather(*tasks)
 
     except WebSocketDisconnect as e:
+        if id in connections:
+            del connections[id]
         print("Voice Socket Disconnected", e)

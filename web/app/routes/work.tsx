@@ -2,9 +2,10 @@ import * as d3 from "d3";
 import styles from "./work.module.scss";
 import { useRef } from "react";
 import useDimensions from "store/usedimensions";
+import { v4 as uuidv4 } from "uuid";
 
 interface DataNode {
-  id: number;
+  id: string;
   title: string;
   description?: string;
   value: number;
@@ -12,38 +13,38 @@ interface DataNode {
 }
 
 const data: DataNode = {
-  id: 0,
+  id: uuidv4(),
   title: "root",
   value: 1,
   children: [
     {
-      id: 1,
+      id: uuidv4(),
       title: "Project A",
       description: "Description of Project A",
       value: 1,
       children: [
         {
-          id: 2,
+          id: uuidv4(),
           title: "Subproject A1",
           description: "Description of Subproject A1",
           value: 1,
           children: [],
         },
         {
-          id: 3,
+          id: uuidv4(),
           title: "Subproject A2",
           description: "Description of Subproject A2",
           value: 1,
           children: [
             {
-              id: 4,
+              id: uuidv4(),
               title: "Subproject A2.1",
               description: "Description of Subproject A2.1",
               value: 1,
               children: [],
             },
             {
-              id: 5,
+              id: uuidv4(),
               title: "Subproject A2.2",
               description: "Description of Subproject A2.2",
               value: 1,
@@ -54,20 +55,20 @@ const data: DataNode = {
       ],
     },
     {
-      id: 4,
+      id: uuidv4(),
       title: "Project B",
       description: "Description of Project B",
       value: 1,
       children: [
         {
-          id: 5,
+          id: uuidv4(),
           title: "Subproject B1",
           description: "Description of Subproject B1",
           value: 1,
           children: [],
         },
         {
-          id: 6,
+          id: uuidv4(),
           title: "Subproject B2",
           description: "Description of Subproject B2",
           value: 1,
@@ -76,33 +77,33 @@ const data: DataNode = {
       ],
     },
     {
-      id: 5,
+      id: uuidv4(),
       title: "Project C",
       description: "Description of Project C",
       value: 1,
       children: [
         {
-          id: 6,
+          id: uuidv4(),
           title: "Subproject C1",
           description: "Description of Subproject C1",
           value: 1,
           children: [],
         },
         {
-          id: 7,
+          id: uuidv4(),
           title: "Subproject C2",
           description: "Description of Subproject C2",
           value: 1,
           children: [
             {
-              id: 8,
+              id: uuidv4(),
               title: "Subproject C2.1",
               description: "Description of Subproject C2.1",
               value: 1,
               children: [],
             },
             {
-              id: 9,
+              id: uuidv4(),
               title: "Subproject C2.2",
               description: "Description of Subproject C2.2",
               value: 1,
@@ -113,47 +114,47 @@ const data: DataNode = {
       ],
     },
     {
-      id: 10,
+      id: uuidv4(),
       title: "Project D",
       description: "Description of Project D",
       value: 1,
       children: [
         {
-          id: 11,
+          id: uuidv4(),
           title: "Subproject D1",
           description: "Description of Subproject D1",
           value: 1,
           children: [],
         },
         {
-          id: 12,
+          id: uuidv4(),
           title: "Subproject D2",
           description: "Description of Subproject D2",
           value: 1,
           children: [],
         },
         {
-          id: 13,
+          id: uuidv4(),
           title: "Subproject D3",
           description: "Description of Subproject D3",
-          value: 10,
+          value: 1,
           children: [],
         },
         {
-          id: 14,
+          id: uuidv4(),
           title: "Subproject D4",
           description: "Description of Subproject D4",
           value: 1,
           children: [
             {
-              id: 15,
+              id: uuidv4(),
               title: "Subproject D4.1",
               description: "Description of Subproject D4.1",
-              value: 15,
+              value: 1,
               children: [],
             },
             {
-              id: 16,
+              id: uuidv4(),
               title: "Subproject D4.2",
               description: "Description of Subproject D4.2",
               value: 1,
@@ -164,46 +165,46 @@ const data: DataNode = {
       ],
     },
     {
-      id: 13,
+      id: uuidv4(),
       title: "Project E",
       description: "Description of Project E",
       value: 1,
       children: [
         {
-          id: 14,
+          id: uuidv4(),
           title: "Subproject E1",
           description: "Description of Subproject E1",
           value: 1,
           children: [],
         },
         {
-          id: 15,
+          id: uuidv4(),
           title: "Subproject E2",
           description: "Description of Subproject E2",
           value: 1,
           children: [
             {
-              id: 16,
+              id: uuidv4(),
               title: "Subproject E2.1",
               description: "Description of Subproject E2.1",
               value: 1,
               children: [],
             },
             {
-              id: 17,
+              id: uuidv4(),
               title: "Subproject E2.2",
               description: "Description of Subproject E2.2",
               value: 1,
               children: [
                 {
-                  id: 18,
+                  id: uuidv4(),
                   title: "Subproject E2.2.1",
                   description: "Description of Subproject E2.2.1",
                   value: 1,
                   children: [],
                 },
                 {
-                  id: 19,
+                  id: uuidv4(),
                   title: "Subproject E2.2.2",
                   description: "Description of Subproject E2.2.2",
                   value: 1,

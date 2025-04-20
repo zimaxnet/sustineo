@@ -31,7 +31,7 @@ export const useRealtime = (
         : WS_ENDPOINT;
 
       voiceRef.current = new VoiceClient(
-        `${endpoint}/api/voice`,
+        `${endpoint}/api/voice/${user.key}`,
         handleMessage,
         setTalking
       );

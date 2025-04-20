@@ -3,12 +3,17 @@ import os
 from pathlib import Path
 from typing import Union
 from prompty import _load_with_slots
+import prompty
 from prompty.utils import parse
 from azure.cosmos import PartitionKey
 from azure.cosmos.aio import CosmosClient, ContainerProxy
 import aiofiles
 import contextlib
 from prompty.core import Prompty
+from prompty.common import convert_function_tools
+
+from openai.types.beta.realtime.session_update_event import SessionTool
+
 
 COSMOSDB_CONNECTION = os.getenv("COSMOSDB_CONNECTION", "fake_connection")
 DATABASE_NAME = "sustineo"
@@ -114,7 +119,7 @@ async def get_cosmos_container():
 async def get_default_configuration() -> Union[Configuration, None]:
     async with get_cosmos_container() as container:
         query = "SELECT * FROM c WHERE c.default = true"
-        items = container.query_items(query=query, enable_cross_partition_query=True)
+        items = container.query_items(query=query)
         async for item in items:
             return Configuration(
                 id=item["id"],
@@ -123,3 +128,31 @@ async def get_default_configuration() -> Union[Configuration, None]:
                 content=item["content"],
             )
         return None
+
+
+@dataclass
+class DefaultConfiguration:
+    system_message: str
+    tools: list[SessionTool]
+
+async def get_default_configuration_data(**args) -> Union[DefaultConfiguration, None]:
+    config = await get_default_configuration()
+    if config:
+        p = load_prompty(config.content)
+        msgs = await prompty.prepare_async(p, inputs={**args})
+        system_message = msgs[0]["content"] if len(msgs) > 0 else ""
+        internal_tools = convert_function_tools(p.tools)
+        tools = []
+        for tool in internal_tools:
+            tools.append(
+                SessionTool(
+                    type="function",
+                    name=tool["function"]["name"],
+                    description=tool["function"]["description"],
+                    parameters=tool["function"]["parameters"],
+                )
+            )
+        return DefaultConfiguration(
+            system_message=system_message, tools=tools
+        )
+    return None

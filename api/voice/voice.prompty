@@ -6,7 +6,7 @@ model:
   api: chat
 
 inputs:
-  name: Seth Juarez
+  customer: Seth Juarez
 tools:
   start_blog_post:
     type: function

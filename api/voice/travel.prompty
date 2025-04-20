@@ -3,7 +3,7 @@ id: wanderly-travel-agent
 name: Wanderly Travel Agent
 description: Voice agent for Wanderly Travel Agency
 inputs:
-  name: Seth Juarez
+  customer: Seth Juarez
 model:
   api: chat
 tools:

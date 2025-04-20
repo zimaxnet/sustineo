@@ -63,6 +63,7 @@ jobs:
                                 "AZURE_VOICE_ENDPOINT=secretref:azure-voice-endpoint" \
                                 "AZURE_VOICE_KEY=secretref:azure-voice-key" \
                                 "APPINSIGHTS_CONNECTIONSTRING=secretref:appinsights-connectionstring" \
+                                "COSMOSDB_CONNECTION=secretref:cosmosdb-connection" \
                                 "LOCAL_TRACING_ENABLED=false"
 
       - name: Logout

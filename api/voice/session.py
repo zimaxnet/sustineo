@@ -65,7 +65,6 @@ from openai.types.beta.realtime import (
 )
 
 import prompty
-from prompty.common import convert_function_tools
 
 travel_prompty = prompty.load("voice.prompty")
 
@@ -110,26 +109,25 @@ class RealtimeSession:
         threshold: float = 0.8,
         silence_duration_ms: int = 500,
         prefix_padding_ms: int = 300,
-        customer: str = "Seth",
-        #tools: list[SessionTool] = [],
+        tools: list[SessionTool] = [],
     ):
         if self.realtime is not None:
-            msgs = await prompty.prepare_async(
-                travel_prompty,
-                inputs={"name": customer},
-            )
+            # msgs = await prompty.prepare_async(
+            #    travel_prompty,
+            #    inputs={"name": customer},
+            # )
 
-            tls = []
-            tools = convert_function_tools(travel_prompty.tools)
-            for tool in tools:
-                tls.append(
-                    SessionTool(
-                        type="function",
-                        name=tool["function"]["name"],
-                        description=tool["function"]["description"],
-                        parameters=tool["function"]["parameters"],
-                    )
-                )
+            # tls = []
+            # tools = convert_function_tools(travel_prompty.tools)
+            # for tool in tools:
+            #    tls.append(
+            #        SessionTool(
+            #            type="function",
+            #           name=tool["function"]["name"],
+            #            description=tool["function"]["description"],
+            #            parameters=tool["function"]["parameters"],
+            #        )
+            #    )
 
             session: Session = Session(
                 input_audio_format="pcm16",
@@ -143,10 +141,10 @@ class RealtimeSession:
                     model="whisper-1",
                 ),
                 voice="sage",
-                instructions=msgs[0]["content"],
+                instructions=instructions,
                 modalities=["text", "audio"],
                 tool_choice="auto",
-                tools=tls,
+                tools=tools,
             )
             await self.realtime.send(
                 SessionUpdateEvent(
@@ -323,7 +321,6 @@ class RealtimeSession:
 
     @trace(name="response.done")
     async def _response_done(self, event: ResponseDoneEvent):
-        print(event.to_json(indent=2))
         if event.response.output is not None and len(event.response.output) > 0:
             output = event.response.output[0]
             match output.type:

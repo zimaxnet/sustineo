@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { WEB_ENDPOINT } from "store/endpoint";
 
 export interface User {
+  key: string;
   name: string;
   email: string;
   avatar?: string;
@@ -17,6 +18,7 @@ const availableUsers: { [key: string]: string } = {
 };
 
 const defaultUser: User = {
+  key: "seth-juarez",
   name: "Seth Juarez",
   email: "seth.juarez@microsoft.com",
   avatar: "/images/people/seth-juarez.jpg",
@@ -39,12 +41,14 @@ const getUser = async (): Promise<User> => {
   const userAvatar = availableUsers[nameKey];
   if (userAvatar) {
     return {
+      key: nameKey,
       name: name,
       email: email,
       avatar: userAvatar,
     };
   } else {
     return {
+      key: nameKey,
       name: userData.name,
       email: userData.email,
     };
@@ -56,6 +60,7 @@ const getUser = async (): Promise<User> => {
  */
 export const useUser = () => {
   const [user, setUser] = useState<User>({
+    key: "",
     name: "",
     email: "",
   });
