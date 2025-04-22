@@ -19,7 +19,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Output from "components/output";
 
 import VoiceTool from "components/voicetool";
-import Effort from "components/effort";
+import Effort from "components/effortlist";
+import { data } from "store/work";
 
 const queryClient = new QueryClient();
 
@@ -56,16 +57,13 @@ export default function Home() {
         }),
       });
       setLastFunctionCall(func.call_id);
-
-      console.log("Function call:", func);
+      effort?.addEffort({
+        id: func.call_id,
+        source: "assistant",
+        type: "function",
+        content: serverEvent.payload,
+      });
     } else {
-      console.log(
-        "serverEvent",
-        serverEvent.type,
-        serverEvent.payload.startsWith("{")
-          ? JSON.parse(serverEvent.payload)
-          : serverEvent.payload
-      );
       if (serverEvent.type === "user" || serverEvent.type === "assistant") {
         const msg = JSON.parse(serverEvent.payload);
         effort?.addEffort({
@@ -74,16 +72,22 @@ export default function Home() {
           type: "message",
           content: msg.content,
         });
+      } else {
+        console.log(
+          "serverEvent",
+          serverEvent.type,
+          serverEvent.payload.startsWith("{")
+            ? JSON.parse(serverEvent.payload)
+            : serverEvent.payload
+        );
       }
     }
   };
 
-  const {
-    toggleRealtime,
-    talking,
-    sendRealtime,
-    callState,
-  } = useRealtime(user, handleServerMessage);
+  const { toggleRealtime, talking, sendRealtime, callState } = useRealtime(
+    user,
+    handleServerMessage
+  );
 
   const handleVoice = async () => {
     if (callState === "idle") {
@@ -114,7 +118,7 @@ export default function Home() {
           <Effort />
         </div>
         <div className={styles.output}>
-          <Output />
+          <Output data={data} />
         </div>
       </div>
       <Actions>

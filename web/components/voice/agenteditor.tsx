@@ -1,6 +1,5 @@
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import styles from "./agenteditor.module.scss";
-import { Editor } from "@monaco-editor/react";
 import { useState } from "react";
 import { VscNewFile, VscSave, VscStarEmpty } from "react-icons/vsc";
 import { MdDeleteOutline, MdClose } from "react-icons/md";
@@ -174,12 +173,31 @@ const AgentEditor = () => {
           <MdDeleteOutline size={22} />
         </button>
       </div>
-      <Editor
-        height="75vh"
-        defaultLanguage="markdown"
-        value={editorValue}
-        onChange={(value) => handleEditorChange(value)}
-      />
+      <div className={styles.editor}>
+        <textarea
+          id="editor"
+          spellCheck="false"
+          className={styles.textarea}
+          value={editorValue}
+          onChange={(e) => handleEditorChange(e.target.value)}
+          placeholder="Write your agent configuration here..."
+        ></textarea>
+        <div className={styles.tools}>
+          <fieldset>
+            <legend>Available Tools</legend>
+
+            <div>
+              <input type="checkbox" id="scales" name="scales" />
+              <label htmlFor="scales">Scales</label>
+            </div>
+
+            <div>
+              <input type="checkbox" id="horns" name="horns" />
+              <label htmlFor="horns">Horns</label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
     </>
   );
 };

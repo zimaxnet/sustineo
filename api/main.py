@@ -10,7 +10,10 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 from api.voice.common import get_default_configuration_data
 from api.voice.session import Message, RealtimeSession
-from api.voice.configuration import router as voice_configuration_router
+from api.voice import router as voice_configuration_router
+from api.agent import router as agent_router, load_agents
+
+from api.connection import connections
 
 from dotenv import load_dotenv
 
@@ -23,27 +26,22 @@ COSMOSDB_CONNECTION = os.getenv("COSMOSDB_CONNECTION", "fake_connection")
 
 base_path = Path(__file__).parent
 
-connections: dict[str, WebSocket] = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        # manage lifetime scope
+        # Load agents from prompty files in directory
+        await load_agents()
         yield
     finally:
-        # remove all stray sockets
-        for connection in connections.values():
-            try:
-                await connection.close()
-            except Exception as e:
-                print("Error closing connection:", e)
-
-        connections.clear()
+        await connections.clear()
 
 
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(voice_configuration_router, tags=["voice"])
+app.include_router(agent_router, tags=["agents"])
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -70,13 +68,9 @@ async def message(message: SimpleMessage):
 
 @app.websocket("/api/voice/{id}")
 async def voice_endpoint(id: str, websocket: WebSocket):
-    # check if the connection is already open
-    if id in connections:
-        del connections[id]
 
-    connections[id] = websocket
-    # accept the connection
-    await websocket.accept()
+    connection = await connections.connect(id, websocket)
+
     try:
         client = AsyncAzureOpenAI(
             azure_endpoint=AZURE_VOICE_ENDPOINT,
@@ -88,7 +82,7 @@ async def voice_endpoint(id: str, websocket: WebSocket):
         ) as realtime_client:
 
             # get current username and receive any parameters
-            user_message = await websocket.receive_json()
+            user_message = await connection.receive_json()
             user = Message(**user_message)
 
             settings = json.loads(user.payload)
@@ -101,18 +95,18 @@ async def voice_endpoint(id: str, websocket: WebSocket):
             customer = settings["user"] if "user" in settings else "unnamed user"
             prompt_settings = await get_default_configuration_data(customer=customer)
             if prompt_settings is None:
-                await websocket.send_json(
+                await connection.send_json(
                     {
                         "error": "No default configuration found.",
                         "message": "Please contact support.",
                     }
                 )
-                await websocket.close()
+                await connection.close()
                 return
 
             session = RealtimeSession(
                 realtime=realtime_client,
-                client=websocket,
+                client=connection,
             )
 
             await session.update_realtime_session(
@@ -132,7 +126,5 @@ async def voice_endpoint(id: str, websocket: WebSocket):
             await asyncio.gather(*tasks)
 
     except WebSocketDisconnect as e:
-        if id in connections:
-            del connections[id]
-
+        connections.remove(id)
         print("Voice Socket Disconnected", e)

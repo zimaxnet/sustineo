@@ -1,8 +1,7 @@
 import json
-from typing import Literal, Union
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocketDisconnect
 from prompty.tracer import trace
-from pydantic import BaseModel
+from api.connection import Connection, Message
 from fastapi.websockets import WebSocketState
 
 from openai.resources.beta.realtime.realtime import (
@@ -65,14 +64,8 @@ from openai.types.beta.realtime import (
 
 import prompty
 
+
 travel_prompty = prompty.load("voice.prompty")
-
-
-class Message(BaseModel):
-    type: Literal[
-        "user", "assistant", "system", "audio", "console", "interrupt", "function"
-    ]
-    payload: str
 
 
 class RealtimeSession:
@@ -80,27 +73,11 @@ class RealtimeSession:
     Realtime session for handling websocket connections and messages.
     """
 
-    def __init__(self, realtime: AsyncRealtimeConnection, client: WebSocket):
-        self.realtime: Union[AsyncRealtimeConnection, None] = realtime
-        self.client: Union[WebSocket, None] = client
+    def __init__(self, realtime: AsyncRealtimeConnection, client: Connection):
+        self.realtime: AsyncRealtimeConnection = realtime
+        self.connection: Connection = client
         self.response_queue: list[ConversationItemCreateEvent] = []
         self.active = True
-
-    async def send_message(self, message: Message):
-        if self.client is not None:
-            await self.client.send_json(message.model_dump())
-
-    async def send_audio(self, audio: Message):
-        # send audio to client, format into bytes
-        if (
-            self.client is not None
-            and self.client.client_state != WebSocketState.DISCONNECTED
-        ):
-            await self.client.send_json(audio.model_dump())
-
-    async def send_console(self, message: Message):
-        if self.client is not None:
-            await self.client.send_json(message.model_dump())
 
     async def update_realtime_session(
         self,
@@ -138,9 +115,6 @@ class RealtimeSession:
     @trace
     async def receive_realtime(self):
         # signature = "api.session.RealtimeSession.receive_realtime"
-        if self.realtime is None:
-            pass
-
         while self.realtime is not None:
             async for event in self.realtime:
                 if "delta" not in event.type:
@@ -151,7 +125,7 @@ class RealtimeSession:
                         await self._handle_error(event)
                     case "session.created":
                         await self._session_created(event)
-                    case "session.updated": 
+                    case "session.updated":
                         await self._session_updated(event)
                     case "conversation.created":
                         await self._conversation_created(event)
@@ -216,8 +190,6 @@ class RealtimeSession:
                             f"Unhandled event type {event.type}",
                         )
 
-        self.realtime = None
-
     @trace(name="error")
     async def _handle_error(self, event: ErrorEvent):
         pass
@@ -242,7 +214,7 @@ class RealtimeSession:
     async def _conversation_item_input_audio_transcription_completed(
         self, event: ConversationItemInputAudioTranscriptionCompletedEvent
     ):
-        await self.send_message(
+        await self.connection.send_message(
             Message(
                 type="user",
                 payload=json.dumps(
@@ -289,7 +261,7 @@ class RealtimeSession:
     async def _input_audio_buffer_speech_started(
         self, event: InputAudioBufferSpeechStartedEvent
     ):
-        await self.send_console(Message(type="interrupt", payload=""))
+        await self.connection.send_console(Message(type="interrupt", payload=""))
 
     @trace(name="input_audio_buffer.speech_stopped")
     async def _input_audio_buffer_speech_stopped(
@@ -307,7 +279,7 @@ class RealtimeSession:
             output = event.response.output[0]
             match output.type:
                 case "message":
-                    await self.send_console(
+                    await self.connection.send_console(
                         Message(
                             type=output.role if output.role else "assistant",
                             payload=json.dumps(
@@ -324,7 +296,7 @@ class RealtimeSession:
                         )
                     )
                 case "function_call":
-                    await self.send_console(
+                    await self.connection.send_console(
                         Message(
                             type="function",
                             payload=json.dumps(
@@ -339,7 +311,7 @@ class RealtimeSession:
                     )
 
                 case "function_call_output":
-                    await self.send_console(
+                    await self.connection.send_console(
                         Message(type="console", payload=output.model_dump_json())
                     )
 
@@ -385,12 +357,14 @@ class RealtimeSession:
     async def _response_audio_transcript_done(
         self, event: ResponseAudioTranscriptDoneEvent
     ):
-        await self.send_console(Message(type="console", payload=event.transcript.strip()))
+        await self.connection.send_console(
+            Message(type="console", payload=event.transcript.strip())
+        )
         pass
 
     @trace(name="response.audio.delta")
     async def _response_audio_delta(self, event: ResponseAudioDeltaEvent):
-        await self.send_audio(Message(type="audio", payload=event.delta))
+        await self.connection.send_audio(Message(type="audio", payload=event.delta))
 
     @trace(name="response.audio.done")
     async def _response_audio_done(self, event: ResponseAudioDoneEvent):
@@ -414,12 +388,12 @@ class RealtimeSession:
 
     @trace
     async def receive_client(self):
-        if self.client is None or self.realtime is None:
+        if self.connection.state != WebSocketState.CONNECTED or self.realtime is None:
             return
 
         try:
-            while self.client.client_state != WebSocketState.DISCONNECTED:
-                message = await self.client.receive_text()
+            while self.connection.state != WebSocketState.DISCONNECTED:
+                message = await self.connection.receive_text()
 
                 message_json = json.loads(message)
                 m = Message(**message_json)
@@ -468,7 +442,7 @@ class RealtimeSession:
                         await self.realtime.response.create()
 
                     case _:
-                        await self.send_console(
+                        await self.connection.send_console(
                             Message(type="console", payload="Unhandled message")
                         )
 
@@ -476,12 +450,8 @@ class RealtimeSession:
             print("Realtime Socket Disconnected")
 
     async def close(self):
-        if self.client is None or self.realtime is None:
-            return
         try:
-            await self.client.close()
+            await self.connection.close()
             await self.realtime.close()
         except Exception as e:
             print("Error closing session", e)
-            self.client = None
-            self.realtime = None
