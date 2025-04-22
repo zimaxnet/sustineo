@@ -66,12 +66,14 @@ export default function Home() {
     } else {
       if (serverEvent.type === "user" || serverEvent.type === "assistant") {
         const msg = JSON.parse(serverEvent.payload);
-        effort?.addEffort({
-          id: msg.id,
-          source: msg.role,
-          type: "message",
-          content: msg.content,
-        });
+        if (msg.content.trim() !== "") {
+          effort?.addEffort({
+            id: msg.id,
+            source: msg.role,
+            type: "message",
+            content: msg.content,
+          });
+        }
       } else {
         console.log(
           "serverEvent",

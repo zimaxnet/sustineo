@@ -60,13 +60,16 @@ export class VoiceConfiguration {
     return await response.json();
   }
 
-  async createConfiguration(content: string): Promise<Configuration> {
-    const response = await fetch(`${this.endpoint}/api/configuration`, {
+  async createConfiguration(configuration: Configuration): Promise<Configuration> {
+    console.log("Creating configuration", configuration);
+    const response = await fetch(`${this.endpoint}/api/configuration/`, {
       method: "POST",
       headers: {
-        "Content-Type": "text/plain",
+        "Content-Type": "application/json",
       },
-      body: content,
+      body: JSON.stringify({
+        "content": configuration.content,
+      }),
     });
     if (!response.ok) {
       throw new Error("Failed to create configuration");

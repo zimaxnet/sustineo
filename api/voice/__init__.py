@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Body, Response, status
+from fastapi import APIRouter, Response, status
 from pydantic import BaseModel
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
@@ -23,6 +23,7 @@ class Config(BaseModel):
     id: Optional[str] = None
     name: Optional[str] = None
     default: Optional[bool] = False
+    tools: Optional[list[dict]] = None
     content: str
 
 
@@ -68,11 +69,11 @@ async def get_configuration(id: str, response: Response):
 
 @router.post("/")
 async def create_configuration(
+    configuration: Config,
     response: Response,
-    body: str = Body(..., media_type="text/plain"),
 ) -> Configuration:
     async with get_cosmos_container() as container:
-        config = load_prompty_config(body)
+        config = load_prompty_config(configuration.content)
 
         try:
             # Upsert the configuration

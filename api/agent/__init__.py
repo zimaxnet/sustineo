@@ -12,6 +12,7 @@ agents: dict[str, Prompty] = {}
 # load agents from prompty files in directory
 async def load_agents():
     agents_dir = Path(__file__).parent
+    agents.clear()
     for agent_file in agents_dir.glob("*.prompty"):
         agent_name = agent_file.stem
         prompty_agent = await prompty.load_async(str(agent_file))
@@ -27,25 +28,35 @@ router = APIRouter(
 )
 
 
+@router.get("/refresh")
+async def refresh_agents():
+    # reload agents from prompty files in directory
+    await load_agents()
+    return {"message": "Agents refreshed"}
+
+
 @router.get("/")
 async def get_agents():
     # return list of available agents
-    return {
-        "agents": [
-            {
-                "id": agent.id,
-                "name": agent.name,
-                "description": agent.description,
-                "model": {
-                    "api": agent.model.api,
-                    "connection": agent.model.connection,
-                    "options": agent.model.options,
-                },
-                "inputs": agent.inputs,
-            }
-            for agent in agents.values()
-        ]
-    }
+    return [
+        {
+            "id": agent.id,
+            "name": agent.name,
+            "type": agent.model.connection["type"],
+            "description": agent.description,
+            "options": agent.model.options,
+            "parameters": [
+                {
+                    "name": param.name,
+                    "type": param.type,
+                    "description": param.description,
+                    "required": param.required,
+                }
+                for param in agent.inputs
+            ],
+        }
+        for agent in agents.values()
+    ]
 
 
 @router.get("/{id}")

@@ -1,6 +1,6 @@
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import styles from "./agenteditor.module.scss";
-import { useState } from "react";
+import { act, useEffect, useState, type ChangeEvent } from "react";
 import { VscNewFile, VscSave, VscStarEmpty } from "react-icons/vsc";
 import { MdDeleteOutline, MdClose } from "react-icons/md";
 import {
@@ -8,11 +8,15 @@ import {
   VoiceConfiguration,
   type Configuration,
 } from "store/voice/configuration";
+import { API_ENDPOINT } from "store/endpoint";
+import type { AgentConfig } from "store/agents";
 
 const AgentEditor = () => {
   const queryClient = useQueryClient();
   const [selectedConfig, setSelectedConfig] = useState<string>("");
   const [editorValue, setEditorValue] = useState("");
+
+  const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
 
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["configurations"],
@@ -27,6 +31,30 @@ const AgentEditor = () => {
         }
       }
       return configs;
+    },
+  });
+
+  const {
+    isPending: isAgentsPending,
+    isError: isAgentsError,
+    data: agentConfigs,
+    error: agentsError,
+  } = useQuery({
+    queryKey: ["agents"],
+    queryFn: async () => {
+      // fetch agents from server
+      const uri = `${API_ENDPOINT}/api/agent/`;
+      const response = await fetch(uri, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch agents");
+      }
+      const data: AgentConfig[] = await response.json();
+      return data;
     },
   });
 
@@ -54,7 +82,7 @@ const AgentEditor = () => {
       let c: Configuration;
       if (config.name === "New Configuration") {
         // Create new configuration
-        c = await voiceConfig.createConfiguration(config.content);
+        c = await voiceConfig.createConfiguration(config);
       } else {
         // Update existing configuration
         c = await voiceConfig.updateConfiguration(config);
@@ -122,6 +150,24 @@ const AgentEditor = () => {
     await removeMutation.mutateAsync(selectedConfig);
   };
 
+  function changeAgent(event: ChangeEvent<HTMLInputElement>): void {
+    const { value, checked } = event.target;
+    if (checked) {
+      setSelectedAgents((prev) => [...prev, value]);
+    } else {
+      setSelectedAgents((prev) => prev.filter((agent) => agent !== value));
+    }
+    //console.log("Selected agents:", selectedAgents);
+  }
+
+  useEffect(() => {
+    console.log("Selected agents:", selectedAgents);
+    const activeAgents = agentConfigs?.filter((agent) =>
+      selectedAgents.includes(agent.id)
+    );
+    console.log("Active agents:", activeAgents);
+  }, [selectedAgents]);
+
   return (
     <>
       <div className={styles.toolbar}>
@@ -179,22 +225,35 @@ const AgentEditor = () => {
           spellCheck="false"
           className={styles.textarea}
           value={editorValue}
+          wrap="off"
           onChange={(e) => handleEditorChange(e.target.value)}
           placeholder="Write your agent configuration here..."
         ></textarea>
         <div className={styles.tools}>
-          <fieldset>
-            <legend>Available Tools</legend>
-
-            <div>
-              <input type="checkbox" id="scales" name="scales" />
-              <label htmlFor="scales">Scales</label>
-            </div>
-
-            <div>
-              <input type="checkbox" id="horns" name="horns" />
-              <label htmlFor="horns">Horns</label>
-            </div>
+          <fieldset className={styles.fieldset}>
+            <legend>Available Agents</legend>
+            {isAgentsPending && <p>Loading...</p>}
+            {isAgentsError && <p>Error: {agentsError.message}</p>}
+            {agentConfigs &&
+              agentConfigs.map((agent) => (
+                <div key={agent.id}>
+                  <input
+                    type="checkbox"
+                    id={agent.id}
+                    name={agent.id}
+                    value={agent.id}
+                    radioGroup="agents"
+                    onChange={changeAgent}
+                  />
+                  <label
+                    className={styles.label}
+                    htmlFor={agent.id}
+                    title={agent.description}
+                  >
+                    {agent.name}
+                  </label>
+                </div>
+              ))}
           </fieldset>
         </div>
       </div>
