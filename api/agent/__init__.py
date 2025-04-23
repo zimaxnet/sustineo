@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from pathlib import Path
 import prompty
 from prompty.core import Prompty
+from .common import get_foundry_agents
 
 # from api.connection import connections
 
@@ -38,25 +39,27 @@ async def refresh_agents():
 @router.get("/")
 async def get_agents():
     # return list of available agents
-    return [
-        {
-            "id": agent.id,
-            "name": agent.name,
-            "type": agent.model.connection["type"],
-            "description": agent.description,
-            "options": agent.model.options,
-            "parameters": [
-                {
-                    "name": param.name,
-                    "type": param.type,
-                    "description": param.description,
-                    "required": param.required,
-                }
-                for param in agent.inputs
-            ],
-        }
-        for agent in agents.values()
-    ]
+    #a = [
+    #    {
+    #        "id": agent.id,
+    #        "name": agent.name,
+    #        "type": agent.model.connection["type"],
+    #        "description": agent.description,
+    #        "options": agent.model.options,
+    #        "parameters": [
+    #            {
+    #                "name": param.name,
+    #                "type": param.type,
+    #                "description": param.description,
+    #                "required": param.required,
+    #            }
+    #            for param in agent.inputs
+    #        ],
+    #    }
+    #    for agent in agents.values()
+    #]
+    f = await get_foundry_agents()
+    return f
 
 
 @router.get("/{id}")
