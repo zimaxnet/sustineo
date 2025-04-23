@@ -64,7 +64,7 @@ jobs:
                                 "AZURE_VOICE_KEY=secretref:azure-voice-key" \
                                 "APPINSIGHTS_CONNECTIONSTRING=secretref:appinsights-connectionstring" \
                                 "COSMOSDB_CONNECTION=secretref:cosmosdb-connection" \
-                                "FOUNDRY_CONNECTION=secretref:foundry-connection"
+                                "FOUNDRY_CONNECTION=secretref:foundry-connection" \
                                 "LOCAL_TRACING_ENABLED=false"
 
       - name: Logout
