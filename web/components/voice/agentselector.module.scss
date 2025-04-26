@@ -1,0 +1,18 @@
+@use "../../app/defaults.scss" as *;
+
+.fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  border: solid 1px $color-zinc-300;
+  background-color: $color-white;
+}
+
+.label {
+  margin-left: 0.5rem;
+  color: $color-zinc-800;
+  user-select: none;
+  cursor: pointer;
+}

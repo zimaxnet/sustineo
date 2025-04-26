@@ -192,7 +192,7 @@ class RealtimeSession:
 
     @trace(name="error")
     async def _handle_error(self, event: ErrorEvent):
-        pass
+        print("Error event", event.error)
 
     @trace(name="session.created")
     async def _session_created(self, event: SessionCreatedEvent):

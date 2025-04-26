@@ -52,17 +52,27 @@
   color: $color-fuchsia-200;
 }
 
-.functionArg {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  margin-left: 2rem;
+.functionArgs {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1rem;
   align-self: start;
   justify-content: space-evenly;
+  gap: 0.75rem;
+  user-select: none;
+    cursor: pointer;
+}
+
+.functionArgKey {
+  font-weight: 400;
+  color: $color-zinc-200;
 }
 
 .functionArgValue {
   font-weight: 400;
   color: $color-zinc-200;
+  user-select: none;
+  cursor: pointer;
 }
 
 .assistant {

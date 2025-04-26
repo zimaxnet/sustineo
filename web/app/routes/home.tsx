@@ -16,6 +16,7 @@ import styles from "./home.module.scss";
 import AgentEditor from "components/voice/agenteditor";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { API_ENDPOINT } from "store/endpoint";
 import Output from "components/output";
 
 import VoiceTool from "components/voicetool";
@@ -45,6 +46,7 @@ export default function Home() {
 
   const handleServerMessage = async (serverEvent: Message) => {
     if (serverEvent.type === "function") {
+      console.log(JSON.parse(serverEvent.payload));
       // handle function call
       const func = JSON.parse(serverEvent.payload);
       sendRealtime({
@@ -63,10 +65,25 @@ export default function Home() {
         type: "function",
         content: serverEvent.payload,
       });
-    } else {
-      if (serverEvent.type === "user" || serverEvent.type === "assistant") {
+
+      const api = `${API_ENDPOINT}/api/agent/${user.key}/`;
+      await fetch(api, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          call_id: func.call_id,
+          id: func.id,
+          name: func.name,
+          arguments: func.arguments,
+        }),
+      });
+
+    } else if (serverEvent.type === "user" || serverEvent.type === "assistant") {
+        //console.log("serverEvent", serverEvent.type, serverEvent.payload);
         const msg = JSON.parse(serverEvent.payload);
-        if (msg.content.trim() !== "") {
+        if (msg.content && msg.content.trim() !== "") {
           effort?.addEffort({
             id: msg.id,
             source: msg.role,
@@ -74,16 +91,19 @@ export default function Home() {
             content: msg.content,
           });
         }
-      } else {
-        console.log(
-          "serverEvent",
-          serverEvent.type,
-          serverEvent.payload.startsWith("{")
-            ? JSON.parse(serverEvent.payload)
-            : serverEvent.payload
-        );
+      } else if (serverEvent.type === "agent") {
+        const payload = JSON.parse(serverEvent.payload);
+        // everything except call_id and name
+        const { call_id, name, ...rest } = payload;
+        effort?.addEffort({
+            id: call_id,
+            source: name,
+            type: "agent",
+            content: JSON.stringify({
+              ...rest
+            }),
+          });
       }
-    }
   };
 
   const { toggleRealtime, talking, sendRealtime, callState } = useRealtime(

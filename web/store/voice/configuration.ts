@@ -3,24 +3,9 @@ import { API_ENDPOINT } from "store/endpoint";
 export const defaultVoiceDocument = `---
 id: your-unique-id
 name: Your Display Name
-
-model:
-  api: realtime
-
-inputs:
-  name: Seth Juarez
-
-tools:
-  your_tool_name:
-    type: function
-    description: Your tool description
-    parameters:
-      - name: name_of_parameter
-        type: string
-        description: Your parameter description
-        required: true
+description: A brief description of the configuration.
 ---
-Your Markdown content goes here (using {{name}} for customer name).
+Your Markdown content goes here (using {{customer}} for customer name).
 `
 
 export interface Configuration {
@@ -28,6 +13,18 @@ export interface Configuration {
   name: string;
   default: boolean;
   content: string;
+  tools: Array<{
+    id: string;
+    name: string;
+    type: string;
+    description: string;
+    parameters: Array<{
+      name: string;
+      type: string;
+      description: string;
+      required: boolean;
+    }>;
+  }>;
 }
 
 export interface ConfigurationAction {
@@ -74,7 +71,9 @@ export class VoiceConfiguration {
     if (!response.ok) {
       throw new Error("Failed to create configuration");
     }
-    return await response.json();
+    const c =  await response.json();
+    console.log("Created configuration", c);
+    return c;
   }
 
   async updateConfiguration(configuration: Configuration): Promise<Configuration> {
@@ -88,7 +87,10 @@ export class VoiceConfiguration {
     if (!response.ok) {
       throw new Error("Failed to update configuration");
     }
-    return await response.json();
+
+    const c = await response.json();
+    console.log("Updated configuration", c);
+    return c;
   }
 
   async deleteConfiguration(id: string): Promise<ConfigurationAction> {

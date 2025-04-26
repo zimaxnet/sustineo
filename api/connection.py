@@ -1,13 +1,16 @@
-from typing import Literal
+import json
+from typing import Any, Literal, TypeAlias
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 from pydantic import BaseModel
 
 
+MessageType: TypeAlias = Literal[
+    "user", "assistant", "system", "audio", "console", "interrupt", "function", "agent"
+]
+
 class Message(BaseModel):
-    type: Literal[
-        "user", "assistant", "system", "audio", "console", "interrupt", "function"
-    ]
+    type: MessageType
     payload: str
 
 
@@ -63,9 +66,9 @@ class ConnectionManager:
         self.active_connections[id] = Connection(websocket)
         return self.active_connections[id]
 
-    async def send_message(self, id: str, message: str):
+    async def send_message(self, id: str, type: MessageType, payload: dict[str, Any]):
         if id in self.active_connections:
-            await self.active_connections[id].send_text(message)
+            await self.active_connections[id].send_message(Message(type=type, payload=json.dumps(payload)))
         else:
             raise ValueError(f"Connection with id {id} not found.")
 
@@ -73,6 +76,9 @@ class ConnectionManager:
         if id not in self.active_connections:
             raise KeyError(f"Connection with id {id} not found.")
         return self.active_connections[id]
+
+    def __contains__(self, id: str) -> bool:
+        return id in self.active_connections
 
     async def clear(self):
         keys = list(self.active_connections.keys())

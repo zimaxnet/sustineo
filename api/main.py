@@ -11,7 +11,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from api.voice.common import get_default_configuration_data
 from api.voice.session import Message, RealtimeSession
 from api.voice import router as voice_configuration_router
-from api.agent import router as agent_router, load_agents
+from api.agent import router as agent_router
+from api.agent.common import get_custom_agents
 
 from api.connection import connections
 
@@ -31,7 +32,7 @@ base_path = Path(__file__).parent
 async def lifespan(app: FastAPI):
     try:
         # Load agents from prompty files in directory
-        await load_agents()
+        await get_custom_agents()
         yield
     finally:
         await connections.clear()
@@ -92,8 +93,15 @@ async def voice_endpoint(id: str, websocket: WebSocket):
             )
 
             # create voice system message
-            customer = settings["user"] if "user" in settings else "unnamed user"
-            prompt_settings = await get_default_configuration_data(customer=customer)
+            args = {
+                "customer": settings["user"] if "user" in settings else "unnamed user"
+            }
+            if "date" in settings:
+                args["date"] = settings["date"]
+            if "time" in settings:
+                args["time"] = settings["time"]
+
+            prompt_settings = await get_default_configuration_data(**args)
             if prompt_settings is None:
                 await connection.send_json(
                     {

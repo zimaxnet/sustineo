@@ -59,17 +59,10 @@ const EffortList = () => {
               {/* enumerate args dictionary */}
               {Object.entries(args).map(([key, value], index) => {
                 return (
-                  <div key={index} className={styles.functionArg}>
-                    <span className={styles.functionArgKey}>{key}:</span>
-                    {typeof value === "object" ? (
-                      <span className={styles.functionArgValue}>
-                        {JSON.stringify(value)}
-                      </span>
-                    ) : (
-                      <span className={styles.functionArgValue}>
-                        {value?.toString()}
-                      </span>
-                    )}
+                  <div key={index} className={styles.functionArg} title={key}>
+                    {typeof value === "object"
+                      ? JSON.stringify(value)
+                      : value?.toString()}
                   </div>
                 );
               })}
@@ -77,7 +70,27 @@ const EffortList = () => {
           </>
         );
       case "agent":
-        return effort.content;
+        const agent_args = JSON.parse(effort.content);
+        return (
+          <>
+            <div className={styles.functionCall}>
+              <span>Agent</span>&nbsp;
+              <span className={styles.functionName}>{effort.source}</span>
+            </div>
+            <div className={styles.functionArgs}>
+              {/* enumerate args dictionary */}
+              {Object.entries(agent_args).map(([key, value], index) => {
+                return (
+                  <div key={index} className={styles.functionArg} title={key}>
+                    {typeof value === "object"
+                      ? JSON.stringify(value)
+                      : value?.toString()}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        );;
       default:
         return <div className={styles.nothing}>Nothing</div>;
     }

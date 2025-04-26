@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 import os
 from pathlib import Path
 from typing import Union
@@ -10,7 +11,7 @@ from azure.cosmos.aio import CosmosClient, ContainerProxy
 import aiofiles
 import contextlib
 from prompty.core import Prompty
-from prompty.common import convert_function_tools
+import typing
 
 from openai.types.beta.realtime.session_update_event import SessionTool
 
@@ -26,6 +27,7 @@ class Configuration:
     name: str
     default: bool
     content: str
+    tools: list[dict[str, typing.Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -66,9 +68,38 @@ async def seed_configurations(container: ContainerProxy) -> list[Configuration]:
     return configs
 
 
-def load_prompty(contents: str) -> Prompty:
+def load_prompty(contents: str, date: datetime = datetime.now()) -> Prompty:
     matter = parse(contents)
     attributes = matter.pop("attributes", {})
+    if "model" not in attributes:
+        attributes["model"] = {}
+
+    if "api" not in attributes["model"]:
+        attributes["model"]["api"] = "chat"
+
+    # add default inputs
+    attributes["inputs"] = [
+        {
+            "name": "customer",
+            "type": "string",
+            "description": "Customer name",
+            "required": True,
+        },
+        {
+            "name": "date",
+            "type": "string",
+            "description": "Current date",
+            "default": date.strftime("%Y-%m-%d"),
+            "required": False,
+        },
+        {
+            "name": "time",
+            "type": "string",
+            "description": "Current time",
+            "default": date.strftime("%H:%M"),
+            "required": False,
+        },
+    ]
     return _load_with_slots(attributes, matter["body"], {}, Path(__file__).parent)
 
 
@@ -126,6 +157,7 @@ async def get_default_configuration() -> Union[Configuration, None]:
                 name=item["name"],
                 default=item["default"],
                 content=item["content"],
+                tools=item["tools"] if "tools" in item else [],
             )
         return None
 
@@ -135,24 +167,44 @@ class DefaultConfiguration:
     system_message: str
     tools: list[SessionTool]
 
+
+def convert_function_params(params: list[dict]) -> dict:
+    return {
+        "type": "object",
+        "properties": {
+            p["name"]: {
+                "type": p["type"],
+                "description": (
+                    p["description"] if "description" in p else "No Description"
+                ),
+            }
+            for p in params
+        },
+        "required": [p["name"] for p in params if p["required"]],
+    }
+
+
 async def get_default_configuration_data(**args) -> Union[DefaultConfiguration, None]:
     config = await get_default_configuration()
     if config:
         p = load_prompty(config.content)
         msgs = await prompty.prepare_async(p, inputs={**args})
         system_message = msgs[0]["content"] if len(msgs) > 0 else ""
-        internal_tools = convert_function_tools(p.tools)
-        tools = []
-        for tool in internal_tools:
-            tools.append(
-                SessionTool(
-                    type="function",
-                    name=tool["function"]["name"],
-                    description=tool["function"]["description"],
-                    parameters=tool["function"]["parameters"],
+        tools: list[SessionTool] = []
+        if config.tools is not None and len(config.tools) > 0:
+            for tool in config.tools:
+                tools.append(
+                    SessionTool(
+                        type="function",
+                        name=tool["name"].strip().lower().replace(" ", "_"),
+                        description=(
+                            tool["description"]
+                            if "description" in tool
+                            else "No Description"
+                        ),
+                        parameters=convert_function_params(tool["parameters"]),
+                    )
                 )
-            )
-        return DefaultConfiguration(
-            system_message=system_message, tools=tools
-        )
+
+        return DefaultConfiguration(system_message=system_message, tools=tools)
     return None
