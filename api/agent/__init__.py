@@ -1,17 +1,17 @@
-import typing
-import prompty
+import json
 from fastapi import APIRouter
-from pydantic import BaseModel
-from .common import (
+
+from api.agent.model import AgentStatus, FunctionCall
+from api.agent.common import (
     get_foundry_agents,
-    Agent,
     get_custom_agents,
     custom_agents,
     foundry_agents,
 )
-from ..connection import connections
+from api.agent.model import Agent
+from api.agent.common import execute_foundry_agent
 
-# from api.connection import connections
+from api.connection import connections
 
 # available agents
 router = APIRouter(
@@ -78,6 +78,7 @@ async def get_agents():
 
 @router.get("/{id}")
 async def get_agent(id: str):
+    global connections, custom_agents, foundry_agents
     # return agent by id
     if id not in custom_agents:
         return {"error": "Agent not found"}
@@ -85,63 +86,40 @@ async def get_agent(id: str):
     return {k: v for k, v in custom_agents[id].to_safe_dict().items() if k != "file"}
 
 
-class FunctionCall(BaseModel):
-    call_id: str
-    id: str
-    name: str
-    arguments: dict[str, typing.Any]
-
-
 @router.post("/{id}")
 async def execute_agent(id: str, function: FunctionCall):
+    global connections, custom_agents, foundry_agents
 
-    if id in connections:
-        await connections.send_message(
-            id,
-            "agent",
-            {
-                "name": function.name,
-                "call_id": function.call_id,
-                "message": "Starting agent execution",
-            },
+    if len(foundry_agents) == 0:
+        foundry_agents = await get_foundry_agents()
+
+    async def send_agent_status(status: AgentStatus):
+        print(json.dumps(status.__dict__, indent=4))
+        # send agent status to connection
+        if id in connections:
+            await connections[id].send_json(
+                {
+                    "type": "agent",
+                    "payload": json.dumps({
+                        "id": status.id,
+                        "agentName": status.agentName,
+                        "callId": status.callId,
+                        "name": status.name,
+                        "status": status.status,
+                        "type": status.type,
+                        "content": status.content,
+                    }),
+                }
+            )
+
+
+    if id in connections and function.name in foundry_agents:
+        # execute foundry agent
+        foundry_agent = foundry_agents[function.name]
+        await execute_foundry_agent(
+            foundry_agent,
+            function.arguments["additional_instructions"],
+            function.arguments["query"],
+            function.call_id,
+            send_agent_status,
         )
-
-        if function.name in custom_agents:
-            # execute custom prompty agent
-            agent = custom_agents[function.name]
-            result = await prompty.execute_async(
-                agent,
-                inputs={**function.arguments},
-            )
-
-            await connections.send_message(
-                id,
-                "agent",
-                {
-                    "name": function.name,
-                    "call_id": function.call_id,
-                    "message": "Agent execution completed",
-                    "result": result,
-                },
-            )
-
-            return {
-                "status": "success",
-            }
-
-        if function.name in foundry_agents:
-            # execute foundry agent
-            foundry_agent = foundry_agents[function.name]
-            await connections.send_message(
-                id,
-                "agent",
-                {
-                    "name": function.name,
-                    "message": "Starting agent execution",
-                    "call_id": function.call_id,
-                    "agentId": foundry_agent.id,
-                    "agentName": foundry_agent.name,
-                },
-            )
-
-        return {"status": "success"}

@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from datetime import datetime
 import os
 from pathlib import Path
@@ -11,31 +10,15 @@ from azure.cosmos.aio import CosmosClient, ContainerProxy
 import aiofiles
 import contextlib
 from prompty.core import Prompty
-import typing
 
 from openai.types.beta.realtime.session_update_event import SessionTool
+
+from api.voice.model import Configuration, DefaultConfiguration
 
 
 COSMOSDB_CONNECTION = os.getenv("COSMOSDB_CONNECTION", "fake_connection")
 DATABASE_NAME = "sustineo"
 CONTAINER_NAME = "VoiceConfigurations"
-
-
-@dataclass
-class Configuration:
-    id: str
-    name: str
-    default: bool
-    content: str
-    tools: list[dict[str, typing.Any]] = field(default_factory=list)
-
-    def to_dict(self) -> dict:
-        return {
-            "id": self.id,
-            "name": self.name,
-            "default": self.default,
-            "content": self.content,
-        }
 
 
 async def seed_configurations(container: ContainerProxy) -> list[Configuration]:
@@ -162,10 +145,7 @@ async def get_default_configuration() -> Union[Configuration, None]:
         return None
 
 
-@dataclass
-class DefaultConfiguration:
-    system_message: str
-    tools: list[SessionTool]
+
 
 
 def convert_function_params(params: list[dict]) -> dict:

@@ -1,6 +1,4 @@
-from typing import Optional
 from fastapi import APIRouter, Response, status
-from pydantic import BaseModel
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
 from api.voice.common import (
@@ -9,6 +7,7 @@ from api.voice.common import (
     load_prompty_config,
     seed_configurations,
 )
+from api.voice.model import Config
 
 
 router = APIRouter(
@@ -17,15 +16,6 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
     dependencies=[],
 )
-
-
-class Config(BaseModel):
-    id: Optional[str] = None
-    name: Optional[str] = None
-    default: Optional[bool] = False
-    tools: Optional[list[dict]] = None
-    content: str
-
 
 @router.get("/")
 async def get_configurations():

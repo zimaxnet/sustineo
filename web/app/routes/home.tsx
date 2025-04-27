@@ -58,12 +58,12 @@ export default function Home() {
             "Working on it - will continue to update as I go. Feel free to work on other tasks in the meantime. Make sure to let the user know you are working on it and can do other tasks.",
         }),
       });
-      setLastFunctionCall(func.call_id);
+      //setLastFunctionCall(func.call_id);
       effort?.addEffort({
         id: func.call_id,
-        source: "assistant",
         type: "function",
-        content: serverEvent.payload,
+        name: func.name,
+        arguments: func.arguments,
       });
 
       const api = `${API_ENDPOINT}/api/agent/${user.key}/`;
@@ -86,23 +86,26 @@ export default function Home() {
         if (msg.content && msg.content.trim() !== "") {
           effort?.addEffort({
             id: msg.id,
-            source: msg.role,
             type: "message",
+            role: msg.role,
             content: msg.content,
           });
         }
       } else if (serverEvent.type === "agent") {
         const payload = JSON.parse(serverEvent.payload);
         // everything except call_id and name
-        const { call_id, name, ...rest } = payload;
         effort?.addEffort({
-            id: call_id,
-            source: name,
+            id: payload.id,
             type: "agent",
-            content: JSON.stringify({
-              ...rest
-            }),
+            agentName: payload.agentName,
+            callId: payload.callId,
+            name: payload.name,
+            status: payload.status,
+            statusType: payload.type,
+            content: payload.content,
           });
+
+        // check for message completion to add to output
       }
   };
 

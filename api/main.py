@@ -8,13 +8,12 @@ from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
+from api.connection import connections
 from api.voice.common import get_default_configuration_data
 from api.voice.session import Message, RealtimeSession
 from api.voice import router as voice_configuration_router
 from api.agent import router as agent_router
 from api.agent.common import get_custom_agents
-
-from api.connection import connections
 
 from dotenv import load_dotenv
 

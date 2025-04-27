@@ -72,6 +72,7 @@ class ConnectionManager:
         else:
             raise ValueError(f"Connection with id {id} not found.")
 
+
     def __getitem__(self, id: str) -> Connection:
         if id not in self.active_connections:
             raise KeyError(f"Connection with id {id} not found.")
@@ -91,5 +92,4 @@ class ConnectionManager:
             del self.active_connections[id]
 
 
-# global connection manager
 connections = ConnectionManager()
