@@ -72,7 +72,7 @@ class SustineoAgentEventHandler(AsyncAgentEventHandler[str]):
                         agentName=self.agent.name,
                         callId=self.call_id,
                         name="step",
-                        status=message.status,
+                        status="completed",
                         type=message.type,
                         content=message.step_details.as_dict(),
                     )
@@ -96,8 +96,12 @@ class SustineoAgentEventHandler(AsyncAgentEventHandler[str]):
                         agentName=self.agent.name,
                         callId=self.call_id,
                         name="message",
-                        status=message.status,
-                        content=message.content[0].as_dict(),
+                        status="completed",
+                        type="thread_message",
+                        content={
+                            "type": "thread_message",
+                            "thread_message": [m.as_dict() for m in message.content],
+                        }
                     )
                 )
             else:
