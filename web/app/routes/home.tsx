@@ -21,6 +21,7 @@ import Output from "components/output";
 import VoiceTool from "components/voicetool";
 import Effort from "components/effortlist";
 import { data } from "store/work";
+import Layout from "../layout";
 
 const queryClient = new QueryClient();
 
@@ -113,38 +114,39 @@ export default function Home() {
   };
 
   return (
-    <main className={styles.home}>
-      <Title text="sustineō" version={version} user={user} />
-      <div className={styles.scratch}>
-        <div className={styles.effort}>
-          <Effort />
+    <Layout version={version} user={user}>
+      <main className={styles.home}>
+        <div className={styles.scratch}>
+          <div className={styles.effort}>
+            <Effort />
+          </div>
+          <div className={styles.output}>
+            <Output data={data} />
+          </div>
         </div>
-        <div className={styles.output}>
-          <Output data={data} />
-        </div>
-      </div>
-      <Actions>
-        <VoiceTool onClick={() => handleVoice()} />
-      </Actions>
-      <Settings>
-        <Setting
-          id={"voice-settings"}
-          icon={<TbSettingsCog size={18} />}
-          className={styles.voice}
-        >
-          <VoiceSettings />
-        </Setting>
-        <Setting
-          id={"voice-agent-settings"}
-          icon={<TbArticle size={18} />}
-          className={styles.editor}
-        >
-          <QueryClientProvider client={queryClient}>
-            <AgentEditor />
-          </QueryClientProvider>
-        </Setting>
-      </Settings>
-      {talking && <div>!!!!!!!!!!!!!!!</div>}
-    </main>
+        <Actions>
+          <VoiceTool onClick={() => handleVoice()} />
+        </Actions>
+        <Settings>
+          <Setting
+            id={"voice-settings"}
+            icon={<TbSettingsCog size={18} />}
+            className={styles.voice}
+          >
+            <VoiceSettings />
+          </Setting>
+          <Setting
+            id={"voice-agent-settings"}
+            icon={<TbArticle size={18} />}
+            className={styles.editor}
+          >
+            <QueryClientProvider client={queryClient}>
+              <AgentEditor />
+            </QueryClientProvider>
+          </Setting>
+        </Settings>
+        {talking && <div>!!!!!!!!!!!!!!!</div>}
+      </main>
+    </Layout>
   );
 }
