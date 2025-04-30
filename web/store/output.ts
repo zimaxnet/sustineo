@@ -88,14 +88,14 @@ export const useOutputStore = create<OutputStore>()(
             } else {
               //newLeaf.children = state.output.children[idx].children;
               // Update the existing leaf with the new one (leaving children intact)
-              state.output.children[idx] = { 
+              state.output.children[idx] = {
                 id: newLeaf.id,
                 title: newLeaf.title,
                 value: newLeaf.value,
                 description: newLeaf.description,
                 data: newLeaf.data,
                 children: state.output.children[idx].children || [],
-               };
+              };
             }
           });
         },

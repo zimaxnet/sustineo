@@ -11,7 +11,10 @@ from azure.ai.projects.models import (
     RunStep,
     ThreadMessage,
     ThreadRun,
+    MessageInputContentBlock,
+    MessageAttachment,
 )
+
 from azure.identity.aio import DefaultAzureCredential
 from prompty.core import Prompty
 
@@ -225,6 +228,32 @@ async def execute_foundry_agent(
             event_handler=handler,
         ) as stream:
             await stream.until_done()
+
+
+async def create_foundry_thread():
+    """Create a Foundry thread."""
+    async with get_foundry_project_client() as project_client:
+        thread = await project_client.agents.create_thread()
+        return thread.id
+
+
+async def create_thread_message(
+    thread_id: str,
+    role: str,
+    content: Union[str, list[MessageInputContentBlock]],
+    attachments: list[MessageAttachment] = [],
+    metadata: dict[str, str] = {},
+):
+    """Create a Foundry message."""
+    async with get_foundry_project_client() as project_client:
+        message = await project_client.agents.create_message(
+            thread_id=thread_id,
+            role=role,
+            content=content,
+            metadata=metadata,
+            attachments=attachments,
+        )
+        return message.id
 
 
 if __name__ == "__main__":

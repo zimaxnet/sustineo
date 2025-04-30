@@ -13,7 +13,7 @@ from api.voice.common import get_default_configuration_data
 from api.voice.session import Message, RealtimeSession
 from api.voice import router as voice_configuration_router
 from api.agent import router as agent_router
-from api.agent.common import get_custom_agents
+from api.agent.common import get_custom_agents, create_foundry_thread
 
 from dotenv import load_dotenv
 
@@ -110,10 +110,14 @@ async def voice_endpoint(id: str, websocket: WebSocket):
                 )
                 await connection.close()
                 return
+            
+            # create a new thread in the foundry
+            thread_id = await create_foundry_thread()
 
             session = RealtimeSession(
                 realtime=realtime_client,
                 client=connection,
+                thread_id=thread_id,
             )
 
             await session.update_realtime_session(
