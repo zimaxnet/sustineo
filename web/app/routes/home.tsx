@@ -1,7 +1,7 @@
 import type { Route } from "./+types/home";
 import Settings from "components/settings";
 import Setting from "components/setting";
-import { TbArticle, TbSettingsCog } from "react-icons/tb";
+import { TbArticle, TbSettingsCog, TbClearAll } from "react-icons/tb";
 import VoiceSettings from "components/voice/voicesettings";
 import Actions from "components/actions";
 import { version } from "store/version";
@@ -243,11 +243,20 @@ export default function Home() {
             <Effort />
           </div>
           <div className={styles.output}>
-            <Output data={output?.output} />
+            {output && output.output && output.output.children.length > 0 && (
+              <Output data={output.output} />
+            )}
           </div>
         </div>
         <Actions>
-          {/*<Tool icon={<TbArticle size={18} />} onClick={() => addOutpuItem()} />*/}
+          <Tool
+            icon={<TbClearAll size={18} />}
+            onClick={() => {
+              effort?.clearEfforts();
+              output?.reset();
+            }}
+          />
+          <Tool icon={<TbArticle size={18} />} onClick={() => addOutpuItem()} />
           <VoiceTool onClick={() => handleVoice()} />
         </Actions>
         <Settings>
