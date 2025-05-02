@@ -4,6 +4,7 @@ import { useRef } from "react";
 import useDimensions from "store/usedimensions";
 import type { OutputNode, Data } from "store/output";
 import TextOutput from "./output/textoutput";
+import { API_ENDPOINT } from "store/endpoint";
 
 type Props = {
   data: OutputNode;
@@ -27,10 +28,29 @@ const Output: React.FC<Props> = ({ data }: Props) => {
     .padding(8)
     .round(true)(hierarchy);
 
-  const getContent = (data: Data) => {
+  const getContent = (
+    data: Data,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    clipPath: string
+  ) => {
     switch (data.type) {
       case "text":
-        return <TextOutput text={data} />;
+        return (
+          <foreignObject
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            clipPath={clipPath}
+          >
+            <TextOutput text={data} />
+          </foreignObject>
+        );
+      case "image":
+        return <image x={x} y={y+5} width={width} height={height} href={`${API_ENDPOINT}/${data.image_url}`} />;
       default:
         return <div>Unknown type</div>;
     }
@@ -94,17 +114,15 @@ const Output: React.FC<Props> = ({ data }: Props) => {
                   {d.data.title}
                 </tspan>
               </text>
-              {d.data.data && (
-                <foreignObject
-                  x={5}
-                  y={25}
-                  width={Math.max(d.x1 - d.x0 - 12, 1)}
-                  height={Math.max(d.y1 - d.y0 - 30, 1)}
-                  clipPath={`url(#clip-${i})`}
-                >
-                  {getContent(d.data.data)}
-                </foreignObject>
-              )}
+              {d.data.data &&
+                getContent(
+                  d.data.data,
+                  5,
+                  25,
+                  Math.max(d.x1 - d.x0 - 12, 1),
+                  Math.max(d.y1 - d.y0 - 30, 1),
+                  `url(#clip-${i})`
+                )}
             </g>
           ))}
         </g>

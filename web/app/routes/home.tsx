@@ -21,7 +21,7 @@ import { API_ENDPOINT } from "store/endpoint";
 import VoiceTool from "components/voicetool";
 import Effort from "components/effortlist";
 import Tool from "components/tool";
-import { useOutputStore, type TextData } from "store/output";
+import { useOutputStore, type TextData, type ImageData } from "store/output";
 import { v4 as uuidv4 } from "uuid";
 import Output from "components/output";
 
@@ -129,9 +129,7 @@ export default function Home() {
             const m = message.text;
             output?.addLeaf(payload.agentName.toLowerCase().replace(" ", "_"), {
               id: payload.callId,
-
               title: payload.agentName,
-              description: "Bing Search Agent",
               value: 1,
               data: {
                 id: payload.id,
@@ -153,6 +151,46 @@ export default function Home() {
             sendRealtime(call);
           }
         }
+      }
+
+      if (
+        payload.type === "image_generation" &&
+        payload.name === "step" &&
+        payload.status === "completed"
+      ) {
+        console.log(payload);
+
+        output?.addOrUpdateRootLeaf({
+          id: payload.agentName.toLowerCase().replace(" ", "_"),
+          title: payload.agentName,
+          value: 1,
+          children: [],
+        });
+
+        output?.addLeaf(payload.agentName.toLowerCase().replace(" ", "_"), {
+          id: payload.callId,
+          title: payload.agentName,
+          value: 1,
+          data: {
+            id: payload.id,
+            type: "image",
+            description: payload.content.description,
+            image_url: payload.content.image_url,
+            size: payload.content.size,
+            quality: payload.content.quality,
+          } as ImageData,
+          children: [],
+        });
+
+        const call = {
+          type: "function",
+          payload: JSON.stringify({
+            call_id: payload.callId,
+            output: `Image described by "${payload.content.description}" generated successfully. It has been saved and is currently being displayed to the user.`,
+          }),
+        } as Message;
+
+        sendRealtime(call);
       }
       // check for message completion to add to output
     }

@@ -6,7 +6,11 @@ type Props = {
   agent: Agent;
 };
 const AgentEffort = ({ agent }: Props) => {
+
   const getContent = (content: { [key: string]: any }, statusType?: string) => {
+    if (statusType === "image_generation") {
+      return <div className={styles.status}>{content.message}</div>;
+    }
     if (statusType && statusType in content) {
       const agentContent = content[statusType];
       switch (statusType) {
@@ -15,7 +19,11 @@ const AgentEffort = ({ agent }: Props) => {
             return (
               <div className={styles.toolCalls}>
                 {agentContent.map((call: any, index: number) => (
-                  <div className={styles.status} key={index} title={call[call.type].requesturl}>
+                  <div
+                    className={styles.status}
+                    key={index}
+                    title={call[call.type].requesturl}
+                  >
                     <span>Executed</span>
                     <span className={styles.tool}>{call.type}</span>
                     <span>tool...</span>
@@ -32,7 +40,11 @@ const AgentEffort = ({ agent }: Props) => {
             return (
               <div className={styles.toolCalls}>
                 {agentContent.map((call: any, index: number) => (
-                  <div className={styles.status} key={index} title={call[call.type].value}>
+                  <div
+                    className={styles.status}
+                    key={index}
+                    title={call[call.type].value}
+                  >
                     Acquired Result
                   </div>
                 ))}
@@ -53,9 +65,7 @@ const AgentEffort = ({ agent }: Props) => {
         <span>{agent.name}</span>
         <span>{agent.status}</span>
       </div>
-      {agent.content &&
-        agent.status === "completed" &&
-        getContent(agent.content, agent.statusType)}
+      {getContent(agent.content || {}, agent.statusType)}
     </div>
   );
 };

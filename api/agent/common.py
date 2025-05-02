@@ -1,8 +1,7 @@
 import os
 import contextlib
 from pathlib import Path
-from functools import partial
-from typing import Any, Callable, Coroutine, Union, get_type_hints
+from typing import Any, Callable, Coroutine, Union
 
 import prompty
 from azure.ai.projects.aio import AIProjectClient
@@ -14,55 +13,16 @@ from azure.ai.projects.models import (
 from azure.identity.aio import DefaultAzureCredential
 from prompty.core import Prompty
 
-from prompty.utils import get_json_type
 from api.agent.model import Agent, AgentStatus
 from api.agent.handler import SustineoAgentEventHandler
+
+# for loading function agents
+import api.agent.agents  # noqa: F401
 
 
 FOUNDRY_CONNECTION = os.environ.get("FOUNDRY_CONNECTION", "EMPTY")
 foundry_agents: dict[str, Agent] = {}
 custom_agents: dict[str, Prompty] = {}
-function_agents: dict[str, Agent] = {}
-function_calls: dict[str, Agent] = {}
-
-
-def agent(func: Union[Callable, None] = None, **kwargs: Any) -> Callable:
-    if func is None:
-        return partial(agent, **kwargs)
-
-    if "description" not in kwargs:
-        return func
-
-    if "name" not in kwargs:
-        return func
-
-    name = kwargs.pop("name")
-    description = kwargs.pop("description")
-    args = get_type_hints(func, include_extras=True)
-
-    if func.__name__ not in function_agents:
-        function_agents[func.__name__] = Agent(
-            id=func.__name__,
-            name=name,
-            type="function_agent",
-            description=description,
-            parameters=[
-                {
-                    "name": k,
-                    "type": get_json_type(v.__args__[0]),
-                    "description": (
-                        v.__metadata__[0]
-                        if hasattr(v, "__metadata__")
-                        else "No Description"
-                    ),
-                    "required": True,
-                }
-                for k, v in args.items()
-            ],
-        )
-
-
-    return func
 
 
 # load agents from prompty files in directory

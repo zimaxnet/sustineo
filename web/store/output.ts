@@ -19,7 +19,17 @@ export interface TextData {
   }[];
 }
 
-export type Data = TextData
+export interface ImageData {
+  id: string;
+  type: "image";
+  description: string;
+  image_url: string;
+  size: string;
+  quality: string;
+}
+
+
+export type Data = TextData | ImageData
 
 export interface OutputNode {
   id: string;
