@@ -1,6 +1,4 @@
-from typing import Optional
 from fastapi import APIRouter, Response, status
-from pydantic import BaseModel
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
 from api.voice.common import (
@@ -9,6 +7,7 @@ from api.voice.common import (
     load_prompty_config,
     seed_configurations,
 )
+from api.voice.model import Config
 
 
 router = APIRouter(
@@ -17,15 +16,6 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
     dependencies=[],
 )
-
-
-class Config(BaseModel):
-    id: Optional[str] = None
-    name: Optional[str] = None
-    default: Optional[bool] = False
-    tools: Optional[list[dict]] = None
-    content: str
-
 
 @router.get("/")
 async def get_configurations():
@@ -39,6 +29,7 @@ async def get_configurations():
                     name=item["name"],
                     default=item["default"] if "default" in item else False,
                     content=item["content"],
+                    tools=item["tools"] if "tools" in item else [],
                 )
             )
 
@@ -58,6 +49,7 @@ async def get_configuration(id: str, response: Response):
                 name=item["name"],
                 default=item["default"] if "default" in item else False,
                 content=item["content"],
+                tools=item["tools"] if "tools" in item else [],
             )
         except Exception as e:
             response.status_code = status.HTTP_404_NOT_FOUND
@@ -83,6 +75,7 @@ async def create_configuration(
                     "name": config.name,
                     "default": False,
                     "content": config.content,
+                    "tools": configuration.tools if configuration.tools else [],
                 }
             )
             return Configuration(
@@ -90,6 +83,7 @@ async def create_configuration(
                 name=item["name"],
                 default=item["default"],
                 content=item["content"],
+                tools=configuration.tools if configuration.tools else [],
             )
         except Exception as e:
             response.status_code = status.HTTP_409_CONFLICT
@@ -98,6 +92,7 @@ async def create_configuration(
                 name="error",
                 default=False,
                 content=f"Configuration with id {config.id} already exists.\n{str(e)}",
+                tools=[],
             )
 
 
@@ -125,6 +120,7 @@ async def update_configuration(
                     name="error",
                     default=False,
                     content=f"Configuration with id {id} already exists.",
+                    tools=[],
                 )
 
             # remove the old id from the configuration
@@ -137,6 +133,7 @@ async def update_configuration(
                 "name": config.name,
                 "default": configuration.default,
                 "content": config.content,
+                "tools": configuration.tools if configuration.tools else [],
             }
         )
 
@@ -145,6 +142,7 @@ async def update_configuration(
             name=item["name"],
             default=item["default"] if "default" in item else False,
             content=item["content"],
+            tools=item["tools"] if "tools" in item else [],
         )
 
 

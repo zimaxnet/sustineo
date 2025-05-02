@@ -15,6 +15,7 @@ const availableUsers: { [key: string]: string } = {
   "seth-juarez": "/images/people/seth-juarez.jpg",
   "yina-arenas": "/images/people/yina-arenas.jpg",
   "zia-mansoor": "/images/people/zia-mansoor.jpg",
+  "amanda-foster": "/images/people/amanda-foster.jpg",
 };
 
 const defaultUser: User = {
@@ -26,6 +27,7 @@ const defaultUser: User = {
 
 const getUser = async (): Promise<User> => {
   if (WEB_ENDPOINT.startsWith("http://localhost")) {
+    //TODO: check for local json
     return defaultUser;
   }
   const response = await fetch(`${WEB_ENDPOINT}/.auth/me`);

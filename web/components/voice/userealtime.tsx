@@ -37,8 +37,11 @@ export const useRealtime = (
       );
 
       await voiceRef.current.start(settings.inputDeviceId);
+      const currentDate = new Date();
       const message = {
         user: user!.name,
+        date: currentDate.toLocaleDateString(),
+        time: currentDate.toLocaleTimeString(),
         threshold: settings.threshold,
         silence: settings.silence,
         prefix: settings.prefix,

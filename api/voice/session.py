@@ -1,7 +1,9 @@
 import json
+from typing import Union
 from fastapi import WebSocketDisconnect
 from prompty.tracer import trace
 from api.connection import Connection, Message
+from api.agent.common import create_thread_message
 from fastapi.websockets import WebSocketState
 
 from openai.resources.beta.realtime.realtime import (
@@ -62,22 +64,18 @@ from openai.types.beta.realtime import (
     ConversationItemContent,
 )
 
-import prompty
-
-
-travel_prompty = prompty.load("voice.prompty")
-
 
 class RealtimeSession:
     """
     Realtime session for handling websocket connections and messages.
     """
 
-    def __init__(self, realtime: AsyncRealtimeConnection, client: Connection):
+    def __init__(self, realtime: AsyncRealtimeConnection, client: Connection, thread_id: Union[str, None] = None):
         self.realtime: AsyncRealtimeConnection = realtime
         self.connection: Connection = client
         self.response_queue: list[ConversationItemCreateEvent] = []
         self.active = True
+        self.thread_id = thread_id
 
     async def update_realtime_session(
         self,
@@ -192,7 +190,7 @@ class RealtimeSession:
 
     @trace(name="error")
     async def _handle_error(self, event: ErrorEvent):
-        pass
+        print("Error event", event.error)
 
     @trace(name="session.created")
     async def _session_created(self, event: SessionCreatedEvent):
@@ -226,6 +224,18 @@ class RealtimeSession:
                 ),
             )
         )
+
+        if self.thread_id is not None:
+            await create_thread_message(
+                thread_id=self.thread_id,
+                role="user",
+                content=event.transcript.strip(),
+                metadata={
+                    "id": event.item_id,
+                    "event": "conversation.item.input_audio_transcription.completed",
+                    "source": "realtime"
+                }
+            )
 
     @trace(name="conversation.item.input_audio_transcription.delta")
     async def _conversation_item_input_audio_transcription_delta(
@@ -295,6 +305,21 @@ class RealtimeSession:
                             ),
                         )
                     )
+                    if self.thread_id is not None:
+                        await create_thread_message(
+                            thread_id=self.thread_id,
+                            role=output.role if output.role else "assistant",
+                            content=str(
+                                output.content[0].transcript
+                                if output.content
+                                else "" if output.content else ""
+                            ),
+                            metadata={
+                                "id": str(output.id),
+                                "event": "response.done",
+                                "source": "realtime",
+                            },
+                        )
                 case "function_call":
                     await self.connection.send_console(
                         Message(
@@ -309,6 +334,18 @@ class RealtimeSession:
                             ),
                         )
                     )
+
+                    if self.thread_id is not None:
+                        await create_thread_message(
+                            thread_id=self.thread_id,
+                            role="assistant",
+                            content=f"Calling {output.name} with {str(output.arguments)}",
+                            metadata={
+                                "id": str(output.id),
+                                "event": "response.done",
+                                "source": "realtime",
+                            },
+                        )
 
                 case "function_call_output":
                     await self.connection.send_console(
