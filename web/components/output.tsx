@@ -24,7 +24,7 @@ const Output: React.FC<Props> = ({ data }: Props) => {
     .treemap<OutputNode>()
     .tile(d3.treemapBinary)
     .size([dms.boundedWidth, dms.boundedHeight])
-    .padding(1.5)
+    .padding(8)
     .round(true)(hierarchy);
 
   const getContent = (data: Data) => {

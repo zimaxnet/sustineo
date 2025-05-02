@@ -1,16 +1,12 @@
-import json
 import os
 import contextlib
 from pathlib import Path
-from typing import Any, Callable, Coroutine, Union
+from functools import partial
+from typing import Any, Callable, Coroutine, Union, get_type_hints
 
 import prompty
 from azure.ai.projects.aio import AIProjectClient
 from azure.ai.projects.models import (
-    AsyncAgentEventHandler,
-    RunStep,
-    ThreadMessage,
-    ThreadRun,
     MessageInputContentBlock,
     MessageAttachment,
 )
@@ -18,122 +14,55 @@ from azure.ai.projects.models import (
 from azure.identity.aio import DefaultAzureCredential
 from prompty.core import Prompty
 
+from prompty.utils import get_json_type
 from api.agent.model import Agent, AgentStatus
+from api.agent.handler import SustineoAgentEventHandler
 
 
 FOUNDRY_CONNECTION = os.environ.get("FOUNDRY_CONNECTION", "EMPTY")
 foundry_agents: dict[str, Agent] = {}
 custom_agents: dict[str, Prompty] = {}
+function_agents: dict[str, Agent] = {}
+function_calls: dict[str, Agent] = {}
 
 
-class SustineoAgentEventHandler(AsyncAgentEventHandler[str]):
+def agent(func: Union[Callable, None] = None, **kwargs: Any) -> Callable:
+    if func is None:
+        return partial(agent, **kwargs)
 
-    def __init__(
-        self,
-        project_client: AIProjectClient,
-        agent: Agent,
-        call_id: str,
-        notify: Callable[[AgentStatus], Coroutine[Any, Any, Any]],
-    ) -> None:
-        super().__init__()
-        self.project_client = project_client
-        self.agent = agent
-        self.notify = notify
-        self.call_id = call_id
-        self.history: list[dict[str, Any]] = []
+    if "description" not in kwargs:
+        return func
 
-    async def add_message(
-        self,
-        message: Union[ThreadMessage, ThreadRun, RunStep],
-    ) -> None:
-        last_message = self.history[-1] if self.history else None
-        # if the last message is the same as the current one, skip it
-        # this is to avoid duplicate messages in the history
-        if (
-            last_message
-            and last_message["id"] == message["id"]
-            and last_message["status"] == message["status"]
-            and last_message["object"] == message["object"]
-        ):
-            return
+    if "name" not in kwargs:
+        return func
 
-        if isinstance(message, ThreadRun):
-            await self.notify(
-                AgentStatus(
-                    id=message.id,
-                    agentName=self.agent.name,
-                    callId=self.call_id,
-                    name="run",
-                    status=message.status,
-                )
-            )
-        elif isinstance(message, RunStep):
-            if message.status == "completed" and message.type != "message_creation":
-                await self.notify(
-                    AgentStatus(
-                        id=message.id,
-                        agentName=self.agent.name,
-                        callId=self.call_id,
-                        name="step",
-                        status="completed",
-                        type=message.type,
-                        content=message.step_details.as_dict(),
-                    )
-                )
-            else:
-                await self.notify(
-                    AgentStatus(
-                        id=message.id,
-                        agentName=self.agent.name,
-                        callId=self.call_id,
-                        name="step",
-                        status=message.status,
-                        type=message.type,
-                    )
-                )
-        elif isinstance(message, ThreadMessage):
-            if message.status == "completed":
-                await self.notify(
-                    AgentStatus(
-                        id=message.id,
-                        agentName=self.agent.name,
-                        callId=self.call_id,
-                        name="message",
-                        status="completed",
-                        type="thread_message",
-                        content={
-                            "type": "thread_message",
-                            "thread_message": [m.as_dict() for m in message.content],
-                        }
-                    )
-                )
-            else:
-                await self.notify(
-                    AgentStatus(
-                        id=message.id,
-                        agentName=self.agent.name,
-                        callId=self.call_id,
-                        name="message",
-                        status=message.status,
-                    )
-                )
+    name = kwargs.pop("name")
+    description = kwargs.pop("description")
+    args = get_type_hints(func, include_extras=True)
 
-        self.history.append(message.as_dict())
+    if func.__name__ not in function_agents:
+        function_agents[func.__name__] = Agent(
+            id=func.__name__,
+            name=name,
+            type="function_agent",
+            description=description,
+            parameters=[
+                {
+                    "name": k,
+                    "type": get_json_type(v.__args__[0]),
+                    "description": (
+                        v.__metadata__[0]
+                        if hasattr(v, "__metadata__")
+                        else "No Description"
+                    ),
+                    "required": True,
+                }
+                for k, v in args.items()
+            ],
+        )
 
-    async def on_thread_message(self, message: "ThreadMessage") -> None:
-        await self.add_message(message)
 
-    async def on_thread_run(self, run: "ThreadRun") -> None:
-        await self.add_message(run)
-
-    async def on_run_step(self, step: "RunStep") -> None:
-        await self.add_message(step)
-
-    async def on_error(self, data: str) -> None:
-        print(f"An error occurred. Data: {data}")
-
-    async def on_unhandled_event(self, event_type: str, event_data: Any) -> None:
-        print(f"Unhandled Event Type: {event_type}, Data: {event_data}")
+    return func
 
 
 # load agents from prompty files in directory
@@ -254,30 +183,3 @@ async def create_thread_message(
             attachments=attachments,
         )
         return message.id
-
-
-if __name__ == "__main__":
-    import asyncio
-
-    agents = asyncio.run(get_foundry_agents())
-    print("Foundry agents loaded successfully.")
-
-    agent = agents["bing_search_agent"]
-    instr = "This agent can use the web to find information on current winter camping trends in 2025, especially related to tents and outdoor gear. The search results should return any relevant insights or popular practices."
-    query = "winter camping trends 2025 tents outdoor gear"
-    # instr = "This agent can use the web to find information on the Azure AI Foundry Agent Service. The search results should return any relevant insights or popular practices."
-    # query = "latest news Azure AI Foundry Agent Service"
-
-    async def notify(status: AgentStatus):
-        print(f"{json.dumps(status.__dict__, indent=2)}")
-
-    asyncio.run(
-        execute_foundry_agent(
-            agent=agent,
-            additional_instructions=instr,
-            query=query,
-            call_id="12345",
-            notify=notify,
-        )
-    )
-    print("Agent executed successfully.")

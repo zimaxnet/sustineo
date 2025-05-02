@@ -6,13 +6,15 @@ from openai import AsyncAzureOpenAI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Response, WebSocket, WebSocketDisconnect
 
 from api.connection import connections
 from api.voice.common import get_default_configuration_data
 from api.voice.session import Message, RealtimeSession
 from api.voice import router as voice_configuration_router
 from api.agent import router as agent_router
+from azure.identity.aio import DefaultAzureCredential
+from azure.storage.blob.aio import BlobServiceClient
 from api.agent.common import get_custom_agents, create_foundry_thread
 
 from dotenv import load_dotenv
@@ -23,6 +25,7 @@ AZURE_VOICE_ENDPOINT = os.getenv("AZURE_VOICE_ENDPOINT") or ""
 AZURE_VOICE_KEY = os.getenv("AZURE_VOICE_KEY", "fake_key")
 LOCAL_TRACING_ENABLED = os.getenv("LOCAL_TRACING_ENABLED", "false").lower() == "true"
 COSMOSDB_CONNECTION = os.getenv("COSMOSDB_CONNECTION", "fake_connection")
+SUSTINEO_STORAGE = os.environ.get("SUSTINEO_STORAGE", "EMPTY")
 
 base_path = Path(__file__).parent
 
@@ -60,9 +63,28 @@ class SimpleMessage(BaseModel):
 async def root():
     return {"message": "Hello World"}
 
+@app.get("/images/{image_id}")
+async def get_image(image_id: str):
+    async with DefaultAzureCredential() as credential:
+        async with BlobServiceClient(
+            account_url=SUSTINEO_STORAGE, credential=credential
+        ) as blob_service_client:
+            container_client = blob_service_client.get_container_client("sustineo")
+            # get the blob client for the image
+            blob_client = container_client.get_blob_client(f"images/{image_id}")
+
+            # check if the blob exists
+            if not await blob_client.exists():
+                return Response(status_code=404, content="Image not found")
+
+            # return bytes as png image
+            image_data = await blob_client.download_blob()
+            image_bytes = await image_data.readall()
+            return Response(content=image_bytes, media_type="image/png")
+
 
 @app.post("/api/message")
-async def message(message: SimpleMessage):
+async def message(message: SimpleMessage):    
     return {"message": f"Hello {message.name}, you sent: {message.text}"}
 
 

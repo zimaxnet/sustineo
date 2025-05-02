@@ -16,3 +16,5 @@ mypy
 azure-ai-projects==1.0.0b10
 azure-identity
 prompty[azure]==1.0.0a1
+aiohttp
+azure-storage-blob

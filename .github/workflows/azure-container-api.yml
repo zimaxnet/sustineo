@@ -3,7 +3,7 @@ name: Build and deploy sustineo-api
 on:
   push:
     branches:
-      - main
+      - release
     paths:
       - "api/**"
   workflow_dispatch:
@@ -65,6 +65,9 @@ jobs:
                                 "APPINSIGHTS_CONNECTIONSTRING=secretref:appinsights-connectionstring" \
                                 "COSMOSDB_CONNECTION=secretref:cosmosdb-connection" \
                                 "FOUNDRY_CONNECTION=secretref:foundry-connection" \
+                                "AZURE_IMAGE_ENDPOINT=secretref:azure-image-endpoint" \
+                                "AZURE_IMAGE_API_KEY=secretref:azure-image-api-key" \
+                                "SUSTINEO_STORAGE=secretref:sustineo-storage" \
                                 "LOCAL_TRACING_ENABLED=false"
 
       - name: Logout
