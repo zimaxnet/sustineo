@@ -131,7 +131,7 @@ export default function Home() {
         effort?.addEffort(serverEvent);
 
         const endpoint = API_ENDPOINT;
-        if (!endpoint.startsWith("http://localhost")) {
+        if (!endpoint.includes("localhost")) {
           endpoint.replace("http://", "https://");
         }
         
