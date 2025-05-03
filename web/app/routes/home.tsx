@@ -130,7 +130,12 @@ export default function Home() {
 
         effort?.addEffort(serverEvent);
 
-        const api = `${API_ENDPOINT}/api/agent/${user.key}/`;
+        const endpoint = API_ENDPOINT;
+        if (endpoint.startsWith("http://")) {
+          endpoint.replace("http://", "https://");
+        }
+        
+        const api = `${endpoint}/api/agent/${user.key}/`;
         console.log("Sending function call to agent", api, serverEvent);
         await fetch(api, {
           method: "POST",
