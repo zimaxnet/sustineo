@@ -1,9 +1,9 @@
 import os
+import prompty
 import contextlib
 from pathlib import Path
-from typing import Any, Callable, Coroutine, Union
+from typing import Union
 
-import prompty
 from azure.ai.projects.aio import AIProjectClient
 from azure.ai.projects.models import (
     MessageInputContentBlock,
@@ -13,12 +13,8 @@ from azure.ai.projects.models import (
 from azure.identity.aio import DefaultAzureCredential
 from prompty.core import Prompty
 
-from api.agent.model import Agent, AgentStatus
+from api.model import Agent, AgentUpdateEvent
 from api.agent.handler import SustineoAgentEventHandler
-
-# for loading function agents
-import api.agent.agents  # noqa: F401
-
 
 FOUNDRY_CONNECTION = os.environ.get("FOUNDRY_CONNECTION", "EMPTY")
 foundry_agents: dict[str, Agent] = {}
@@ -95,8 +91,7 @@ async def execute_foundry_agent(
     agent: Agent,
     additional_instructions: str,
     query: str,
-    call_id: str,
-    notify: Callable[[AgentStatus], Coroutine[Any, Any, Any]],
+    notify: AgentUpdateEvent,
 ):
     """Execute a Foundry agent."""
 
@@ -109,7 +104,7 @@ async def execute_foundry_agent(
             content=query,
         )
 
-        handler = SustineoAgentEventHandler(project_client, agent, call_id, notify)
+        handler = SustineoAgentEventHandler(notify)
         async with await project_client.agents.create_stream(
             agent_id=server_agent.id,
             thread_id=thread.id,
@@ -133,7 +128,25 @@ async def create_thread_message(
     attachments: list[MessageAttachment] = [],
     metadata: dict[str, str] = {},
 ):
-    """Create a Foundry message."""
+    """
+    Create a message in a Foundry thread.
+
+    Args:
+        thread_id (str): The ID of the thread to add the message to.
+        role (str): The role of the entity sending the message (e.g., 'user', 'assistant').
+        content (Union[str, list[MessageInputContentBlock]]): The content of the message.
+            Can be a simple string or a list of content blocks.
+        attachments (list[MessageAttachment], optional): Files to attach to the message.
+            Defaults to an empty list.
+        metadata (dict[str, str], optional): Additional metadata for the message.
+            Defaults to an empty dictionary.
+
+    Returns:
+        str: The ID of the created message.
+
+    Note:
+        This function requires an active Foundry project client connection.
+    """
     async with get_foundry_project_client() as project_client:
         message = await project_client.agents.create_message(
             thread_id=thread_id,

@@ -1,9 +1,9 @@
-import { type Message } from "store/effort";
+import type { MessageUpdate } from "store/voice/voice-client";
 import styles from "./agentmessage.module.scss";
 import clsx from "clsx";
 
 type Props = {
-  message: Message;
+  message: MessageUpdate;
 };
 const AgentMessage = ({ message }: Props) => {
   return (

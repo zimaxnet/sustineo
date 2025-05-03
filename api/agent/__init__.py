@@ -1,19 +1,17 @@
-import json
-from typing import Any, Callable, Coroutine, Literal, Optional
-import uuid
+from typing import Any
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 from api.agent.decorators import function_agents
-from api.agent.model import AgentStatus, FunctionCall
+from api.model import Agent, AgentUpdate, AgentUpdateEvent, Content
 from api.agent.common import (
     get_foundry_agents,
     get_custom_agents,
     custom_agents,
     foundry_agents,
 )
-from api.agent.model import Agent
-from api.agent.common import execute_foundry_agent
 
+from api.agent.common import execute_foundry_agent
 # load function agents
 import api.agent.agents as agents  # noqa: F401
 
@@ -93,73 +91,38 @@ async def get_agent(id: str):
     return {k: v for k, v in custom_agents[id].to_safe_dict().items() if k != "file"}
 
 
-def send_agent_status(id: str) -> Callable[[AgentStatus], Coroutine[Any, Any, Any]]:
-    global connections
-
-    async def status_fn(status: AgentStatus):
-        # send agent status to connection
-        if id in connections:
-            await connections[id].send_json(
-                {
-                    "type": "agent",
-                    "payload": json.dumps(
-                        {
-                            "id": status.id,
-                            "agentName": status.agentName,
-                            "callId": status.callId,
-                            "name": status.name,
-                            "status": status.status,
-                            "type": status.type,
-                            "content": status.content,
-                        }
-                    ),
-                }
-            )
-
-    return status_fn
-
-
-def send_func_agent_status(
-    id: str,
-    call_id: str,
-    agent_ref: Agent,
-) -> Callable[
-    [
-        Literal["run", "step", "message"],
-        Literal["in_progress", "failed", "completed"],
-        str,
-        Optional[dict[str, Any]],
-    ],
-    Coroutine[Any, Any, Any],
-]:
+def send_agent_status(connection_id: str, name: str, call_id: str) -> AgentUpdateEvent:
     global connections
 
     async def status_fn(
-        name: Literal["run", "step", "message"],
-        status: Literal["in_progress", "failed", "completed"],
-        type: str,
-        content: Optional[dict[str, Any]] = None,
+        id: str,
+        status: str,
+        information: str | None = None,
+        content: Content | None = None,
+        output: bool = False,
     ):
         # send agent status to connection
-        if id in connections:
-            await connections[id].send_json(
-                {
-                    "type": "agent",
-                    "payload": json.dumps(
-                        {
-                            "id": str(uuid.uuid4()).replace("-", ""),
-                            "agentName": agent_ref.name,
-                            "callId": call_id,
-                            "name": name,
-                            "status": status,
-                            "type": type,
-                            "content": content,
-                        }
-                    ),
-                }
+        if connection_id in connections:
+            await connections[connection_id].send_update(
+                AgentUpdate(
+                    id=id,
+                    type="agent",
+                    call_id=call_id,
+                    name=name,
+                    status=status,
+                    information=information,
+                    content=content,
+                    output=output,
+                )
             )
 
     return status_fn
+
+class FunctionCall(BaseModel):
+    call_id: str
+    id: str
+    name: str
+    arguments: dict[str, Any]
 
 
 @router.post("/{id}")
@@ -179,8 +142,7 @@ async def execute_agent(id: str, function: FunctionCall):
             foundry_agent,
             function.arguments["additional_instructions"],
             function.arguments["query"],
-            function.call_id,
-            send_agent_status(id),
+            send_agent_status(connection_id=id, name=foundry_agent.name, call_id=function.call_id),
         )
     elif function.name in function_agents:
         function_agent = function_agents[function.name]
@@ -189,10 +151,8 @@ async def execute_agent(id: str, function: FunctionCall):
             # execute function agent
             func = getattr(agents, function_agent.id)
             args = function.arguments.copy()
-            args["notify"] = send_func_agent_status(
-                id,
-                function.call_id,
-                function_agent,
+            args["notify"] = send_agent_status(
+                connection_id=id, name=function_agent.name, call_id=function.call_id
             )
             await func(**args)
         else:

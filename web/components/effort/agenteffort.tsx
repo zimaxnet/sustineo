@@ -1,71 +1,31 @@
-import { type Agent } from "store/effort";
 import styles from "./agenteffort.module.scss";
-import clsx from "clsx";
+import type { AgentUpdate } from "store/voice/voice-client";
 
 type Props = {
-  agent: Agent;
+  agent: AgentUpdate;
 };
 const AgentEffort = ({ agent }: Props) => {
 
-  const getContent = (content: { [key: string]: any }, statusType?: string) => {
-    if (statusType === "image_generation") {
-      return <div className={styles.status}>{content.message}</div>;
-    }
-    if (statusType && statusType in content) {
-      const agentContent = content[statusType];
-      switch (statusType) {
-        case "tool_calls":
-          if (agentContent.length > 0) {
-            return (
-              <div className={styles.toolCalls}>
-                {agentContent.map((call: any, index: number) => (
-                  <div
-                    className={styles.status}
-                    key={index}
-                    title={call[call.type].requesturl}
-                  >
-                    <span>Executed</span>
-                    <span className={styles.tool}>{call.type}</span>
-                    <span>tool...</span>
-                  </div>
-                ))}
-              </div>
-            );
-          } else {
-            return <div className={styles.status}>No tool calls made</div>;
-          }
-        case "thread_message":
-          //return <div>{JSON.stringify(agentContent)}</div>;
-          if (agentContent.length > 0) {
-            return (
-              <div className={styles.toolCalls}>
-                {agentContent.map((call: any, index: number) => (
-                  <div
-                    className={styles.status}
-                    key={index}
-                    title={call[call.type].value}
-                  >
-                    Acquired Result
-                  </div>
-                ))}
-              </div>
-            );
-          } else {
-            return <div className={styles.status}>No tool calls made</div>;
-          }
-        default:
-          return <></>;
-      }
-    }
-  };
   return (
     <div className={styles.agent}>
-      <div title={`${agent.callId} - ${agent.id}`} className={styles.title}>
-        <span className={styles.agentName}>{agent.agentName}</span>
-        <span>{agent.name}</span>
-        <span>{agent.status}</span>
+      <div title={`${agent.call_id} - ${agent.id}`} className={styles.title}>
+        <span className={styles.agentName}>{agent.name}</span>
       </div>
-      {getContent(agent.content || {}, agent.statusType)}
+      <div className={styles.title}>{agent.status}</div>
+      {agent.information && (
+        <div className={styles.status} title={agent.information}>
+          {agent.information}
+        </div>
+      )}
+      {agent.content &&
+        agent.content.type === "tool_calls" &&
+        agent.content.content.map((call: any, index: number) => (
+          <div className={styles.status} key={index}>
+            <span>Executed</span>
+            <span className={styles.tool}>{call.type}</span>
+            <span>tool...</span>
+          </div>
+        ))}
     </div>
   );
 };

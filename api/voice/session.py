@@ -1,10 +1,10 @@
 import json
 from typing import Union
-from fastapi import WebSocketDisconnect
 from prompty.tracer import trace
-from api.connection import Connection, Message
-from api.agent.common import create_thread_message
+from api.connection import Connection
+from fastapi import WebSocketDisconnect
 from fastapi.websockets import WebSocketState
+from api.agent.common import create_thread_message
 
 from openai.resources.beta.realtime.realtime import (
     AsyncRealtimeConnection,
@@ -64,13 +64,20 @@ from openai.types.beta.realtime import (
     ConversationItemContent,
 )
 
+from api.model import Update
+
 
 class RealtimeSession:
     """
     Realtime session for handling websocket connections and messages.
     """
 
-    def __init__(self, realtime: AsyncRealtimeConnection, client: Connection, thread_id: Union[str, None] = None):
+    def __init__(
+        self,
+        realtime: AsyncRealtimeConnection,
+        client: Connection,
+        thread_id: Union[str, None] = None,
+    ):
         self.realtime: AsyncRealtimeConnection = realtime
         self.connection: Connection = client
         self.response_queue: list[ConversationItemCreateEvent] = []
@@ -212,18 +219,14 @@ class RealtimeSession:
     async def _conversation_item_input_audio_transcription_completed(
         self, event: ConversationItemInputAudioTranscriptionCompletedEvent
     ):
-        await self.connection.send_message(
-            Message(
-                type="user",
-                payload=json.dumps(
-                    {
-                        "id": event.item_id,
-                        "role": "user",
-                        "content": event.transcript.strip(),
-                    }
-                ),
-            )
-        )
+        if event.transcript is None or len(event.transcript.strip()) == 0:
+            return
+        
+        await self.connection.send_update(Update.message(
+            id=event.item_id,
+            role="user",
+            content=event.transcript.strip(),
+        ))
 
         if self.thread_id is not None:
             await create_thread_message(
@@ -233,8 +236,8 @@ class RealtimeSession:
                 metadata={
                     "id": event.item_id,
                     "event": "conversation.item.input_audio_transcription.completed",
-                    "source": "realtime"
-                }
+                    "source": "realtime",
+                },
             )
 
     @trace(name="conversation.item.input_audio_transcription.delta")
@@ -271,7 +274,7 @@ class RealtimeSession:
     async def _input_audio_buffer_speech_started(
         self, event: InputAudioBufferSpeechStartedEvent
     ):
-        await self.connection.send_console(Message(type="interrupt", payload=""))
+        await self.connection.send_update(Update.interrupt())
 
     @trace(name="input_audio_buffer.speech_stopped")
     async def _input_audio_buffer_speech_stopped(
@@ -289,67 +292,37 @@ class RealtimeSession:
             output = event.response.output[0]
             match output.type:
                 case "message":
-                    await self.connection.send_console(
-                        Message(
-                            type=output.role if output.role else "assistant",
-                            payload=json.dumps(
-                                {
-                                    "id": output.id,
-                                    "role": output.role,
-                                    "content": (
-                                        output.content[0].transcript
-                                        if output.content
-                                        else ""
-                                    ),
-                                }
-                            ),
-                        )
-                    )
-                    if self.thread_id is not None:
-                        await create_thread_message(
-                            thread_id=self.thread_id,
-                            role=output.role if output.role else "assistant",
-                            content=str(
-                                output.content[0].transcript
-                                if output.content
-                                else "" if output.content else ""
-                            ),
-                            metadata={
-                                "id": str(output.id),
-                                "event": "response.done",
-                                "source": "realtime",
-                            },
-                        )
-                case "function_call":
-                    await self.connection.send_console(
-                        Message(
-                            type="function",
-                            payload=json.dumps(
-                                {
-                                    "name": output.name,
-                                    "arguments": json.loads(output.arguments or "{}"),
-                                    "call_id": output.call_id,
-                                    "id": output.id,
-                                }
-                            ),
-                        )
-                    )
-
-                    if self.thread_id is not None:
-                        await create_thread_message(
-                            thread_id=self.thread_id,
-                            role="assistant",
-                            content=f"Calling {output.name} with {str(output.arguments)}",
-                            metadata={
-                                "id": str(output.id),
-                                "event": "response.done",
-                                "source": "realtime",
-                            },
+                    if output.content and len(output.content) > 0:
+                        content = str(output.content[0].transcript)
+                        await self.connection.send_update(
+                            Update.message(
+                                id=str(output.id),
+                                role="user" if output.role == "user" else "assistant",
+                                content=content,
+                            )
                         )
 
+                        if self.thread_id is not None:
+                            await create_thread_message(
+                                thread_id=self.thread_id,
+                                role=output.role if output.role else "assistant",
+                                content=str(
+                                    output.content[0].transcript
+                                    if output.content
+                                    else "" if output.content else ""
+                                ),
+                                metadata={
+                                    "id": str(output.id),
+                                    "event": "response.done",
+                                    "source": "realtime",
+                                },
+                            )
                 case "function_call_output":
-                    await self.connection.send_console(
-                        Message(type="console", payload=output.model_dump_json())
+                    await self.connection.send_update(
+                        Update.console(
+                            id=str(output.call_id),
+                            payload=output.model_dump(exclude={"id", "call_id"}),
+                        )
                     )
 
         if len(self.response_queue) > 0 and self.realtime is not None:
@@ -366,7 +339,27 @@ class RealtimeSession:
 
     @trace(name="response.output_item.done")
     async def _response_output_item_done(self, event: ResponseOutputItemDoneEvent):
-        pass
+        if event.item.type == "function_call":
+            await self.connection.send_update(
+                Update.function(
+                    id=str(event.item.id),
+                    call_id=str(event.item.call_id),
+                    name=str(event.item.name),
+                    arguments=json.loads(event.item.arguments or "{}"),
+                )
+            )
+
+            if self.thread_id is not None:
+                await create_thread_message(
+                    thread_id=self.thread_id,
+                    role="assistant",
+                    content=f"Calling {event.item.name} with {str(event.item.arguments)}",
+                    metadata={
+                        "id": str(event.item.id),
+                        "event": "response.done",
+                        "source": "realtime",
+                    },
+                )
 
     @trace(name="response.content_part.added")
     async def _response_content_part_added(self, event: ResponseContentPartAddedEvent):
@@ -394,14 +387,13 @@ class RealtimeSession:
     async def _response_audio_transcript_done(
         self, event: ResponseAudioTranscriptDoneEvent
     ):
-        await self.connection.send_console(
-            Message(type="console", payload=event.transcript.strip())
-        )
         pass
 
     @trace(name="response.audio.delta")
     async def _response_audio_delta(self, event: ResponseAudioDeltaEvent):
-        await self.connection.send_audio(Message(type="audio", payload=event.delta))
+        await self.connection.send_update(
+            Update.audio(id=event.event_id, data=event.delta)
+        )
 
     @trace(name="response.audio.done")
     async def _response_audio_done(self, event: ResponseAudioDoneEvent):
@@ -430,19 +422,18 @@ class RealtimeSession:
 
         try:
             while self.connection.state != WebSocketState.DISCONNECTED:
-                message = await self.connection.receive_text()
+                text = await self.connection.receive_text()
+                event = json.loads(text)
 
-                message_json = json.loads(message)
-                m = Message(**message_json)
-                # print("received message", m.type)
-                match m.type:
+                match event["type"]:
                     case "audio":
                         await self.realtime.send(
                             InputAudioBufferAppendEvent(
-                                type="input_audio_buffer.append", audio=m.payload
+                                type="input_audio_buffer.append", audio=event["content"]
                             )
                         )
-                    case "user":
+
+                    case "message":
                         await self.realtime.send(
                             ConversationItemCreateEvent(
                                 type="conversation.item.create",
@@ -452,26 +443,26 @@ class RealtimeSession:
                                     content=[
                                         ConversationItemContent(
                                             type="input_text",
-                                            text=m.payload,
+                                            text=event["content"],
                                         )
                                     ],
                                 ),
                             )
                         )
+
                     case "interrupt":
                         await self.realtime.send(
                             ResponseCreateEvent(type="response.create")
                         )
-                    case "function":
-                        function_message = json.loads(m.payload)
 
+                    case "function_completion":
                         await self.realtime.send(
                             ConversationItemCreateEvent(
                                 type="conversation.item.create",
                                 item=ConversationItem(
-                                    call_id=function_message["call_id"],
+                                    call_id=event["call_id"],
                                     type="function_call_output",
-                                    output=function_message["output"],
+                                    output=event["output"],
                                 ),
                             )
                         )
@@ -479,8 +470,11 @@ class RealtimeSession:
                         await self.realtime.response.create()
 
                     case _:
-                        await self.connection.send_console(
-                            Message(type="console", payload="Unhandled message")
+                        await self.connection.send_update(
+                            Update.console(
+                                id="unhandled_message",
+                                payload={"message": "Unhandled message"},
+                            )
                         )
 
         except WebSocketDisconnect:

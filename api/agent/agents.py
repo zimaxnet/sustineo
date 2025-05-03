@@ -1,11 +1,12 @@
 import os
 import uuid
-import aiohttp
 import base64
-from typing import Annotated, Any, Callable, Coroutine, Literal, Optional
+import aiohttp
+from typing import Annotated
 from api.agent.decorators import agent
-from azure.identity.aio import DefaultAzureCredential
-from azure.storage.blob.aio import BlobServiceClient
+
+from api.agent.storage import get_storage_client
+from api.model import AgentUpdateEvent, Content
 
 
 AZURE_IMAGE_ENDPOINT = os.environ.get("AZURE_IMAGE_ENDPOINT", "EMPTY").rstrip("/")
@@ -23,22 +24,13 @@ async def gpt_image_generation(
         "The detailed description of the image to be generated. The more detailed the description, the better the image will be. Make sure to include the style of the image, the colors, and any other details that will help the model generate a better image.",
     ],
     n: Annotated[int, "number of images to generate"],
-    notify: Callable[
-        [
-            Literal["run", "step", "message"],
-            Literal["in_progress", "failed", "completed"],
-            str,
-            Optional[dict[str, Any]],
-        ],
-        Coroutine[Any, Any, Any],
-    ],
+    notify: AgentUpdateEvent,
 ):
 
     await notify(
-        "run",
-        "in_progress",
-        "image_generation",
-        {"message": "Starting image generation"},
+        id="image_generation",
+        status="run in_progress",
+        information="Starting image generation",
     )
 
     size: str = "1024x1024"
@@ -48,11 +40,9 @@ async def gpt_image_generation(
     endpoint = f"{AZURE_IMAGE_ENDPOINT}/openai/deployments/{deployment_name}/images/generations?api-version={api_version}"
 
     await notify(
-        "step",
-        "in_progress",
-        "image_generation",
-        {"message": "Executing Model"},
+        id="image_generation", status="step in_progress", information="Executing Model"
     )
+
     async with aiohttp.ClientSession() as session:
         async with session.post(
             endpoint,
@@ -72,19 +62,18 @@ async def gpt_image_generation(
             if response.status != 200:
                 print(f"Error: {response.status}")
                 await notify(
-                    "run",
-                    "failed",
-                    "image_generation",
-                    {"message": f"Error: {response.status}"},
+                    id="image_generation",
+                    status="step failed",
+                    information=f"Error: {response.status}",
                 )
                 return []
 
             await notify(
-                "step",
-                "in_progress",
-                "image_generation",
-                {"message": "fetching images" if n > 1 else "fetching image"},
+                id="image_generation",
+                status="step in_progress",
+                information="fetching images" if n > 1 else "fetching image",
             )
+
             image = await response.json()
             # save the image to a file
             # iterate through the images and save them
@@ -93,53 +82,43 @@ async def gpt_image_generation(
                 return []
 
             await notify(
-                "step",
-                "in_progress",
-                "image_generation",
-                {"message": "storing images" if n > 1 else "storing image"},
+                id="image_generation",
+                status="step in_progress",
+                information="storing images" if n > 1 else "storing image",
             )
-            async with DefaultAzureCredential() as credential:
-                async with BlobServiceClient(
-                    account_url=SUSTINEO_STORAGE, credential=credential
-                ) as blob_service_client:
-                    container_client = blob_service_client.get_container_client(
-                        "sustineo"
-                    )
-                    # Create the container if it doesn't exist
-                    if not await container_client.exists():
-                        await container_client.create_container()
 
-                    images = []
-                    for item in image["data"]:
-                        if item["b64_json"]:
-                            base_64image = item["b64_json"]
-                            image_bytes = base64.b64decode(base_64image)
-                            blob_name = f"images/{str(uuid.uuid4())}.png"
-                            await container_client.upload_blob(
-                                name=blob_name, data=image_bytes, overwrite=True
-                            )
+            async with get_storage_client("sustineo") as container_client:
+                images = []
+                for item in image["data"]:
+                    if item["b64_json"]:
+                        base_64image = item["b64_json"]
+                        image_bytes = base64.b64decode(base_64image)
+                        blob_name = f"images/{str(uuid.uuid4())}.png"
+                        await container_client.upload_blob(
+                            name=blob_name, data=image_bytes, overwrite=True
+                        )
 
-                            await notify(
-                                "step",
-                                "completed",
-                                "image_generation",
-                                {
-                                    "message": "Image generated successfully",
-                                    "description": description,
-                                    "size": size,
-                                    "quality": quality,
-                                    "image_url": blob_name,
-                                },
-                            )
+                        await notify(
+                            id="image_generation",
+                            status="step completed",
+                            content=Content(
+                                type="image",
+                                content=[
+                                    {
+                                        "type": "image",
+                                        "description": description,
+                                        "size": size,
+                                        "quality": quality,
+                                        "image_url": blob_name,
+                                    }
+                                ],
+                            ),
+                            output=True,
+                        )
+                        images.append(blob_name)
 
-                            images.append(blob_name)
-                    await notify(
-                        "run",
-                        "completed",
-                        "image_generation",
-                        {
-                            "message": "Image generation complete",
-                            "images": images,
-                        },
-                    )
-                    return images
+            await notify(
+                id="image_generation",
+                status="run completed",
+                information="Image generation complete",
+            )

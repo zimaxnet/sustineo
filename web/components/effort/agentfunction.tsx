@@ -1,9 +1,8 @@
-import { type Function } from "store/effort";
 import styles from "./agentfunction.module.scss";
-import clsx from "clsx";
+import type { FunctionUpdate } from "store/voice/voice-client";
 
 type Props = {
-  func: Function;
+  func: FunctionUpdate;
 };
 const AgentFunction = ({ func }: Props) => {
   return (

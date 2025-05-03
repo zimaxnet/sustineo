@@ -1,46 +1,28 @@
-import json
-from typing import Any, Literal, TypeAlias
+from api.model import Update
 from fastapi import WebSocket
+from dataclasses import asdict
 from fastapi.websockets import WebSocketState
-from pydantic import BaseModel
 
 
-MessageType: TypeAlias = Literal[
-    "user", "assistant", "system", "audio", "console", "interrupt", "function", "agent"
-]
-
-class Message(BaseModel):
-    type: MessageType
-    payload: str
-
+# MessageType: TypeAlias = Literal[
+#    "user", "assistant", "system", "audio", "console", "interrupt", "function", "agent"
+# ]
 
 class Connection:
     def __init__(self, websocket: WebSocket):
         self.websocket = websocket
 
-    async def send_text(self, message: str):
-        await self.websocket.send_text(message)
-
     async def receive_json(self) -> dict:
         return await self.websocket.receive_json()
 
-    async def send_json(self, message: dict):
-        await self.websocket.send_json(message)
+    async def send_update(self, update: Update):
+        await self.websocket.send_json(asdict(update))
 
     async def accept(self):
         await self.websocket.accept()
 
     async def receive_text(self) -> str:
         return await self.websocket.receive_text()
-
-    async def send_message(self, message: Message):
-        await self.websocket.send_json(message.model_dump())
-
-    async def send_audio(self, audio: Message):
-        await self.websocket.send_json(audio.model_dump())
-
-    async def send_console(self, message: Message):
-        await self.websocket.send_json(message.model_dump())
 
     async def close(self):
         if self.websocket.client_state == WebSocketState.CONNECTED:
@@ -66,12 +48,11 @@ class ConnectionManager:
         self.active_connections[id] = Connection(websocket)
         return self.active_connections[id]
 
-    async def send_message(self, id: str, type: MessageType, payload: dict[str, Any]):
+    async def send_update(self, id: str, update: Update):
         if id in self.active_connections:
-            await self.active_connections[id].send_message(Message(type=type, payload=json.dumps(payload)))
+            await self.active_connections[id].send_update(update)
         else:
             raise ValueError(f"Connection with id {id} not found.")
-
 
     def __getitem__(self, id: str) -> Connection:
         if id not in self.active_connections:

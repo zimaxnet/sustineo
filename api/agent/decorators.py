@@ -1,7 +1,7 @@
+from api.model import Agent
 from functools import partial
-from typing import Any, Callable, Union, get_type_hints
-from api.agent.model import Agent
 from prompty.utils import get_json_type
+from typing import Any, Callable, Union, get_type_hints
 
 
 function_agents: dict[str, Agent] = {}
@@ -46,13 +46,7 @@ def agent(func: Union[Callable, None] = None, **kwargs: Any) -> Callable:
                     "required": True,
                 }
                 for k, v in args.items()
-                if (k != "return" or k != "notify")
             ],
         )
 
     return func
-
-
-async def get_function_agents() -> dict[str, Agent]:
-    global function_agents
-    return function_agents

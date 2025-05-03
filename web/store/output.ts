@@ -92,7 +92,7 @@ export const useOutputStore = create<OutputStore>()(
         addOrUpdateRootLeaf: (newLeaf) => {
           set((state) => {
             const idx = state.output.children.findIndex((child) => child.id === newLeaf.id);
-            console.log("idx", idx, state.output.children, newLeaf);
+            //console.log("idx", idx, state.output.children, newLeaf);
             if (idx === -1) {
               state.output.children = [...state.output.children, newLeaf];
             } else {
