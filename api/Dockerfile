@@ -8,4 +8,4 @@ COPY . .
 EXPOSE 8000
 
 
-CMD ["fastapi", "run", "main.py", "--forwarded-allow-ips"]
+CMD ["fastapi", "run", "main.py"]
