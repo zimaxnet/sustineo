@@ -25,7 +25,6 @@ import {
   useOutputStore,
   type TextData,
   type ImageData,
-  type Data,
 } from "store/output";
 import { v4 as uuidv4 } from "uuid";
 import Output from "components/output";
@@ -132,6 +131,7 @@ export default function Home() {
         effort?.addEffort(serverEvent);
 
         const api = `${API_ENDPOINT}/api/agent/${user.key}/`;
+        console.log("Sending function call to agent", api, serverEvent);
         await fetch(api, {
           method: "POST",
           headers: {
