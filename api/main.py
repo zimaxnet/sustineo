@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
         await connections.clear()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, redirect_slashes=False)
 
 app.include_router(voice_configuration_router, tags=["voice"])
 app.include_router(agent_router, tags=["agents"])
@@ -64,6 +64,7 @@ class SimpleMessage(BaseModel):
 async def root():
     return {"message": "Hello World"}
 
+
 @app.get("/images/{image_id}")
 async def get_image(image_id: str):
     async with DefaultAzureCredential() as credential:
@@ -85,7 +86,7 @@ async def get_image(image_id: str):
 
 
 @app.post("/api/message")
-async def message(message: SimpleMessage):    
+async def message(message: SimpleMessage):
     return {"message": f"Hello {message.name}, you sent: {message.text}"}
 
 
@@ -108,11 +109,13 @@ async def voice_endpoint(id: str, websocket: WebSocket):
             user_message = await connection.receive_json()
 
             if user_message["type"] != "settings":
-                await connection.send_update(Update.exception(
-                    id=id,
-                    error="Invalid message type",
-                    content="Expected SettingsUpdate, got {settings.type}",
-                ))
+                await connection.send_update(
+                    Update.exception(
+                        id=id,
+                        error="Invalid message type",
+                        content="Expected SettingsUpdate, got {settings.type}",
+                    )
+                )
 
                 await connection.close()
                 return
