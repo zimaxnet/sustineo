@@ -1,12 +1,34 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export interface Effort {
+export interface Message {
   id: string;
-  source: string;
-  type: "message" | "function" | "agent";
+  type: "message";
   content: string;
+  role: "user" | "assistant";
 }
+
+export interface Function {
+  id: string;
+  type: "function";
+  name: string;
+  arguments: Record<string, any>;
+}
+
+export interface Agent {
+  id: string;
+  type: "agent";
+  agentName: string;
+  callId: string;
+  name: "run" | "step" | "message";
+  status: string;
+  statusType?: string;
+  content?: object;
+}
+
+
+export type Effort = Message | Function | Agent;
+
 
 export interface EffortStore {
   efforts: Effort[];

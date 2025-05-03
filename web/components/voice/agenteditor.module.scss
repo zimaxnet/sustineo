@@ -57,14 +57,22 @@
   width: 400px;
 }
 
-.editor {
+.agentEditor {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   justify-self: flex-start;
-  height: 80vh;
   
-  gap: 1rem;
+  
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-self: flex-start;
+  height: 80vh;
+  width: 100%;
 }
 
 .tools {
@@ -74,22 +82,25 @@
 
 .textarea {
   padding: 10px;
-  width: calc(100% - 400px);
-  height: calc(100% - 21px);
+  width: calc(100% - 61px);
+  height: calc(100% - 51px);
   padding-left: 10px;
   border: none;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 14px;
+  font-size: 16px;
   color: $color-zinc-800;
   scrollbar-width: none;
+  padding: 10px;
+  border: solid 1px $color-zinc-300;
+  border-radius: 0.375rem;
+  background-color: $color-white;
+  margin-top: 10px;
+  margin-left: 20px;
 }
 
 .textarea:focus {
   scrollbar-width: thin;
   outline: none;
-  border: none;
-  box-shadow: none;
-  background-color: $color-zinc-50;
 }
 
 .fieldset {

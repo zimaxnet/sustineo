@@ -3,7 +3,7 @@ name: Build and deploy sustineo-web
 on:
   push:
     branches:
-      - main
+      - release
     paths:
       - 'web/**'
   workflow_dispatch:

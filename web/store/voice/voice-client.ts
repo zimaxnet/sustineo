@@ -3,7 +3,7 @@ import { Player, Recorder } from ".";
 import { WebSocketClient } from "./websocket-client";
 
 export interface Message {
-  type: "user" | "assistant" | "audio" | "console" | "interrupt" | "messages" | "function";
+  type: "user" | "assistant" | "audio" | "console" | "interrupt" |  "function" | "agent";
   payload: string;
 }
 
