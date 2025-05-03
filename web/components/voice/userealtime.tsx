@@ -3,12 +3,12 @@ import { WS_ENDPOINT } from "store/endpoint";
 import { useLocalStorage } from "store/uselocalstorage";
 import type { User } from "store/useuser";
 import { defaultConfiguration, type VoiceConfiguration } from "store/voice";
-import type { Message } from "store/voice/voice-client";
+import type { Update } from "store/voice/voice-client";
 import { VoiceClient } from "store/voice/voice-client";
 
 export const useRealtime = (
   user: User,
-  handleMessage: (serverEvent: Message) => Promise<void>
+  handleMessage: (serverEvent: Update) => Promise<void>
 ) => {
   const { storedValue: settings } = useLocalStorage<VoiceConfiguration>(
     "voice-settings",
@@ -38,16 +38,19 @@ export const useRealtime = (
 
       await voiceRef.current.start(settings.inputDeviceId);
       const currentDate = new Date();
-      const message = {
-        user: user!.name,
-        date: currentDate.toLocaleDateString(),
-        time: currentDate.toLocaleTimeString(),
-        threshold: settings.threshold,
-        silence: settings.silence,
-        prefix: settings.prefix,
-      };
 
-      await voiceRef.current.sendUserMessage(JSON.stringify(message));
+      await voiceRef.current.send({
+        id: user.key,
+        type: "settings",
+        settings: {
+          user: user!.name,
+          date: currentDate.toLocaleDateString(),
+          time: currentDate.toLocaleTimeString(),
+          threshold: settings.threshold,
+          silence: settings.silence,
+          prefix: settings.prefix,
+        },
+      });
       await voiceRef.current.sendCreateResponse();
       setCallState("call");
     }
@@ -70,9 +73,9 @@ export const useRealtime = (
     }
   };
 
-  const sendRealtime = async (message: Message) => {
+  const sendRealtime = async (update: Update) => {
     if (voiceRef.current) {
-      await voiceRef.current.send(message);
+      await voiceRef.current.send(update);
     }
   };
 

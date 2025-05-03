@@ -19,7 +19,17 @@ export interface TextData {
   }[];
 }
 
-export type Data = TextData
+export interface ImageData {
+  id: string;
+  type: "image";
+  description: string;
+  image_url: string;
+  size: string;
+  quality: string;
+}
+
+
+export type Data = TextData | ImageData
 
 export interface OutputNode {
   id: string;
@@ -82,7 +92,7 @@ export const useOutputStore = create<OutputStore>()(
         addOrUpdateRootLeaf: (newLeaf) => {
           set((state) => {
             const idx = state.output.children.findIndex((child) => child.id === newLeaf.id);
-            console.log("idx", idx, state.output.children, newLeaf);
+            //console.log("idx", idx, state.output.children, newLeaf);
             if (idx === -1) {
               state.output.children = [...state.output.children, newLeaf];
             } else {

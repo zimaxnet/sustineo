@@ -2,27 +2,96 @@
 import { Player, Recorder } from ".";
 import { WebSocketClient } from "./websocket-client";
 
-export interface Message {
-  type: "user" | "assistant" | "audio" | "console" | "interrupt" |  "function" | "agent";
-  payload: string;
+export interface ConsoleUpdate {
+  id: string;
+  type: "console";
+  payload: object;
 }
 
-export interface SimpleMessage {
-  name: string;
-  text: string;
+export interface MessageUpdate {
+  id: string;
+  type: "message"
+  role: "user" | "assistant";
+  content: string;
 }
+export interface FunctionUpdate {
+  id: string;
+  type: "function";
+  call_id: string;
+  name: string;
+  arguments: Record<string, any>;
+}
+
+export interface FunctionCompletionUpdate {
+  id: string;
+  type: "function_completion";
+  call_id: string;
+  output: string;
+}
+
+export interface AudioUpdate {
+  id: string;
+  type: "audio";
+  content: string;
+}
+
+export interface Content {
+  type: "text" | "image" | "video" | "tool_calls";
+  content: Array<Record<string, any>>;
+}
+
+export interface AgentUpdate {
+  id: string;
+  type: "agent";
+  call_id: string;
+  name: string;
+  status: string;
+  information?: string;
+  content?: Content;
+  output?: boolean;
+}
+
+export interface InterruptUpdate {
+  id: string;
+  type: "interrupt";
+}
+
+export interface SettingsUpdate {
+  id: string;
+  type: "settings";
+  settings: Record<string, any>;
+}
+
+export interface ErrorUpdate {
+  id: string;
+  type: "error";
+  message: string;
+  error: string;
+}
+
+export type Update =
+  | MessageUpdate
+  | FunctionUpdate
+  | AgentUpdate
+  | AudioUpdate
+  | ConsoleUpdate
+  | InterruptUpdate
+  | FunctionCompletionUpdate
+  | SettingsUpdate
+  | ErrorUpdate;
+
 
 export class VoiceClient {
   url: string | URL;
-  socket: WebSocketClient<Message, Message> | null;
+  socket: WebSocketClient<Update, Update> | null;
   player: Player | null;
   recorder: Recorder | null;
-  handleServerMessage: (message: Message) => Promise<void>;
+  handleServerMessage: (update: Update) => Promise<void>;
   setTalking: (talking: boolean) => void;
 
   constructor(
     url: string | URL,
-    handleServerMessage: (message: Message) => Promise<void>,
+    handleServerMessage: (update: Update) => Promise<void>,
     setTalking: (talking: boolean) => void
   ) {
     this.url = url;
@@ -35,7 +104,7 @@ export class VoiceClient {
 
   async start(deviceId: string | null = null) {
     console.log("Starting voice client", this.url);
-    this.socket = new WebSocketClient<Message, Message>(this.url);
+    this.socket = new WebSocketClient<Update, Update>(this.url);
 
     this.player = new Player(this.setTalking);
 
@@ -43,7 +112,7 @@ export class VoiceClient {
 
     this.recorder = new Recorder((buffer: any) => {
       const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-      this.socket!.send({ type: "audio", payload: base64 });
+      this.socket!.send({ id: "audio", type: "audio", content: base64 });
     });
 
     let audio: object = {
@@ -77,7 +146,7 @@ export class VoiceClient {
 
         if (serverEvent.type === "audio") {
           // handle audio case internally
-          const buffer = Uint8Array.from(atob(serverEvent.payload), (c) =>
+          const buffer = Uint8Array.from(atob(serverEvent.content), (c) =>
             c.charCodeAt(0)
           ).buffer;
           this.player!.play(new Int16Array(buffer));
@@ -103,18 +172,18 @@ export class VoiceClient {
     }
   }
 
-  async send(message: Message) {
+  async send(update: Update) {
     if (this.socket) {
-      this.socket.send(message);
+      this.socket.send(update);
     }
   }
 
   async sendUserMessage(message: string) {
-    this.send({ type: "user", payload: message });
+    this.send({ id: "message", type: "message", role: "user", content: message });
   }
 
   async sendCreateResponse() {
-    this.send({ type: "interrupt", payload: "" });
+    this.send({ id:"interrupt", type: "interrupt" });
   }
 }
 

@@ -9,8 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, WebSocket, WebSocketDisconnect
 
 from api.connection import connections
+from api.model import Update
 from api.voice.common import get_default_configuration_data
-from api.voice.session import Message, RealtimeSession
+from api.voice.session import RealtimeSession
 from api.voice import router as voice_configuration_router
 from api.agent import router as agent_router
 from azure.identity.aio import DefaultAzureCredential
@@ -105,9 +106,19 @@ async def voice_endpoint(id: str, websocket: WebSocket):
 
             # get current username and receive any parameters
             user_message = await connection.receive_json()
-            user = Message(**user_message)
 
-            settings = json.loads(user.payload)
+            if user_message["type"] != "settings":
+                await connection.send_update(Update.exception(
+                    id=id,
+                    error="Invalid message type",
+                    content="Expected SettingsUpdate, got {settings.type}",
+                ))
+
+                await connection.close()
+                return
+
+            settings = user_message["settings"]
+
             print(
                 "Starting voice session with settings:\n",
                 json.dumps(settings, indent=2),
@@ -124,15 +135,16 @@ async def voice_endpoint(id: str, websocket: WebSocket):
 
             prompt_settings = await get_default_configuration_data(**args)
             if prompt_settings is None:
-                await connection.send_json(
-                    {
-                        "error": "No default configuration found.",
-                        "message": "Please contact support.",
-                    }
+                await connection.send_update(
+                    Update.exception(
+                        id=id,
+                        error="No default configuration found.",
+                        content="Please contact support.",
+                    )
                 )
                 await connection.close()
                 return
-            
+
             # create a new thread in the foundry
             thread_id = await create_foundry_thread()
 
