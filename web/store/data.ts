@@ -1,3 +1,4 @@
+import { WEB_ENDPOINT } from "./endpoint";
 import type { TextData, ImageData } from "./output";
 
 
@@ -193,7 +194,7 @@ export const imageData: ImageData =
   "id": "f2f7187d-f43d-44cf-9501-7c42b51c9181",
   "type": "image",
   "description": "A futuristic landscape that combines elements of nature and artificial intelligence. Imagine a lush green forest with trees that have glowing circuit patterns, and flowers that bloom with digital petals. In the background, there are sleek, metallic structures intertwined with vines and foliage, symbolizing harmony between technology and nature. The sky is filled with holographic birds and butterflies, creating a surreal and advanced atmosphere.",
-  "image_url": "http://localhost:5173/images/generated/91b5e986-892e-4e09-920b-ec4c39d1dbbb.png",
+  "image_url": `${WEB_ENDPOINT}/images/91b5e986-892e-4e09-920b-ec4c39d1dbbb.png`,
   "size": "1024x1024",
   "quality": "medium"
 };
