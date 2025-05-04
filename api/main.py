@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
         await connections.clear()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, redirect_slashes=False)
 
 app.include_router(voice_configuration_router, tags=["voice"])
 app.include_router(agent_router, tags=["agents"])
@@ -63,6 +63,7 @@ class SimpleMessage(BaseModel):
 async def root():
     return {"message": "Hello World"}
 
+
 @app.get("/images/{image_id}")
 async def get_image(image_id: str):
     async with get_storage_client("sustineo") as container_client:
@@ -72,11 +73,12 @@ async def get_image(image_id: str):
         # check if the blob exists
         if not await blob_client.exists():
             return Response(status_code=404, content="Image not found")
-
+        
         # return bytes as png image
         image_data = await blob_client.download_blob()
         image_bytes = await image_data.readall()
         return Response(content=image_bytes, media_type="image/png")
+
 
 
 @app.websocket("/api/voice/{id}")
@@ -98,11 +100,13 @@ async def voice_endpoint(id: str, websocket: WebSocket):
             user_message = await connection.receive_json()
 
             if user_message["type"] != "settings":
-                await connection.send_update(Update.exception(
-                    id=id,
-                    error="Invalid message type",
-                    content="Expected SettingsUpdate, got {settings.type}",
-                ))
+                await connection.send_update(
+                    Update.exception(
+                        id=id,
+                        error="Invalid message type",
+                        content="Expected SettingsUpdate, got {settings.type}",
+                    )
+                )
 
                 await connection.close()
                 return
