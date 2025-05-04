@@ -73,22 +73,10 @@ async def get_image(image_id: str):
         if not await blob_client.exists():
             return Response(status_code=404, content="Image not found")
 
-<<<<<<< Updated upstream
-            # return bytes as png image
-            image_data = await blob_client.download_blob()
-            image_bytes = await image_data.readall()
-            return Response(content=image_bytes, media_type="image/png")
-
-
-@app.post("/api/message")
-async def message(message: SimpleMessage):    
-    return {"message": f"Hello {message.name}, you sent: {message.text}"}
-=======
         # return bytes as png image
         image_data = await blob_client.download_blob()
         image_bytes = await image_data.readall()
         return Response(content=image_bytes, media_type="image/png")
->>>>>>> Stashed changes
 
 
 @app.websocket("/api/voice/{id}")
