@@ -1,7 +1,14 @@
 import type { Route } from "./+types/home";
 import Settings from "components/settings";
 import Setting from "components/setting";
-import { TbArticle, TbSettingsCog, TbClearAll } from "react-icons/tb";
+import {
+  TbArticle,
+  TbSettingsCog,
+  TbClearAll,
+  TbViewfinder,
+  TbImageInPicture,
+} from "react-icons/tb";
+import { VscClearAll } from "react-icons/vsc";
 import VoiceSettings from "components/voice/voicesettings";
 import Actions from "components/actions";
 import { version } from "store/version";
@@ -21,13 +28,10 @@ import { API_ENDPOINT } from "store/endpoint";
 import VoiceTool from "components/voicetool";
 import Effort from "components/effortlist";
 import Tool from "components/tool";
-import {
-  useOutputStore,
-  type TextData,
-  type ImageData,
-} from "store/output";
+import { useOutputStore, type TextData, type ImageData } from "store/output";
 import { v4 as uuidv4 } from "uuid";
 import Output from "components/output";
+import { imageData, researchData, writerData } from "store/data";
 
 const queryClient = new QueryClient();
 
@@ -56,55 +60,46 @@ export default function Home() {
     content: Array<Record<string, any>>
   ) => {
     console.log("Adding output", parent, agent, call_id, content);
-    output?.addOrUpdateRootLeaf({
-      id: parent,
-      title: agent,
-      value: 1,
-      children: [],
-    });
-
     for (const item of content) {
       if (item.type === "text") {
-        const textData: TextData = {
-          id: uuidv4(),
-          type: "text",
-          value: item.value,
-          annotations: item.annotations,
-        };
-        output?.addLeaf(parent, {
-          id: uuidv4(),
-          title: agent,
-          value: 1,
-          data: textData,
-          children: [],
-        });
         await sendRealtime({
           id: uuidv4(),
           type: "function_completion",
           call_id: call_id,
           output: item.value,
         });
-      } else if (item.type === "image") {
-        const imageData: ImageData = {
-          id: uuidv4(),
-          type: "image",
-          description: item.description,
-          image_url: item.image_url,
-          size: item.size,
-          quality: item.quality,
-        };
-        output?.addLeaf(parent, {
+        output?.addOutput(parent, agent, {
           id: uuidv4(),
           title: agent,
           value: 1,
-          data: imageData,
+          data: {
+            id: uuidv4(),
+            type: "text",
+            value: item.value,
+            annotations: item.annotations,
+          },
           children: [],
         });
+      } else if (item.type === "image") {
         await sendRealtime({
           id: uuidv4(),
           type: "function_completion",
           call_id: call_id,
           output: `Generated image as described by ${item.description}. It is ${item.size} and ${item.quality}. It has been saved and is currently being displayed to ${user.name}.`,
+        });
+        output?.addOutput(parent, agent, {
+          id: uuidv4(),
+          title: agent,
+          value: 1,
+          data: {
+            id: uuidv4(),
+            type: "image",
+            description: item.description,
+            image_url: item.image_url,
+            size: item.size,
+            quality: item.quality,
+          },
+          children: [],
         });
       }
     }
@@ -129,7 +124,7 @@ export default function Home() {
         });
 
         effort?.addEffort(serverEvent);
-        
+
         const api = `${API_ENDPOINT}/api/agent/${user.key}`;
         console.log("Sending function call to agent", api, serverEvent);
         await fetch(api, {
@@ -172,55 +167,6 @@ export default function Home() {
     toggleRealtime();
   };
 
-  const addOutpuItem = () => {
-    const o: TextData = {
-      id: uuidv4(),
-      type: "text",
-      value:
-        "Here are the latest trends for spring hiking in 2025:\n\n### 1. Gear Essentials\n- **Sustainable & Lightweight Gear**: Minimalist designs using eco-friendly materials, like sustainable hiking boots and recycled backpacks.\n- **Tech Gadgets**: Solar-powered chargers and lightweight GPS devices continue to be popular.\n- **Outerwear**: Lightweight, weather-resistant layers, including breathable rain jackets【7:3†source】【7:4†source】.\n\n### 2. Popular Destinations\n- Iconic locations like U.S. national parks (e.g., Yosemite and Zion) draw crowds.\n- Spring blossoms and trails in Japan's countryside and Europe are sought-after for scenery.\n\n### 3. Outdoor Activities\n- Multi-day treks and nature photography dominate trends.\n- Reconnect-with-nature initiatives include trail cleanup hikes and eco-projects.\n\nWould you like detailed info on any specific category?",
-      annotations: [
-        {
-          type: "url_citation",
-          text: "【7:3†source】",
-          start_index: 403,
-          end_index: 415,
-          url_citation: {
-            url: "https://gwynandami.com/2025-outdoor-gear-guide-hiking-backpacking-and-more/",
-            title: "2025 Outdoor Gear Guide: hiking, backpacking, and more",
-          },
-        },
-        {
-          type: "url_citation",
-          text: "【7:4†source】",
-          start_index: 415,
-          end_index: 427,
-          url_citation: {
-            url: "https://explore-mag.com/10-of-the-best-gear-items-for-spring-2025/",
-            title:
-              "10 of the Best Gear Items for Spring 2025 – Explore Magazine",
-          },
-        },
-      ],
-    };
-
-    output?.addOrUpdateRootLeaf({
-      id: "bing_search_agent",
-      title: "Bing Search Agent",
-      description: "Bing Search Agent",
-      value: 1,
-      children: [],
-    });
-
-    output?.addLeaf("bing_search_agent", {
-      id: uuidv4(),
-      title: "Results for Search about dogs",
-      description: "Bing Search Agent",
-      value: 1,
-      data: o,
-      children: [],
-    });
-  };
-
   return (
     <QueryClientProvider client={queryClient}>
       <main className={styles.home}>
@@ -237,13 +183,56 @@ export default function Home() {
         </div>
         <Actions>
           <Tool
-            icon={<TbClearAll size={18} />}
+            icon={<VscClearAll size={18} title={"Reset"} />}
             onClick={() => {
               effort?.clearEfforts();
               output?.reset();
             }}
+            title={"Reset"}
           />
-          <Tool icon={<TbArticle size={18} />} onClick={() => addOutpuItem()} />
+          <Tool
+            icon={<TbImageInPicture size={18} title={"Add Image"} />}
+            onClick={() => {
+              output?.addOutput("gpt-image-1_agent", "GPT Image Agent", {
+                id: uuidv4(),
+                title: "GPT Image Agent",
+                value: 1,
+                data: imageData,
+                children: [],
+              });
+            }}
+            title={"Add Image"}
+          />
+          <Tool
+            icon={<TbArticle size={18} title={"Add Article"} />}
+            onClick={() => {
+              output?.addOutput(
+                "content_writer_agent",
+                "Content Writer Agent",
+                {
+                  id: uuidv4(),
+                  title: "Content Writer Agent",
+                  value: 1,
+                  data: writerData,
+                  children: [],
+                }
+              );
+            }}
+            title={"Add Article"}
+          />
+          <Tool
+            icon={<TbViewfinder size={18} title={"Add Research"} />}
+            onClick={() => {
+              output?.addOutput("research_agent", "Research Agent", {
+                id: uuidv4(),
+                title: "Research Agent",
+                value: 1,
+                data: researchData,
+                children: [],
+              });
+            }}
+            title={"Add Research"}
+          />
           <VoiceTool onClick={() => handleVoice()} />
         </Actions>
         <Settings>

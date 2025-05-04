@@ -14,3 +14,8 @@
   cursor: pointer;
   user-select: none;
 }
+
+.button:hover {
+  background-color: $color-zinc-300;
+  border-color: $color-zinc-600;
+}

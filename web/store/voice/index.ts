@@ -3,13 +3,27 @@ export interface VoiceConfiguration {
   silence: number;
   prefix: number;
   inputDeviceId: string;
+  voice: string;
 }
+
+export const defaultVoices = [
+  { name: "Alloy", value: "alloy" },
+  { name: "Ash", value: "ash" },
+  { name: "Ballad", value: "ballad" },
+  { name: "Coral", value: "coral" },
+  { name: "Echo", value: "echo" },
+  { name: "Sage", value: "sage" },
+  { name: "Shimmer", value: "shimmer" },
+  { name: "Verse", value: "verse" }
+];
+
 
 export const defaultConfiguration: VoiceConfiguration = {
   threshold: 0.8,
   silence: 500,
   prefix: 300,
   inputDeviceId: "default",
+  voice: "sage"
 };
 
 export class Player {

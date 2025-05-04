@@ -3,7 +3,7 @@ import { WS_ENDPOINT } from "store/endpoint";
 import { useLocalStorage } from "store/uselocalstorage";
 import type { User } from "store/useuser";
 import { defaultConfiguration, type VoiceConfiguration } from "store/voice";
-import type { Update } from "store/voice/voice-client";
+import type { SettingsUpdate, Update } from "store/voice/voice-client";
 import { VoiceClient } from "store/voice/voice-client";
 
 export const useRealtime = (
@@ -39,7 +39,7 @@ export const useRealtime = (
       await voiceRef.current.start(settings.inputDeviceId);
       const currentDate = new Date();
 
-      await voiceRef.current.send({
+      const values: SettingsUpdate = {
         id: user.key,
         type: "settings",
         settings: {
@@ -49,8 +49,13 @@ export const useRealtime = (
           threshold: settings.threshold,
           silence: settings.silence,
           prefix: settings.prefix,
+          voice: settings.voice,
         },
-      });
+      };
+
+      console.log("Sending settings", values);
+      
+      await voiceRef.current.send(values);
       await voiceRef.current.sendCreateResponse();
       setCallState("call");
     }

@@ -1,0 +1,346 @@
+{
+  "state": {
+    "output": {
+      "id": "root",
+      "title": "root",
+      "value": 1,
+      "children": [
+        {
+          "id": "research_agent",
+          "title": "Research Agent",
+          "value": 1,
+          "children": [
+            {
+              "id": "353b7ce4-5ec4-4743-956b-ff5cf97e2668",
+              "title": "Research Agent",
+              "value": 1,
+              "data": {
+                "id": "23ce9a0b-b37b-40d1-98a9-043c96880a2c",
+                "type": "text",
+                "value": "Recent updates to Azure AI Foundry include:\n\n1. **Integration of GPT-4.5**: The platform now offers OpenAI's GPT-4.5 model, which introduces expanded capabilities such as enhanced fine-tuning and distillation for creating sophisticated, domain-specific AI agents【7:0†source】【7:5†source】.\n\n2. **Extended Context Windows**: The introduction of GPT-4.1 with a one-million-token context significantly improves workflow efficiency for processing large datasets like codebases or entire corpora【7:1†source】.\n\n3. **Enhanced Enterprise Integration Tools**: Updates such as the Azure Logic Apps connectors enable better integration of enterprise workflows into AI operations【7:8†source】.\n\n4. **Agentic Capabilities**: New tools have been added, including Azure AI Agent Service, which grounds AI outputs in enterprise knowledge for accuracy and relevance【7:3†source】.\n\n5. **Customization and Governance Improvements**: Refinements in data integration, governance, and tool optimizations make the platform increasingly developer-friendly【7:6†source】. \n\nThese updates reinforce Azure AI Foundry's focus on scalable, secure solutions for enterprise-grade AI.",
+                "annotations": [
+                  {
+                    "type": "url_citation",
+                    "text": "【7:0†source】",
+                    "start_index": 262,
+                    "end_index": 274,
+                    "url_citation": {
+                      "url": "https://azure.microsoft.com/en-us/blog/announcing-new-models-customization-tools-and-enterprise-agent-upgrades-in-azure-ai-foundry/",
+                      "title": "Announcing new models, customization tools, and enterprise agent ..."
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【7:5†source】",
+                    "start_index": 274,
+                    "end_index": 286,
+                    "url_citation": {
+                      "url": "https://www.c-sharpcorner.com/news/azure-ai-foundry-uveils-new-models-and-tools",
+                      "title": "Azure AI Foundry Uveils New Models and Tools - C# Corner"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【7:1†source】",
+                    "start_index": 488,
+                    "end_index": 500,
+                    "url_citation": {
+                      "url": "https://devblogs.microsoft.com/foundry/whats-new-in-azure-ai-foundry-april-2025/",
+                      "title": "What's new in Azure AI Foundry | April 2025 | Azure AI Foundry Blog"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【7:8†source】",
+                    "start_index": 665,
+                    "end_index": 677,
+                    "url_citation": {
+                      "url": "https://azurefeeds.com/2025/05/02/in-preview-public-preview-azure-logic-apps-now-available-as-agent-tool-in-azure-ai-foundry/",
+                      "title": "[In preview] Public Preview: Azure Logic Apps now available as Agent ..."
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【7:3†source】",
+                    "start_index": 845,
+                    "end_index": 857,
+                    "url_citation": {
+                      "url": "https://azure.microsoft.com/en-us/blog/the-latest-azure-ai-foundry-innovations-help-you-optimize-ai-investments-and-differentiate-your-business/",
+                      "title": "The latest Azure AI Foundry innovations help you optimize AI ..."
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【7:6†source】",
+                    "start_index": 1027,
+                    "end_index": 1039,
+                    "url_citation": {
+                      "url": "https://serverless-solutions.com/azure-ai-foundry-expands-with-new-models-customizations-and-enterprise-features/",
+                      "title": "Azure AI Foundry Expands with New Models, Customizations, and ..."
+                    }
+                  }
+                ]
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "content_writer_agent_",
+          "title": "Content Writer Agent ",
+          "value": 1,
+          "children": [
+            {
+              "id": "b069753d-835d-47bb-8007-0caffdfd160c",
+              "title": "Content Writer Agent ",
+              "value": 1,
+              "data": {
+                "id": "89143f1d-921d-4d16-ac5a-0a54ca86eb35",
+                "type": "text",
+                "value": "Azure AI Foundry continues to redefine what's possible with AI-driven solutions, offering groundbreaking updates tailor-made for developers and enterprises alike:\n\n1. **GPT-4.5 Fine-Tuning:** Developers can precisely fine-tune AI models, enabling custom solutions that meet specific operational needs.\n2. **Extended Context Windows with GPT-4.1:** Equip AI applications with the ability to manage longer data streams for seamless analysis and user interactions.\n3. **Enhanced Enterprise Integration Tools:** Seamlessly integrate enterprise knowledge through Azure data services, OpenAPI support, and connectors with Azure Functions, Logic Apps, and beyond.\n4. **Agentic Capabilities for Scale:** Leverage multi-agent workflows and intuitive orchestration tools to build, manage, and scale intelligent solutions faster than ever【3:0†source】【3:3†source】.\n\nAzure AI Foundry empowers users to explore new dimensions of scalability, governance, and user-centric development while setting the stage for more secure and innovative AI deployments. What part of this transformative experience excites you most? Dive in and shape the future today!",
+                "annotations": [
+                  {
+                    "type": "url_citation",
+                    "text": "【3:0†source】",
+                    "start_index": 827,
+                    "end_index": 839,
+                    "url_citation": {
+                      "url": "doc_0",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:3†source】",
+                    "start_index": 839,
+                    "end_index": 851,
+                    "url_citation": {
+                      "url": "doc_1",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  }
+                ]
+              },
+              "children": []
+            },
+            {
+              "id": "52efe058-606f-4592-b2f5-32e99a60a7f8",
+              "title": "Content Writer Agent ",
+              "value": 1,
+              "data": {
+                "id": "f218fa62-b0eb-4fc4-b54b-fc2b2e06a65e",
+                "type": "text",
+                "value": "# Introducing the Latest in AI Innovation: Azure AI Foundry Unlocks GPT-4.5 and Next-Level Enterprise Tools  \n\nIn today's rapidly evolving AI landscape, Microsoft continues to push the boundaries of innovation with the latest enhancements to **Azure AI Foundry**, our comprehensive platform for customized and enterprise-ready AI solutions. This October, we're excited to unveil major upgrades, including **GPT-4.5 integration**, **extended context windows**, powerful **agentic capabilities**, improved tools for enterprise-scale integration, and enhanced support for **customization and governance**.  \n\nThese remarkable advancements reflect Microsoft's unwavering commitment to empowering developers and enterprises alike—whether you're creating intelligent business workflows, enhancing customer engagement, or scaling mission-critical operations.  \n\n---\n\n## The Power Behind GPT-4.5  \n\nAzure AI Foundry now integrates **GPT-4.5**, the most advanced version of OpenAI’s Generative Pre-trained Transformer. By integrating this sophisticated model, developers gain access to cutting-edge capabilities that drive more accurate predictions, nuanced conversational interactions, and multimodal support (including **text and image-based reasoning**) for diverse industry applications.  \n\nGPT-4.5 is further optimized for enterprise contexts, seamlessly interoperating with Azure's ecosystem of services—like **Azure AI Search**, **Microsoft Fabric**, **Bing**, and **SharePoint**. This connectivity ensures models are well-grounded in both structured and unstructured enterprise data, delivering reliable and contextualized outputs【3:0†source】【3:1†source】.  \n\n---\n\n## Extended Context Windows for Enhanced Understanding  \n\nAzure AI Foundry extends its focus on delivering high-performing conversational capabilities, enabling businesses to handle **longer context windows**—a game-changer for complex customer service interactions, document summarizations, and in-depth knowledge management tasks. With the ability to process larger context spans, enterprise-grade deployments benefit from memory persistence, multi-turn dialogue advancements, and richer user engagement【3:1†source】【3:2†source】.  \n\n---\n\n## Agentic Capabilities to Leverage Multi-Agent Orchestration  \n\nAzure AI Foundry isn't just a platform; it's a dynamic solution powerhouse. With **multi-agent orchestration**, developers can enable intelligent workflows where multiple specialized agents collaborate, delegate tasks, and make dynamic decisions. Supported by **Foundry Definition Language (FDL)** and the **Foundry Distributed Runtime**, Microsoft delivers enterprise AI tools capable of advanced reasoning that naturally combine resources like APIs, databases, and logic applications【3:2†source】【3:3†source】.  \n\nFor example, in retail scenarios, one AI agent might handle inventory queries while another specializes in customer personalization—working in tandem to provide seamless and efficient service.  \n\n---\n\n## Enterprise-Ready Integration and Full Governance  \n\nEnterprises are transforming their operations through Azure AI Foundry's deep integration capabilities. **No external dependencies** ensure that your AI solution remains secure and compliant while fully customizable within your existing Microsoft ecosystem.  \n\nBuilt-in governance tools allow businesses to segregate sensitive data, control model performance, and ensure operational scalability using components such as **Cosmos DB** for memory management and **Azure Search** for data retrieval【3:4†source】【3:5†source】.  \n\n---\n\n## Unparalleled Customization at Scale  \n\nAzure AI Foundry empowers developers to create bespoke solutions aligned with their unique needs. With options to bring your custom models (**BYOM**) or adapt existing systems into intelligent \"agentic skills\" using **Logic Apps**, **Azure Functions**, or Open APIs, businesses gain the flexibility to reimagine their workflows from the ground up【3:5†source】【3:6†source】.  \n\nWhether scaling up customer-facing applications or driving internal automation, Foundry ensures businesses can operate across **basic, standard, and advanced setups**, adjusting resource allocation in real-time without compromising efficiency【3:6†source】.  \n\n---\n\n## Conclusion: A Platform Built for Impact  \n\nAzure AI Foundry isn’t just a tool; it’s a strategic solution designed for organizations that envision a smarter, more adaptive future. By combining GPT-4.5's intelligence, multi-agent orchestration, long-context capabilities, and governance-first enterprise integration opportunities, Microsoft delivers a platform as versatile as your boldest ambitions.  \n\nReady to transform your organization's AI strategy? Explore the all-new Azure AI Foundry and see how GPT-4.5 and agentic intelligence can revolutionize your workflows.  \n\n**Get started today** and elevate your enterprise AI operations with Microsoft Azure AI Foundry.  \n\nLet’s build the future together.  \n\n",
+                "annotations": [
+                  {
+                    "type": "url_citation",
+                    "text": "【3:0†source】",
+                    "start_index": 1629,
+                    "end_index": 1641,
+                    "url_citation": {
+                      "url": "doc_1",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:1†source】",
+                    "start_index": 1641,
+                    "end_index": 1653,
+                    "url_citation": {
+                      "url": "doc_2",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:1†source】",
+                    "start_index": 2168,
+                    "end_index": 2180,
+                    "url_citation": {
+                      "url": "doc_2",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:2†source】",
+                    "start_index": 2180,
+                    "end_index": 2192,
+                    "url_citation": {
+                      "url": "doc_1",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:2†source】",
+                    "start_index": 2752,
+                    "end_index": 2764,
+                    "url_citation": {
+                      "url": "doc_1",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:3†source】",
+                    "start_index": 2764,
+                    "end_index": 2776,
+                    "url_citation": {
+                      "url": "doc_3",
+                      "title": "whats-new-azure-ai-agent-service.md"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:4†source】",
+                    "start_index": 3532,
+                    "end_index": 3544,
+                    "url_citation": {
+                      "url": "doc_1",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:5†source】",
+                    "start_index": 3544,
+                    "end_index": 3556,
+                    "url_citation": {
+                      "url": "doc_4",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:5†source】",
+                    "start_index": 3954,
+                    "end_index": 3966,
+                    "url_citation": {
+                      "url": "doc_4",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:6†source】",
+                    "start_index": 3966,
+                    "end_index": 3978,
+                    "url_citation": {
+                      "url": "doc_2",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  },
+                  {
+                    "type": "url_citation",
+                    "text": "【3:6†source】",
+                    "start_index": 4225,
+                    "end_index": 4237,
+                    "url_citation": {
+                      "url": "doc_2",
+                      "title": "Book Of Agent- Volume 1 (Draft 04-05-2025).pdf"
+                    }
+                  }
+                ]
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "gpt-image-1_agent",
+          "title": "GPT-image-1 Agent",
+          "value": 1,
+          "children": [
+            {
+              "id": "7a85b2b0-7850-4f7e-be7e-c53965ffa0d7",
+              "title": "GPT-image-1 Agent",
+              "value": 1,
+              "data": {
+                "id": "f2f7187d-f43d-44cf-9501-7c42b51c9181",
+                "type": "image",
+                "description": "A futuristic landscape that combines elements of nature and artificial intelligence. Imagine a lush green forest with trees that have glowing circuit patterns, and flowers that bloom with digital petals. In the background, there are sleek, metallic structures intertwined with vines and foliage, symbolizing harmony between technology and nature. The sky is filled with holographic birds and butterflies, creating a surreal and advanced atmosphere.",
+                "image_url": "images/91b5e986-892e-4e09-920b-ec4c39d1dbbb.png",
+                "size": "1024x1024",
+                "quality": "medium"
+              },
+              "children": []
+            },
+            {
+              "id": "19a0204b-2752-48ef-b749-bb1af59f37f9",
+              "title": "GPT-image-1 Agent",
+              "value": 1,
+              "data": {
+                "id": "8599fc7e-e08c-462d-ad36-181b4caac5c7",
+                "type": "image",
+                "description": "A futuristic landscape that combines elements of nature and artificial intelligence. Imagine a lush green forest with trees that have glowing circuit patterns, and flowers that bloom with digital petals. In the background, there are sleek, metallic structures intertwined with vines and foliage, symbolizing harmony between technology and nature. The sky is filled with holographic birds and butterflies, creating a surreal and advanced atmosphere.",
+                "image_url": "images/08e2339c-6b52-4ebc-bc95-e6379bc7e2f3.png",
+                "size": "1024x1024",
+                "quality": "medium"
+              },
+              "children": []
+            },
+            {
+              "id": "aaa9f74c-f06b-418f-b06f-62fb897fbe7d",
+              "title": "GPT-image-1 Agent",
+              "value": 1,
+              "data": {
+                "id": "20b833df-dbdd-4f3a-b693-074500d1422b",
+                "type": "image",
+                "description": "A futuristic landscape that combines elements of nature and artificial intelligence. Imagine a lush green forest with trees that have glowing circuit patterns, and flowers that bloom with digital petals. In the background, there are sleek, metallic structures intertwined with vines and foliage, symbolizing harmony between technology and nature. The sky is filled with holographic birds and butterflies, creating a surreal and advanced atmosphere.",
+                "image_url": "images/bd40f8a5-1ce7-4e1e-bf1a-c6ea4184b2bf.png",
+                "size": "1024x1024",
+                "quality": "medium"
+              },
+              "children": []
+            },
+            {
+              "id": "e14f537e-56dd-49ff-bb25-071fa48ac211",
+              "title": "GPT-image-1 Agent",
+              "value": 1,
+              "data": {
+                "id": "20770f9e-1282-4859-9b1d-3efcc187c59e",
+                "type": "image",
+                "description": "A futuristic landscape blending nature and AI. Envision a vibrant green forest where the trees have glowing, digital circuit patterns on their bark, and flowers with petals resembling microchips. In the background, sleek metallic structures are seamlessly integrated with lush vegetation, symbolizing the harmony between technology and the natural world. The sky is adorned with digital birds and butterflies, adding a touch of surrealism to this advanced ecosystem.",
+                "image_url": "images/39a3b79c-775b-466c-afc4-ab85611676e3.png",
+                "size": "1024x1024",
+                "quality": "medium"
+              },
+              "children": []
+            },
+            {
+              "id": "ee8a999b-debe-47b3-bd4f-6bf957bec071",
+              "title": "GPT-image-1 Agent",
+              "value": 1,
+              "data": {
+                "id": "5bf28166-4f87-4dc0-97fe-5c13346151a8",
+                "type": "image",
+                "description": "A futuristic landscape blending nature and AI. Envision a vibrant green forest where the trees have glowing, digital circuit patterns on their bark, and flowers with petals resembling microchips. In the background, sleek metallic structures are seamlessly integrated with lush vegetation, symbolizing the harmony between technology and the natural world. The sky is adorned with digital birds and butterflies, adding a touch of surrealism to this advanced ecosystem.",
+                "image_url": "images/dbd4e0fc-6aee-438a-b364-0fe42be7f5a1.png",
+                "size": "1024x1024",
+                "quality": "medium"
+              },
+              "children": []
+            },
+            {
+              "id": "bc7567f5-fe74-4c59-9bf1-566af7906c72",
+              "title": "GPT-image-1 Agent",
+              "value": 1,
+              "data": {
+                "id": "6a761189-122a-4712-bd9c-fa28ae0a7488",
+                "type": "image",
+                "description": "A futuristic landscape blending nature and AI. Envision a vibrant green forest where the trees have glowing, digital circuit patterns on their bark, and flowers with petals resembling microchips. In the background, sleek metallic structures are seamlessly integrated with lush vegetation, symbolizing the harmony between technology and the natural world. The sky is adorned with digital birds and butterflies, adding a touch of surrealism to this advanced ecosystem.",
+                "image_url": "images/2dedd135-3d58-42b7-9e69-5f1074510a70.png",
+                "size": "1024x1024",
+                "quality": "medium"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "version": 0
+}

@@ -155,6 +155,7 @@ async def voice_endpoint(id: str, websocket: WebSocket):
                     settings["silence"] if "silence" in settings else 500
                 ),
                 prefix_padding_ms=(settings["prefix"] if "prefix" in settings else 300),
+                voice=settings["voice"] if "voice" in settings else "sage",
                 tools=prompt_settings.tools,
             )
 

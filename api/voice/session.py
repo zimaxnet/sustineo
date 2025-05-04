@@ -90,6 +90,7 @@ class RealtimeSession:
         threshold: float = 0.8,
         silence_duration_ms: int = 500,
         prefix_padding_ms: int = 300,
+        voice: str = "sage",
         tools: list[SessionTool] = [],
     ):
         if self.realtime is not None:
@@ -104,7 +105,7 @@ class RealtimeSession:
                 input_audio_transcription=SessionInputAudioTranscription(
                     model="whisper-1",
                 ),
-                voice="sage",
+                voice=voice,
                 instructions=instructions,
                 modalities=["text", "audio"],
                 tool_choice="auto",
@@ -125,6 +126,9 @@ class RealtimeSession:
                 if "delta" not in event.type:
                     print(event.type)
                 self.active = True
+                if self.realtime is None or self.connection.state != WebSocketState.CONNECTED:
+                    break
+
                 match event.type:
                     case "error":
                         await self._handle_error(event)

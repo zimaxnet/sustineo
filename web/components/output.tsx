@@ -50,7 +50,10 @@ const Output: React.FC<Props> = ({ data }: Props) => {
           </foreignObject>
         );
       case "image":
-        return <image x={x} y={y+5} width={width} height={height} href={`${API_ENDPOINT}/${data.image_url}`} />;
+        const url = data.image_url.startsWith("http") ? data.image_url : `${API_ENDPOINT}/${data.image_url}`;
+        return (
+          <image x={x} y={y + 5} width={width} height={height} href={url} />
+        );
       default:
         return <div>Unknown type</div>;
     }

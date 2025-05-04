@@ -43,6 +43,7 @@ export interface OutputNode {
 
 export interface OutputStore {
   output: OutputNode;
+  addOutput: (parentId: string, parentTitle: string, newOutput: OutputNode) => void;
   addLeaf: (parentId: string, newLeaf: OutputNode) => void;
   removeLeaf: (id: string) => void;
   addOrUpdateRootLeaf: (newLeaf: OutputNode) => void;
@@ -59,6 +60,17 @@ export const useOutputStore = create<OutputStore>()(
           value: 1,
           children: [],
         },
+        addOutput: (parentId, parentTitle, newOutput) =>
+          set((state) => {
+            const parentOutput = state.output.children.find((child) => child.id === parentId);
+            if(!parentOutput) {
+              // If the parent output doesn't exist, create it and add the new output as its child
+              state.output.children = [...state.output.children, { id: parentId, title: parentTitle, value: 1, children: [newOutput] }];
+            } else {
+              // If the parent output exists, add the new output as its child
+              parentOutput.children = [...parentOutput.children, newOutput];
+            }
+          }),
         addLeaf: (parentId, newLeaf) =>
           set((state) => {
             const addLeafRecursively = (node: OutputNode): OutputNode => {
