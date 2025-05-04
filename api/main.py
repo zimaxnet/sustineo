@@ -8,14 +8,13 @@ from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, WebSocket, WebSocketDisconnect
 
+from api.agent.storage import get_storage_client
 from api.connection import connections
 from api.model import Update
 from api.voice.common import get_default_configuration_data
 from api.voice.session import RealtimeSession
 from api.voice import router as voice_configuration_router
 from api.agent import router as agent_router
-from azure.identity.aio import DefaultAzureCredential
-from azure.storage.blob.aio import BlobServiceClient
 from api.agent.common import get_custom_agents, create_foundry_thread
 
 from dotenv import load_dotenv
@@ -66,18 +65,15 @@ async def root():
 
 @app.get("/images/{image_id}")
 async def get_image(image_id: str):
-    async with DefaultAzureCredential() as credential:
-        async with BlobServiceClient(
-            account_url=SUSTINEO_STORAGE, credential=credential
-        ) as blob_service_client:
-            container_client = blob_service_client.get_container_client("sustineo")
-            # get the blob client for the image
-            blob_client = container_client.get_blob_client(f"images/{image_id}")
+    async with get_storage_client("sustineo") as container_client:
+        # get the blob client for the image
+        blob_client = container_client.get_blob_client(f"images/{image_id}")
 
-            # check if the blob exists
-            if not await blob_client.exists():
-                return Response(status_code=404, content="Image not found")
+        # check if the blob exists
+        if not await blob_client.exists():
+            return Response(status_code=404, content="Image not found")
 
+<<<<<<< Updated upstream
             # return bytes as png image
             image_data = await blob_client.download_blob()
             image_bytes = await image_data.readall()
@@ -87,6 +83,12 @@ async def get_image(image_id: str):
 @app.post("/api/message")
 async def message(message: SimpleMessage):    
     return {"message": f"Hello {message.name}, you sent: {message.text}"}
+=======
+        # return bytes as png image
+        image_data = await blob_client.download_blob()
+        image_bytes = await image_data.readall()
+        return Response(content=image_bytes, media_type="image/png")
+>>>>>>> Stashed changes
 
 
 @app.websocket("/api/voice/{id}")
