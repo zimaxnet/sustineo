@@ -24,6 +24,7 @@ import Tool from "components/tool";
 import { useOutputStore, type TextData } from "store/output";
 import { v4 as uuidv4 } from "uuid";
 import Output from "components/output";
+import Layout from "app/layout";
 
 const queryClient = new QueryClient();
 
@@ -269,7 +270,7 @@ export default function Home() {
           <Setting
             id={"voice-agent-settings"}
             icon={<TbArticle size={18} />}
-            className={styles.editor}
+            className={styles.editor} >
             <QueryClientProvider client={queryClient}>
               <AgentEditor />
             </QueryClientProvider>
