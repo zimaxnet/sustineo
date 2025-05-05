@@ -10,7 +10,6 @@ from azure.ai.projects.models import (
     SubmitToolOutputsAction,
     RequiredFunctionToolCall,
     ToolOutput,
-    AsyncFunctionTool,
 )
 
 from azure.ai.projects.aio import AIProjectClient
