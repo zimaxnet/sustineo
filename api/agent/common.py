@@ -13,7 +13,7 @@ from azure.ai.projects.models import (
 from azure.identity.aio import DefaultAzureCredential
 from prompty.core import Prompty
 
-from api.model import Agent, AgentUpdateEvent
+from api.model import Agent, AgentUpdateEvent, Function
 from api.agent.handler import SustineoAgentEventHandler
 
 FOUNDRY_CONNECTION = os.environ.get("FOUNDRY_CONNECTION", "EMPTY")
@@ -91,6 +91,7 @@ async def execute_foundry_agent(
     agent: Agent,
     additional_instructions: str,
     query: str,
+    tools: dict[str, Function],
     notify: AgentUpdateEvent,
 ):
     """Execute a Foundry agent."""
@@ -104,7 +105,7 @@ async def execute_foundry_agent(
             content=query,
         )
 
-        handler = SustineoAgentEventHandler(notify)
+        handler = SustineoAgentEventHandler(project_client, tools, notify)
         async with await project_client.agents.create_stream(
             agent_id=server_agent.id,
             thread_id=thread.id,

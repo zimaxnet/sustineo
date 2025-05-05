@@ -1,11 +1,11 @@
-from api.model import Agent
+from api.model import Agent, Function, FunctionParameter
 from functools import partial
 from prompty.utils import get_json_type
 from typing import Any, Callable, Union, get_type_hints
 
 
 function_agents: dict[str, Agent] = {}
-function_calls: dict[str, Agent] = {}
+function_calls: dict[str, Function] = {}
 
 
 def agent(func: Union[Callable, None] = None, **kwargs: Any) -> Callable:
@@ -15,10 +15,10 @@ def agent(func: Union[Callable, None] = None, **kwargs: Any) -> Callable:
         return partial(agent, **kwargs)
 
     if "description" not in kwargs:
-        return func
+        raise ValueError("description is required for agent decorator")
 
     if "name" not in kwargs:
-        return func
+        raise ValueError("name is required for agent decorator")
 
     name = kwargs.pop("name")
     description = kwargs.pop("description")
@@ -47,6 +47,34 @@ def agent(func: Union[Callable, None] = None, **kwargs: Any) -> Callable:
                 }
                 for k, v in args.items()
             ],
+        )
+
+    return func
+
+
+def function(func: Union[Callable, None] = None, **kwargs: Any) -> Callable:
+    global function_calls
+
+    if func is None:
+        return partial(function, **kwargs)
+
+    args = get_type_hints(func, include_extras=True)
+
+    # remove the return and notify arguments from the args dictionary
+    args.pop("return", None)
+    args.pop("notify", None)
+
+    if func.__name__ not in function_calls:
+        function_calls[func.__name__] = Function(
+            name=func.__name__,
+            parameters=[
+                FunctionParameter(
+                    name=k,
+                    type=get_json_type(v),
+                )
+                for k, v in args.items()
+            ],
+            func=func,
         )
 
     return func

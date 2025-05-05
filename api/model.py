@@ -34,9 +34,25 @@ class Agent:
     options: dict[str, Any] = field(default_factory=dict)
 
 
+#### Function ####
+
+
+# This is a class representing a function parameter in the system.
+@dataclass
+class FunctionParameter:
+    name: str
+    type: str
+
+
+# This is a class representing a function in the system.
+@dataclass
+class Function:
+    name: str
+    parameters: list[FunctionParameter]
+    func: Callable[..., Any]
+
+
 #### Updates ####
-
-
 # This is a class agent return content.
 @dataclass
 class Content:
@@ -112,7 +128,7 @@ class Update:
     @staticmethod
     def console(id: str, payload: dict[str, Any]) -> "Update":
         return ConsoleUpdate(id=id, type="console", payload=payload)
-    
+
     @staticmethod
     def exception(id: str, error: str, content: str) -> "Update":
         return ErrorUpdate(id=id, type="error", error=error, content=content)
@@ -192,6 +208,7 @@ class SettingsUpdate(Update):
     def __post_init__(self):
         self.type = "settings"
 
+
 @dataclass
 class ErrorUpdate(Update):
     error: str
@@ -199,6 +216,7 @@ class ErrorUpdate(Update):
 
     def __post_init__(self):
         self.type = "error"
+
 
 # This is a class representing an agent update in the system.
 @dataclass

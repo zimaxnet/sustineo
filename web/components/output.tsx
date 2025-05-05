@@ -2,15 +2,17 @@ import * as d3 from "d3";
 import styles from "./output.module.scss";
 import { useRef } from "react";
 import useDimensions from "store/usedimensions";
-import type { OutputNode, Data } from "store/output";
+import { type OutputNode, type Data, useOutputStore } from "store/output";
 import TextOutput from "./output/textoutput";
 import { API_ENDPOINT } from "store/endpoint";
+import usePersistStore from "store/usepersiststore";
 
 type Props = {
   data: OutputNode;
 };
 
 const Output: React.FC<Props> = ({ data }: Props) => {
+  const output = usePersistStore(useOutputStore, (state) => state);
   const chartRef = useRef<HTMLDivElement>(null);
   const dms = useDimensions(chartRef, {
     marginBottom: 100,
@@ -51,8 +53,13 @@ const Output: React.FC<Props> = ({ data }: Props) => {
         );
       case "image":
         const url = data.image_url.startsWith("http") ? data.image_url : `${API_ENDPOINT}/${data.image_url}`;
+        const max_size = Math.max(width, height);
+        const new_x = (width - max_size) / 2;
+        const new_y = (height - max_size) / 2;
         return (
-          <image x={x} y={y + 5} width={width} height={height} href={url} />
+          <g clipPath={clipPath}>
+            <image x={new_x} y={new_y} width={max_size} height={max_size} href={url} />
+          </g>
         );
       default:
         return <div>Unknown type</div>;
@@ -76,6 +83,7 @@ const Output: React.FC<Props> = ({ data }: Props) => {
               }}
               onMouseOver={() => {
                 const rect = document.getElementById(i + "_rect");
+                //output?.changeValue(d.data.id, 10);
                 if (rect) {
                   rect.setAttribute("opacity", "0.9");
                   rect.setAttribute("fill", "#E5ACA3");
@@ -83,6 +91,7 @@ const Output: React.FC<Props> = ({ data }: Props) => {
               }}
               onMouseOut={() => {
                 const rect = document.getElementById(i + "_rect");
+                //output?.changeValue(d.data.id, 1);
                 if (rect) {
                   rect.setAttribute("opacity", "0.5");
                   rect.setAttribute("fill", "#B7AEF0");
@@ -101,8 +110,8 @@ const Output: React.FC<Props> = ({ data }: Props) => {
               />
               <clipPath id={`clip-${i}`}>
                 <rect
-                  width={Math.max(d.x1 - d.x0 - 4, 1)}
-                  height={Math.max(d.y1 - d.y0 - 4, 1)}
+                  width={Math.max(d.x1 - d.x0, 1)}
+                  height={Math.max(d.y1 - d.y0, 1)}
                   rx={8}
                   ry={8}
                 />
@@ -120,10 +129,10 @@ const Output: React.FC<Props> = ({ data }: Props) => {
               {d.data.data &&
                 getContent(
                   d.data.data,
-                  5,
-                  25,
-                  Math.max(d.x1 - d.x0 - 12, 1),
-                  Math.max(d.y1 - d.y0 - 30, 1),
+                  0,
+                  0,
+                  Math.max(d.x1 - d.x0, 1),
+                  Math.max(d.y1 - d.y0, 1),
                   `url(#clip-${i})`
                 )}
             </g>

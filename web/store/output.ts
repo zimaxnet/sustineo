@@ -46,6 +46,7 @@ export interface OutputStore {
   addOutput: (parentId: string, parentTitle: string, newOutput: OutputNode) => void;
   addLeaf: (parentId: string, newLeaf: OutputNode) => void;
   removeLeaf: (id: string) => void;
+  changeValue: (id: string, value: number) => void;
   addOrUpdateRootLeaf: (newLeaf: OutputNode) => void;
   reset: () => void;
 }
@@ -99,6 +100,20 @@ export const useOutputStore = create<OutputStore>()(
               };
             };
             state.output = removeLeafRecursively(state.output);
+          });
+        },
+        changeValue: (id, value) => {
+          set((state) => {
+            const changeValueRecursively = (node: OutputNode): OutputNode => {
+              if (node.id === id) {
+                return { ...node, value };
+              }
+              return {
+                ...node,
+                children: node.children.map(changeValueRecursively),
+              };
+            };
+            state.output = changeValueRecursively(state.output);
           });
         },
         addOrUpdateRootLeaf: (newLeaf) => {

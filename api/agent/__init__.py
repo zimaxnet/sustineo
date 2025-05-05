@@ -1,8 +1,9 @@
+from dataclasses import asdict
 from typing import Any
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from api.agent.decorators import function_agents
+from api.agent.decorators import function_agents, function_calls
 from api.model import Agent, AgentUpdate, AgentUpdateEvent, Content
 from api.agent.common import (
     get_foundry_agents,
@@ -12,8 +13,12 @@ from api.agent.common import (
 )
 
 from api.agent.common import execute_foundry_agent
+
 # load function agents
 import api.agent.agents as agents  # noqa: F401
+
+# load function calls
+import api.agent.functions as functions  # noqa: F401
 
 from api.connection import connections
 
@@ -81,6 +86,12 @@ async def get_agents():
     return [*f, *a, *function_agents.values()]
 
 
+@router.get("/function")
+async def get_functions():
+    global function_calls
+    return [asdict(f) for f in function_calls.values()]
+
+
 @router.get("/{id}")
 async def get_agent(id: str):
     global connections, custom_agents, foundry_agents
@@ -118,6 +129,7 @@ def send_agent_status(connection_id: str, name: str, call_id: str) -> AgentUpdat
 
     return status_fn
 
+
 class FunctionCall(BaseModel):
     call_id: str
     id: str
@@ -127,7 +139,7 @@ class FunctionCall(BaseModel):
 
 @router.post("/{id}")
 async def execute_agent(id: str, function: FunctionCall):
-    global connections, custom_agents, foundry_agents, function_agents
+    global connections, custom_agents, foundry_agents, function_agents, function_calls
 
     if len(foundry_agents) == 0:
         foundry_agents = await get_foundry_agents()
@@ -142,7 +154,10 @@ async def execute_agent(id: str, function: FunctionCall):
             foundry_agent,
             function.arguments["additional_instructions"],
             function.arguments["query"],
-            send_agent_status(connection_id=id, name=foundry_agent.name, call_id=function.call_id),
+            function_calls,
+            send_agent_status(
+                connection_id=id, name=foundry_agent.name, call_id=function.call_id
+            ),
         )
     elif function.name in function_agents:
         function_agent = function_agents[function.name]
