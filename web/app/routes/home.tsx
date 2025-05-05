@@ -14,6 +14,7 @@ import { useEffortStore } from "store/effort";
 import usePersistStore from "store/usepersiststore";
 import styles from "./home.module.scss";
 import AgentEditor from "components/voice/agenteditor";
+import Layout from "../layout";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { API_ENDPOINT } from "store/endpoint";
@@ -257,11 +258,11 @@ export default function Home() {
             className={styles.voice}
           >
             <VoiceSettings />
-          </Setting>
+          </Setting>  
           <Setting
             id={"voice-agent-settings"}
             icon={<TbArticle size={18} />}
-            className={styles.editor}
+            className={styles.editor}>
             <QueryClientProvider client={queryClient}>
               <AgentEditor />
             </QueryClientProvider>
