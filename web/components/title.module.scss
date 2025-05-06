@@ -72,17 +72,17 @@
 }
 
 .userIcon {
-      background-color: $color-zinc-100;
-      color: $color-zinc-800;
-      border: solid 1px $color-zinc-300;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-      margin-right: 1rem;
+  background-color: $color-zinc-100;
+  color: $color-zinc-800;
+  border: solid 1px $color-zinc-300;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  margin-right: 1rem;
 }

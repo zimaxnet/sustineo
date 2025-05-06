@@ -13,7 +13,7 @@ import VoiceSettings from "components/voice/voicesettings";
 import Actions from "components/actions";
 import { version } from "store/version";
 import Title from "components/title";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Update } from "store/voice/voice-client";
 import { useUser } from "store/useuser";
 import { useRealtime } from "components/voice/userealtime";
@@ -28,10 +28,16 @@ import { API_ENDPOINT } from "store/endpoint";
 import VoiceTool from "components/voicetool";
 import Effort from "components/effortlist";
 import Tool from "components/tool";
-import { useOutputStore, type TextData, type ImageData } from "store/output";
+import { useOutputStore } from "store/output";
 import { v4 as uuidv4 } from "uuid";
 import Output from "components/output";
 import { imageData, researchData, writerData } from "store/data";
+import VideoImagePicker from "components/videoimagepicker";
+import { HiOutlineVideoCamera } from "react-icons/hi2";
+import { IoCameraOutline } from "react-icons/io5";
+import FileImagePicker, {
+  type FileInputHandle,
+} from "components/fileimagepicker";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +50,9 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   const { user, error } = useUser();
+  const [showCapture, setShowCapture] = useState(false);
+  const filePickerRef = useRef<FileInputHandle>(null);
+
   useEffect(() => {
     if (error) {
       console.error("Error fetching user data:", error);
@@ -183,6 +192,20 @@ export default function Home() {
         </div>
         <Actions>
           <Tool
+            icon={<IoCameraOutline size={18} title={"Capture Image"} />}
+            onClick={() => {
+              filePickerRef.current?.activateFileInput();
+            }}
+            title={"Capture Image"}
+          />
+          <Tool
+            icon={<HiOutlineVideoCamera size={18} title={"Capture Image"} />}
+            onClick={() => {
+              setShowCapture((prev) => !prev);
+            }}
+            title={"Capture Image"}
+          />
+          <Tool
             icon={<VscClearAll size={18} title={"Reset"} />}
             onClick={() => {
               effort?.clearEfforts();
@@ -252,6 +275,19 @@ export default function Home() {
           </Setting>
         </Settings>
       </main>
+      <VideoImagePicker
+        show={showCapture}
+        setShow={setShowCapture}
+        setCurrentImage={(image) => {
+          console.log("Image selected", image);
+        }}
+      />
+      <FileImagePicker
+        ref={filePickerRef}
+        setCurrentImage={(image) => {
+          console.log("Image selected", image);
+        }}
+      />
     </QueryClientProvider>
   );
 }
