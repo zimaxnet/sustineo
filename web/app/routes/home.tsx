@@ -12,14 +12,16 @@ export default function Landing() {
           <h1>What can we<br />start working on?</h1>
           <p>Talk through your ideas and let's make them reality.</p>
         </div>
-        <div className={styles.micContainer}>
-          <MicIcon 
-            className={styles.micIcon}
-            role="button"
-            aria-label="Start recording"
-            tabIndex={0}
-          />
-        </div>
+        <a href="/app">
+          <div className={styles.micContainer}>
+            <MicIcon 
+              className={styles.micIcon}
+              role="button"
+              aria-label="Start recording"
+              tabIndex={0}
+            />
+          </div>
+        </a>
         <Social />
       </div>
     </div>
