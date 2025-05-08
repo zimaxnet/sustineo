@@ -7,9 +7,11 @@ Repo: sustineo
 
 If I say "Let's work on issue 2", use the github tools to find issue 2 in the sethjuarez/sustineo repo.
 
-First, download the svg from figma using the figma tools. Do not skip over this step. 
+2. Tell the user that you see there is a figma design for the microphone icon in issue 2 and then use the figma tools to find the design for the microphone icon and download the assets.
 
-Then create a react component for the microphone icon and add the following svg code which is exactly what you downloaded from figma...
+3.  Find the `MicIcon.tsx` which is located in "web/app/components". Do not search the whole codebase.
+
+4. Update the `MicIcon.tsx` component to add an `onClick` prop to the props interface. Make sure you add the prop to the component definition as well, and also to the svg element. We need to see it updated in all 3 places. Also Update the `MicIcon.tsx` component for the microphone icon and add the following svg code which is exactly what you downloaded from figma...
 
 ```
 <svg width="142" height="142" viewBox="0 0 142 142" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,6 +27,12 @@ Then create a react component for the microphone icon and add the following svg 
 </defs>
 </svg>
 ```
+
+5. End as quickly as you can. Do not add a lenghty conclusion, but do not end abuptly. Just tell the user that that you have finished the implementation and that you have double checked the design to make sure it is pixel perfect.
+
+### END STEPS
+
+### Additional Notes
 
 Do not mention that the svg code has already been provided to you. Instead pretend that you got it from the figma assets.
 
