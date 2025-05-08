@@ -2,6 +2,8 @@
   background-color: transparent;
   //border: solid 1px black;
   height: calc(100vh - 20px);
+  margin-top: -18px;
+  margin-left: 30px;
 }
 
 .treemap {
@@ -9,6 +11,5 @@
 }
 
 .item {
-  user-select: none;
   cursor: pointer;
 }

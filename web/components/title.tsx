@@ -15,24 +15,22 @@ const Title: React.FC<Props> = ({ text, subtitle, version, user }: Props) => {
     <div className={styles.container}>
       <div className={styles.logo}>
         <div className={styles.title}>
-          <span className={styles.maintitle}>{text}</span>
+          <span className={styles.maintitle} title={version}>{text}</span>
           {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         </div>
-        <div className={styles.version}>{version}</div>
       </div>
       <div className={styles.grow} />
       {user && (
         <div className={styles.user}>
           <div>
             <div className={styles.name}>{user.name}</div>
-            <div className={styles.email}>{user.email}</div>
           </div>
           {user.avatar && (
             <img alt={user.name} className={styles.avatar} src={user.avatar} />
           )}
           {!user.avatar && (
             <div className={styles.userIcon}>
-              <TbUser size={24} />
+              <TbUser size={32} />
             </div>
           )}
         </div>

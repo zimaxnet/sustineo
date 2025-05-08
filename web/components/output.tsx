@@ -26,9 +26,9 @@ const Output: React.FC<Props> = ({ data }: Props) => {
       .treemap<OutputNode>()
       .tile(d3.treemapBinary)
       .size([dms.boundedWidth, dms.boundedHeight])
-      .paddingOuter(4)
-      .paddingTop(28)
-      .paddingInner(4)
+      .paddingOuter(16)
+      .paddingTop(48)
+      .paddingInner(16)
       .round(true)(
       d3
         .hierarchy<OutputNode>(data)
@@ -37,8 +37,7 @@ const Output: React.FC<Props> = ({ data }: Props) => {
     );
 
   const root = Array.from(d3.group(treemap(data), (d) => d.height).values())[1];
-  console.log(root);
-
+  
   const generateContent = (
     id: string,
     title: string,
@@ -71,9 +70,9 @@ const Output: React.FC<Props> = ({ data }: Props) => {
           </clipPath>
           <g clipPath={`url(#clip-${id})`}>
             <foreignObject
-              x={0}
+              x={10}
               y={0}
-              width={800}
+              width={width - 10}
               height={height}
               clipPath={`clip-${id}`}
             >
@@ -163,7 +162,7 @@ const Output: React.FC<Props> = ({ data }: Props) => {
                     clipPath={`url(#clip-${d.data.id})`}
                     style={{ fontSize: "1em", fill: "white" }}
                   >
-                    <tspan dx={10} y={18}>
+                    <tspan dx={18} y={30}>
                       {d.data.title}
                     </tspan>
                   </text>

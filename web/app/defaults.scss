@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap');
+
 $layout-breakpoint-small: 768px;
 $layout-breakpoint-medium: 1024px;
 
@@ -92,13 +94,9 @@ $color-fuchsia-800: #86198f;
 $color-fuchsia-900: #701a75;
 $color-fuchsia-950: #3b0764;
 
-$font-family-sans: ui-sans-serif,
-    system-ui,
-    sans-serif,
-    "Apple Color Emoji",
-    "Segoe UI Emoji",
-    "Segoe UI Symbol",
-    "Noto Color Emoji";
+$font-family-sans: "Sora",
+sans-serif;
+
 $font-family-serif: ui-serif,
     Georgia,
     Cambria,

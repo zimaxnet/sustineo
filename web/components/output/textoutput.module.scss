@@ -1,34 +1,39 @@
 
 @use "../../app/defaults.scss" as *;
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6, p, ol, ul, li {
+  color: $color-zinc-900;
+  font-family: $font-family-sans;
+  font-weight: 300;
+  line-height: 1.75;
+}
+
 h1, h2, h3, h4, h5, h6 {
   margin: 0 0 4px;
+  font-weight: 600;
 }
 
-h1 {
-  font-size: 1.25rem;
+strong {
+  font-weight: 600;
 }
 
-h2 {
-  font-size: 1rem;
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.25;
 }
 
-h3 {
-  font-size: 0.75rem;
-}
-
-h4 {
-  font-size: 0.5rem;
-}
-
-p {
-  margin: 0;
-  font-size: 0.8rem;
-  line-height: 1.5;
-}
 
 .container {
   color: $color-zinc-600;
   padding: 10px;
   overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: $color-zinc-300 $color-zinc-50;
+  mask-image: linear-gradient(180deg, transparent, black 2%);
+  height: 100%;
 }
