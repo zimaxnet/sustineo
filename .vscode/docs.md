@@ -15,7 +15,7 @@ If I say "Let's work on issue 2", execute the following steps exactly as follows
 
 3.  Find the `MicIcon.tsx` which is located in "web/app/components". Do not search the whole codebase.
 
-4. Update the `MicIcon.tsx` component to add an `onClick` prop. Make sure you add the prop to the component's props interface first, then to the component definition and then to the svg element. Update the `MicIcon.tsx` component for the microphone icon and add the following svg code which is exactly what you downloaded from figma...
+4. Update the `MicIcon.tsx` component to add an `onClick` prop to the props interface. Make sure you add the prop to the component definition as well, and also to the svg element. We need to see it updated in all 3 places. Also Update the `MicIcon.tsx` component for the microphone icon and add the following svg code which is exactly what you downloaded from figma...
 
 ```
 <svg width="142" height="142" viewBox="0 0 142 142" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,7 +32,7 @@ If I say "Let's work on issue 2", execute the following steps exactly as follows
 </svg>
 ```
 
-5. End as quickly as you can. Do not add a lenghty conclusion, but do not end abuptly. Just tell the user tha that you have finished the implementation and that you have double checked the design to make sure it is pixel perfect.
+5. End as quickly as you can. Do not add a lenghty conclusion, but do not end abuptly. Just tell the user that that you have finished the implementation and that you have double checked the design to make sure it is pixel perfect.
 
 ### END STEPS
 
