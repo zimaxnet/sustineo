@@ -4,7 +4,6 @@ import Setting from "components/setting";
 import {
   TbArticle,
   TbSettingsCog,
-  TbClearAll,
   TbViewfinder,
   TbImageInPicture,
 } from "react-icons/tb";
@@ -43,8 +42,8 @@ const queryClient = new QueryClient();
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "sustineō" },
-    { name: "description", content: "Your Digital Support Agent" },
+    { title: "BuildEvents by Contoso" },
+    { name: "description", content: "Making Things Happen since 1935" },
   ];
 }
 
@@ -179,7 +178,7 @@ export default function Home() {
   return (
     <QueryClientProvider client={queryClient}>
       <main className={styles.home}>
-        <Title text="sustineō" version={version} user={user} />
+        <Title text="BuildEvents" subtitle="by Contoso" version={version} user={user} />
         <div className={styles.scratch}>
           <div className={styles.effort}>
             <Effort />

@@ -2,144 +2,214 @@ import * as d3 from "d3";
 import styles from "./output.module.scss";
 import { useRef } from "react";
 import useDimensions from "store/usedimensions";
-import { type OutputNode, type Data, useOutputStore } from "store/output";
+import { type OutputNode, type Data, Dimensions } from "store/output";
 import TextOutput from "./output/textoutput";
 import { API_ENDPOINT } from "store/endpoint";
-import usePersistStore from "store/usepersiststore";
+import { v4 as uuidv4 } from "uuid";
+import OutputDisplay, { type OuptutDisplayHandle } from "./output/outputdisplay";
 
 type Props = {
   data: OutputNode;
 };
 
 const Output: React.FC<Props> = ({ data }: Props) => {
-  const output = usePersistStore(useOutputStore, (state) => state);
+  //const output = usePersistStore(useOutputStore, (state) => state);
   const chartRef = useRef<HTMLDivElement>(null);
+  const outputDisplayRef = useRef<OuptutDisplayHandle>(null);
   const dms = useDimensions(chartRef, {
     marginBottom: 100,
   });
 
-  const hierarchy = d3
-    .hierarchy(data)
-    .sum((d) => d.value)
-    .sort((a, b) => (b.value || 0) - (a.value || 0));
+  const color = d3.scaleSequential([8, 0], d3.interpolateMagma);
+  const treemap = (data: OutputNode) =>
+    d3
+      .treemap<OutputNode>()
+      .tile(d3.treemapBinary)
+      .size([dms.boundedWidth, dms.boundedHeight])
+      .paddingOuter(4)
+      .paddingTop(28)
+      .paddingInner(4)
+      .round(true)(
+      d3
+        .hierarchy<OutputNode>(data)
+        .sum((d) => d.value)
+        .sort((a, b) => (b.value || 0) - (a.value || 0))
+    );
 
-  const root = d3
-    .treemap<OutputNode>()
-    .tile(d3.treemapBinary)
-    .size([dms.boundedWidth, dms.boundedHeight])
-    .padding(8)
-    .round(true)(hierarchy);
+  const root = Array.from(d3.group(treemap(data), (d) => d.height).values())[1];
+  console.log(root);
 
-  const getContent = (
+  const generateContent = (
+    id: string,
+    title: string,
     data: Data,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    clipPath: string
+    d: Dimensions
   ) => {
-    switch (data.type) {
-      case "text":
-        return (
-          <foreignObject
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-            clipPath={clipPath}
-          >
-            <TextOutput text={data} />
-          </foreignObject>
-        );
-      case "image":
-        const url = data.image_url.startsWith("http") ? data.image_url : `${API_ENDPOINT}/${data.image_url}`;
-        const max_size = Math.max(width, height);
-        const new_x = (width - max_size) / 2;
-        const new_y = (height - max_size) / 2;
-        return (
-          <g clipPath={clipPath}>
-            <image x={new_x} y={new_y} width={max_size} height={max_size} href={url} />
+    const width = d.x1 - d.x0;
+    const height = d.y1 - d.y0;
+    const x = d.x0;
+    const y = d.y0;
+
+    if (data.type === "text") {
+      return (
+        <>
+          <rect
+            id={id + "_rect"}
+            width={d.x1 - d.x0}
+            height={d.y1 - d.y0}
+            fill={"white"}
+            rx={8}
+            ry={8}
+          />
+          <clipPath id={`clip-${id}`}>
+            <rect
+              width={Math.max(d.x1 - d.x0 - 5, 1)}
+              height={Math.max(d.y1 - d.y0 - 5, 1)}
+              rx={8}
+              ry={8}
+            />
+          </clipPath>
+          <g clipPath={`url(#clip-${id})`}>
+            <foreignObject
+              x={0}
+              y={0}
+              width={800}
+              height={height}
+              clipPath={`clip-${id}`}
+            >
+              <TextOutput text={data} />
+            </foreignObject>
           </g>
-        );
-      default:
-        return <div>Unknown type</div>;
+        </>
+      );
+    } else if (data.type === "image") {
+      const url = data.image_url.startsWith("http")
+        ? data.image_url
+        : `${API_ENDPOINT}/${data.image_url}`;
+
+      const max_size = Math.max(width, height);
+      const new_x = (width - max_size) / 2;
+      const new_y = (height - max_size) / 2;
+      return (
+        <>
+          <clipPath id={`clip-${id}`}>
+            <rect
+              width={Math.max(d.x1 - d.x0, 1)}
+              height={Math.max(d.y1 - d.y0, 1)}
+              rx={8}
+              ry={8}
+            />
+          </clipPath>
+          <g clipPath={`url(#clip-${id})`}>
+            <image
+              x={new_x}
+              y={new_y}
+              width={max_size}
+              height={max_size}
+              href={url}
+            />
+          </g>
+        </>
+      );
+    } else {
+      return (
+        <rect
+          id={id + "_rect"}
+          width={d.x1 - d.x0}
+          height={d.y1 - d.y0}
+          fill={"#FFFFFF"}
+          rx={8}
+          ry={8}
+          opacity={0.5}
+        />
+      );
     }
   };
 
   return (
-    <div className={styles.container} ref={chartRef}>
-      <svg width={dms.width} height={dms.height} className={styles.treemap}>
-        <g
-          transform={`translate(${[dms.marginLeft, dms.marginTop].join(",")})`}
-          height={dms.boundedHeight}
-          width={dms.boundedWidth}
-        >
-          {root.leaves().map((d, i) => (
-            <g
-              key={i}
-              transform={`translate(${d.x0},${d.y0})`}
-              onClick={() => {
-                console.log(d.data);
-              }}
-              onMouseOver={() => {
-                const rect = document.getElementById(i + "_rect");
-                //output?.changeValue(d.data.id, 10);
-                if (rect) {
-                  rect.setAttribute("opacity", "0.9");
-                  rect.setAttribute("fill", "#E5ACA3");
-                }
-              }}
-              onMouseOut={() => {
-                const rect = document.getElementById(i + "_rect");
-                //output?.changeValue(d.data.id, 1);
-                if (rect) {
-                  rect.setAttribute("opacity", "0.5");
-                  rect.setAttribute("fill", "#B7AEF0");
-                }
-              }}
-              className={styles.item}
-            >
-              <rect
-                id={i + "_rect"}
-                width={d.x1 - d.x0}
-                height={d.y1 - d.y0}
-                fill={"#B7AEF0"}
-                rx={8}
-                ry={8}
-                opacity={0.5}
-              />
-              <clipPath id={`clip-${i}`}>
-                <rect
-                  width={Math.max(d.x1 - d.x0, 1)}
-                  height={Math.max(d.y1 - d.y0, 1)}
-                  rx={8}
-                  ry={8}
-                />
-              </clipPath>
-              <text
-                x={3}
-                y={17}
-                style={{ fontSize: "1em", fill: "white" }}
-                clipPath={`url(#clip-${i})`}
-              >
-                <tspan x={5} dy="0.25em">
-                  {d.data.title}
-                </tspan>
-              </text>
-              {d.data.data &&
-                getContent(
-                  d.data.data,
-                  0,
-                  0,
-                  Math.max(d.x1 - d.x0, 1),
-                  Math.max(d.y1 - d.y0, 1),
-                  `url(#clip-${i})`
-                )}
-            </g>
-          ))}
-        </g>
-      </svg>
-    </div>
+    <>
+      <div className={styles.container} ref={chartRef}>
+        <svg width={dms.width} height={dms.height} className={styles.treemap}>
+          <g
+            transform={`translate(${[dms.marginLeft, dms.marginTop].join(
+              ","
+            )})`}
+            height={dms.boundedHeight}
+            width={dms.boundedWidth}
+          >
+            {root.map((d, i) => (
+              <g key={i}>
+                <g key={d.data.id} transform={`translate(${d.x0},${d.y0})`}>
+                  <title>{d.data.title}</title>
+                  <rect
+                    id={`rect-${d.data.id}`}
+                    width={d.x1 - d.x0}
+                    height={d.y1 - d.y0}
+                    fill={"#B7AEF0"}
+                    rx={8}
+                    ry={8}
+                    opacity={0.75}
+                  />
+                  <clipPath id={`clip-${d.data.id}`}>
+                    <rect
+                      width={Math.max(d.x1 - d.x0 - 4, 1)}
+                      height={Math.max(d.y1 - d.y0 - 4, 1)}
+                      rx={8}
+                      ry={8}
+                      opacity={0.5}
+                    />
+                  </clipPath>
+                  <text
+                    clipPath={`url(#clip-${d.data.id})`}
+                    style={{ fontSize: "1em", fill: "white" }}
+                  >
+                    <tspan dx={10} y={18}>
+                      {d.data.title}
+                    </tspan>
+                  </text>
+                </g>
+                {d.children &&
+                  d.children.map((child, j) => (
+                    <g
+                      key={child.data.id}
+                      transform={`translate(${child.x0},${child.y0})`}
+                      onClick={() => {
+                        if (child.data.data) {
+                          outputDisplayRef.current?.activateOutputDisplay(
+                            child.data.data
+                          );
+                        }
+                        console.log(d.data);
+                      }}
+                      className={styles.item}
+                    >
+                      {child.data.data ? (
+                        generateContent(
+                          child.data.id,
+                          child.data.title,
+                          child.data.data,
+                          new Dimensions(child.x0, child.y0, child.x1, child.y1)
+                        )
+                      ) : (
+                        <rect
+                          id={child.id + "_rect"}
+                          width={child.x1 - child.x0}
+                          height={child.y1 - d.y0}
+                          fill={"#6d3131"}
+                          rx={8}
+                          ry={8}
+                          opacity={0.5}
+                        />
+                      )}
+                    </g>
+                  ))}
+              </g>
+            ))}
+          </g>
+        </svg>
+      </div>
+      <OutputDisplay ref={outputDisplayRef} />
+    </>
   );
 };
 

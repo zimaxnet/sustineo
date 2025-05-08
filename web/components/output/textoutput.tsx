@@ -4,8 +4,6 @@ import { useRemark } from "react-remark";
 import remarkGemoji from "remark-gemoji";
 import { useEffect } from "react";
 
-
-
 const TextOutput = ({ text }: { text: TextData }) => {
   const [reactContent, setMarkdownSource] = useRemark({
     //@ts-expect-error - allowDangerousHtml is not in the types

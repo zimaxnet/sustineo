@@ -38,6 +38,7 @@ const FileImagePicker = React.forwardRef<FileInputHandle, FileInputProps>(
 
     return (
       <input
+        title={"File Image Input"}
         type="file"
         className="hidden"
         accept="image/*"

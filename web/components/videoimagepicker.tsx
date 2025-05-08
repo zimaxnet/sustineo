@@ -50,6 +50,7 @@ const VideoImagePicker = ({ show, setShow, setCurrentImage }: Props) => {
   const stopVideo = () => {
     if (videoRef.current) {
       const stream = videoRef.current.srcObject as MediaStream;
+      if (!stream) return;
       const tracks = stream.getTracks();
       tracks.forEach((track) => track.stop());
       videoRef.current.srcObject = null;

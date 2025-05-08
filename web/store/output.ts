@@ -2,6 +2,25 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { immer } from 'zustand/middleware/immer'
 
+export class Dimensions {
+  // this dimensions class is used to calculate the dimensions of the output
+  // given x0, y0, x1, y1
+  constructor(
+    public x0: number,
+    public y0: number,
+    public x1: number,
+    public y1: number,
+  ) {}
+
+  get width() {
+    return this.x1 - this.x0;
+  }
+
+  get height() {
+    return this.y1 - this.y0;
+  }
+}
+
 export interface TextData {
   // this would be the callId
   id: string;

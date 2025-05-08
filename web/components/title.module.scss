@@ -27,10 +27,23 @@
 }
 
 .title {
-  font-size: 2rem;
-  font-weight: bold;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
   color: $color-zinc-100;
-  margin: 0;
+  gap: 5px;
+}
+
+.maintitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: $color-zinc-100;
+  padding-bottom: 0.25rem;
 }
 
 .version {
