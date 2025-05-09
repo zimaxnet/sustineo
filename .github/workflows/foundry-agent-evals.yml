@@ -27,4 +27,4 @@ jobs:
         azure-aiproject-connection-string: ${{ secrets.AZURE_AI_PROJECT_CONNECTION_STRING }}
         agent-ids: ${{ secrets.AZURE_AI_AGENT_IDS }}
         evaluation-result-view: "all-scores"
-        data-path: "data/agent-evals"
+        data-path: "data/agent-evals.json"
