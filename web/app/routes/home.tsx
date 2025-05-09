@@ -31,7 +31,13 @@ import Tool from "components/tool";
 import { useOutputStore } from "store/output";
 import { v4 as uuidv4 } from "uuid";
 import Output from "components/output";
-import { imageData, researchData, scenarioEffort, scenarioOutput, writerData } from "store/data";
+import {
+  imageData,
+  researchData,
+  scenarioEffort,
+  scenarioOutput,
+  writerData,
+} from "store/data";
 import VideoImagePicker from "components/videoimagepicker";
 import { HiOutlineVideoCamera } from "react-icons/hi2";
 import { IoCameraOutline } from "react-icons/io5";
@@ -50,6 +56,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const flags =
@@ -186,9 +193,53 @@ export default function Home() {
     toggleRealtime();
   };
 
+  useEffect(() => {
+    if (callState === "call" && analyzer && canvasRef.current) {
+      console.log("Starting audio visualization");
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+      const bufferLength = analyzer.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      const width = canvas.width;
+      const height = canvas.height;
+      console.log("canvas", width, height);
+      if (context) {
+        const draw = () => {
+          if (callState === "call" && analyzer) {
+            requestAnimationFrame(draw);
+          }
+          if (!analyzer) return;
+
+          context.clearRect(0, 0, width, height);
+          context.fillStyle = "rgb(255, 255, 255, 0)";
+          context.fillRect(0, 0, width, height);
+
+          analyzer.getByteFrequencyData(dataArray);
+          //console.log("Data Array", dataArray);
+          context.strokeStyle = "rgb(255, 255, 255, 0.1)";
+          for (let i = 0; i < bufferLength; i++) {
+            const barHeight = dataArray[i];
+            context.beginPath();
+
+            context.arc(width / 2, height / 2, barHeight, 0, Math.PI * 2);
+            context.stroke();
+
+            //context.fillRect(i * 2, height - barHeight, 1, barHeight);
+          }
+        };
+        draw();
+      }
+    }
+  }, [analyzer, callState]);
 
   return (
     <QueryClientProvider client={queryClient}>
+      <canvas
+        ref={canvasRef}
+        className={styles.canvas}
+        width={300}
+        height={300}
+      />
       <main className={styles.home}>
         <Title
           text="BuildEvents"
@@ -290,7 +341,10 @@ export default function Home() {
           ) : (
             <></>
           )}
-          <VoiceTool onClick={() => handleVoice()} className={callState === "idle" ? styles.idle : styles.call} />
+          <VoiceTool
+            onClick={() => handleVoice()}
+            className={callState === "idle" ? styles.idle : styles.call}
+          />
         </Actions>
         {flags.includes("tools") ? (
           <Settings>

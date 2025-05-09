@@ -36,19 +36,18 @@ export class Player {
 
   async init(sampleRate: number) {
     const audioContext = new AudioContext({ sampleRate });
+    await audioContext.audioWorklet.addModule("playback-worklet.js");
+    this.playbackNode = new AudioWorkletNode(audioContext, "playback-worklet");
+    this.playbackNode.connect(audioContext.destination);
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 256;
-    analyser.smoothingTimeConstant = 0.3;
     analyser.minDecibels = -90;
     analyser.maxDecibels = -10;
     analyser.smoothingTimeConstant = 0.85;
+    console.log("Analyser", analyser);
+    this.playbackNode.connect(analyser);
+    //analyser.connect(this.playbackNode);
     this.setAnalyzer(analyser);
-
-    await audioContext.audioWorklet.addModule("playback-worklet.js");
-
-    this.playbackNode = new AudioWorkletNode(audioContext, "playback-worklet");
-    this.playbackNode.connect(audioContext.destination);
-    
   }
 
   play(buffer: Int16Array) {
