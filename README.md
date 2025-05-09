@@ -1,47 +1,18 @@
-# sustineo
-Ego sustineo, ego sum tuus personalis AI adiutor.
-I support, I am your personal AI assistant.
+This is the website for Evently.
 
-## Feature Flags
-The app has two feature flags when running the app in production mode:
-- `?flags=debug` - enables debug mode - adds pre-population tools for resetting the app
-- `?flags=tools` - enables prompt + agent selection tools for the voice agent
-- `?flags=tools,debug` - enables both debug and tools mode
+## About BuildEvents by Contoso
+BuildEvents by Contoso is a website that allows people to capture ideas about events they go to and things that they enjoy, then add some agentic features to that website, support voice input and support them as they build their own event.
 
-```curl
-http://example.com/?flags=debug,tools
-```
+## Roles and Responsibilities
+These are the experts on the evently team where issues should be assigned to for triaging
+ - Showing how GitHub Copilot’s agentic feature can help speed up development: @jldeen
+ - Migrating legacy Java code @jldeen
+ - Show how to take advantage of the latest models @sethjuarez
+ - Build with LLMs locally to add my own Agentic Features to my BuildEvents app @martinwoodward
 
-## Restarting the container
+## Setting up your Dev Environment
+TODO
 
-List revision:
-
-```bash
-az containerapp revision list --name sustineo-api --resource-group contoso-concierge --query [].name | tr -d '"'
-```
-Output example
-```bash
-[
-  sustineo-api--0000008
-]
-```
-
-This will give you the revision name you need to restart.
-
-Restart Revision:
-```bash
-az containerapp revision restart --name sustineo-api --resource-group contoso-concierge --revision sustineo-api--0000008
-```
-
-Output example
-```bash
-"Restart succeeded"
-```
-
-
-## TODO List
-- gpt-image-1 editor (S)
-- sora integration (S)
-- save output to file function (S)
-- agent definitions (code + file) (A)
-- scenario generation (A)
+### Additional Information
+- magic function calling mapping for generic local function calls (A)
+- figure out backchannel with utility function calls (A+S)*
