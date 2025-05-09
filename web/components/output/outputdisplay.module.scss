@@ -10,12 +10,12 @@
   background-color: color.change($color-zinc-600, $alpha: 0.5);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  z-index: 25;
+  z-index: 50;
 }
 
 .modal {
   display: grid;
-  z-index: 50;
+  z-index: 100;
   place-items: center;
   height: 100vh;
   width: 100vw;
@@ -39,6 +39,7 @@
   justify-content: space-between;
   align-items: center;
   justify-items: flex-end;
+  height: 2rem;
 }
 
 .grow {
@@ -62,6 +63,6 @@
 
 .content {
   overflow-y:auto;
-  scrollbar-width: thin;
-  scrollbar-color: $color-zinc-200 transparent;
+  scrollbar-width: none;
+  height: calc(100% - 2rem);
 }

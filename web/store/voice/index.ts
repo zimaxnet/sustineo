@@ -28,14 +28,22 @@ export const defaultConfiguration: VoiceConfiguration = {
 
 export class Player {
   private playbackNode: AudioWorkletNode | null = null;
-  setTalking: (talking: boolean) => void;
+  setAnalyzer: (analyzer: AnalyserNode) => void;
 
-  constructor(setTalking: (talking: boolean) => void) {
-    this.setTalking = setTalking;
+  constructor(setAnalyzer: (analyzer: AnalyserNode) => void) {
+    this.setAnalyzer = setAnalyzer;
   }
 
   async init(sampleRate: number) {
     const audioContext = new AudioContext({ sampleRate });
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.3;
+    analyser.minDecibels = -90;
+    analyser.maxDecibels = -10;
+    analyser.smoothingTimeConstant = 0.85;
+    this.setAnalyzer(analyser);
+
     await audioContext.audioWorklet.addModule("playback-worklet.js");
 
     this.playbackNode = new AudioWorkletNode(audioContext, "playback-worklet");
@@ -45,15 +53,12 @@ export class Player {
 
   play(buffer: Int16Array) {
     if (this.playbackNode) {
-      this.setTalking(true);
       this.playbackNode.port.postMessage(buffer);
-      this.setTalking(false);
     }
   }
 
   clear() {
     if (this.playbackNode) {
-      this.setTalking(false);
       this.playbackNode.port.postMessage(null);
     }
   }
@@ -73,6 +78,7 @@ export class Recorder {
   async start(stream: MediaStream) {
     try {
       this.audioContext = new AudioContext({ sampleRate: 24000 });
+
       await this.audioContext.audioWorklet.addModule(
         "./audio-worklet-processor.js"
       );

@@ -1,6 +1,7 @@
 from dataclasses import asdict
 from typing import Any
 from fastapi import APIRouter
+from fastapi.websockets import WebSocketState
 from pydantic import BaseModel
 
 from api.agent.decorators import function_agents, function_calls
@@ -113,7 +114,10 @@ def send_agent_status(connection_id: str, name: str, call_id: str) -> AgentUpdat
         output: bool = False,
     ):
         # send agent status to connection
-        if connection_id in connections:
+        if (
+            connection_id in connections
+            and connections[connection_id].state == WebSocketState.CONNECTED
+        ):
             await connections[connection_id].send_update(
                 AgentUpdate(
                     id=id,
@@ -126,7 +130,15 @@ def send_agent_status(connection_id: str, name: str, call_id: str) -> AgentUpdat
                     output=output,
                 )
             )
+        else:
+            # connection is closed, remove agent from connections
+            if connection_id in connections:
+                connections.remove(connection_id)
+                print(f"Connection {connection_id} is closed, removing connection")
+            # print notifications to console
+            print(f"Agent {name} ({id}) - {status}")
 
+    # return status function
     return status_fn
 
 

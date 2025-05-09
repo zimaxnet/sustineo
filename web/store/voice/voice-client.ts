@@ -87,16 +87,16 @@ export class VoiceClient {
   player: Player | null;
   recorder: Recorder | null;
   handleServerMessage: (update: Update) => Promise<void>;
-  setTalking: (talking: boolean) => void;
+  setAnalyzer: (analyzer: AnalyserNode) => void;
 
   constructor(
     url: string | URL,
     handleServerMessage: (update: Update) => Promise<void>,
-    setTalking: (talking: boolean) => void
+    setAnalyzer: (analyzer: AnalyserNode) => void
   ) {
     this.url = url;
     this.handleServerMessage = handleServerMessage;
-    this.setTalking = setTalking;
+    this.setAnalyzer = setAnalyzer;
     this.socket = null;
     this.player = null;
     this.recorder = null;
@@ -106,7 +106,7 @@ export class VoiceClient {
     console.log("Starting voice client", this.url);
     this.socket = new WebSocketClient<Update, Update>(this.url);
 
-    this.player = new Player(this.setTalking);
+    this.player = new Player(this.setAnalyzer);
 
     await this.player.init(24000);
 
@@ -119,7 +119,7 @@ export class VoiceClient {
       sampleRate: 24000,
       echoCancellation: true,
       noiseSuppression: true,
-      autoGainControl: true,
+      autoGainControl: false,
     };
 
     if (deviceId) {

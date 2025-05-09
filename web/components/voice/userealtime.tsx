@@ -16,7 +16,7 @@ export const useRealtime = (
   );
 
   const [callState, setCallState] = useState<"idle" | "call">("idle");
-  const [talking, setTalking] = useState(false);
+  const [analyzer, setAnalyzer] = useState<AnalyserNode | null>(null);
   const voiceRef = useRef<VoiceClient | null>(null);
 
   const startRealtime = async () => {
@@ -33,7 +33,7 @@ export const useRealtime = (
       voiceRef.current = new VoiceClient(
         `${endpoint}/api/voice/${user.key}`,
         handleMessage,
-        setTalking
+        setAnalyzer
       );
 
       await voiceRef.current.start(settings.inputDeviceId);
@@ -89,7 +89,7 @@ export const useRealtime = (
     stopRealtime,
     toggleRealtime,
     sendRealtime,
-    talking,
+    analyzer,
     callState,
   };
 };

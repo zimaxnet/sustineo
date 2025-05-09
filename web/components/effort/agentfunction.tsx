@@ -11,18 +11,6 @@ const AgentFunction = ({ func }: Props) => {
         <span>executing</span>&nbsp;
         <span className={styles.functionName}>{func.name}</span>
       </div>
-      <div className={styles.functionArgs}>
-        {/* enumerate args dictionary */}
-        {Object.entries(func.arguments).map(([key, value], index) => {
-          return (
-            <div key={index} className={styles.functionArg} title={key}>
-              {typeof value === "object"
-                ? JSON.stringify(value)
-                : value?.toString()}
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 };

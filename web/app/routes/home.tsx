@@ -12,7 +12,7 @@ import VoiceSettings from "components/voice/voicesettings";
 import Actions from "components/actions";
 import { version } from "store/version";
 import Title from "components/title";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import type { Update } from "store/voice/voice-client";
 import { useUser } from "store/useuser";
 import { useRealtime } from "components/voice/userealtime";
@@ -37,6 +37,7 @@ import { IoCameraOutline } from "react-icons/io5";
 import FileImagePicker, {
   type FileInputHandle,
 } from "components/fileimagepicker";
+import { useLocation } from "react-router";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,15 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const flags =
+    queryParams
+      .get("flags")
+      ?.split(",")
+      .map((i) => i.toLocaleLowerCase().trim()) || [];
+  //console.log("Flags", flags);
+
   const { user, error } = useUser();
   const [showCapture, setShowCapture] = useState(false);
   const filePickerRef = useRef<FileInputHandle>(null);
@@ -128,7 +138,7 @@ export default function Home() {
           type: "function_completion",
           call_id: serverEvent.call_id,
           output:
-            "Working on it - will continue to update as I go. Feel free to work on other tasks in the meantime. Make sure to let the user know you are working on it and can do other tasks.",
+            "This is a message from the function call that it is in progress. Acknowledge it internally but you don't have to say anything.",
         });
 
         effort?.addEffort(serverEvent);
@@ -162,7 +172,7 @@ export default function Home() {
     }
   };
 
-  const { toggleRealtime, talking, sendRealtime, callState } = useRealtime(
+  const { toggleRealtime, analyzer, sendRealtime, callState } = useRealtime(
     user,
     handleServerMessage
   );
@@ -175,10 +185,17 @@ export default function Home() {
     toggleRealtime();
   };
 
+
   return (
     <QueryClientProvider client={queryClient}>
       <main className={styles.home}>
-        <Title text="BuildEvents" subtitle="by Contoso" version={version} user={user} />
+
+        <Title
+          text="BuildEvents"
+          subtitle="by Contoso"
+          version={version}
+          user={user}
+        />
         <div className={styles.scratch}>
           <div className={styles.effort}>
             <Effort />
@@ -190,89 +207,101 @@ export default function Home() {
           </div>
         </div>
         <Actions>
-          <Tool
-            icon={<IoCameraOutline size={18} title={"Capture Image"} />}
-            onClick={() => {
-              filePickerRef.current?.activateFileInput();
-            }}
-            title={"Capture Image"}
-          />
-          <Tool
-            icon={<HiOutlineVideoCamera size={18} title={"Capture Image"} />}
-            onClick={() => {
-              setShowCapture((prev) => !prev);
-            }}
-            title={"Capture Image"}
-          />
-          <Tool
-            icon={<VscClearAll size={18} title={"Reset"} />}
-            onClick={() => {
-              effort?.clearEfforts();
-              output?.reset();
-            }}
-            title={"Reset"}
-          />
-          <Tool
-            icon={<TbImageInPicture size={18} title={"Add Image"} />}
-            onClick={() => {
-              output?.addOutput("gpt-image-1_agent", "GPT Image Agent", {
-                id: uuidv4(),
-                title: "GPT Image Agent",
-                value: 1,
-                data: imageData,
-                children: [],
-              });
-            }}
-            title={"Add Image"}
-          />
-          <Tool
-            icon={<TbArticle size={18} title={"Add Article"} />}
-            onClick={() => {
-              output?.addOutput(
-                "content_writer_agent",
-                "Content Writer Agent",
-                {
-                  id: uuidv4(),
-                  title: "Content Writer Agent",
-                  value: 1,
-                  data: writerData,
-                  children: [],
+          {flags.includes("debug") ? (
+            <>
+              <Tool
+                icon={<IoCameraOutline size={18} title={"Capture Image"} />}
+                onClick={() => {
+                  filePickerRef.current?.activateFileInput();
+                }}
+                title={"Capture Image"}
+              />
+              <Tool
+                icon={
+                  <HiOutlineVideoCamera size={18} title={"Capture Image"} />
                 }
-              );
-            }}
-            title={"Add Article"}
-          />
-          <Tool
-            icon={<TbViewfinder size={18} title={"Add Research"} />}
-            onClick={() => {
-              output?.addOutput("research_agent", "Research Agent", {
-                id: uuidv4(),
-                title: "Research Agent",
-                value: 1,
-                data: researchData,
-                children: [],
-              });
-            }}
-            title={"Add Research"}
-          />
+                onClick={() => {
+                  setShowCapture((prev) => !prev);
+                }}
+                title={"Capture Image"}
+              />
+              <Tool
+                icon={<VscClearAll size={18} title={"Reset"} />}
+                onClick={() => {
+                  effort?.clearEfforts();
+                  output?.reset();
+                }}
+                title={"Reset"}
+              />
+              <Tool
+                icon={<TbImageInPicture size={18} title={"Add Image"} />}
+                onClick={() => {
+                  output?.addOutput("gpt-image-1_agent", "GPT Image Agent", {
+                    id: uuidv4(),
+                    title: "GPT Image Agent",
+                    value: 1,
+                    data: imageData,
+                    children: [],
+                  });
+                }}
+                title={"Add Image"}
+              />
+              <Tool
+                icon={<TbArticle size={18} title={"Add Article"} />}
+                onClick={() => {
+                  output?.addOutput(
+                    "content_writer_agent",
+                    "Content Writer Agent",
+                    {
+                      id: uuidv4(),
+                      title: "Content Writer Agent",
+                      value: 1,
+                      data: writerData,
+                      children: [],
+                    }
+                  );
+                }}
+                title={"Add Article"}
+              />
+              <Tool
+                icon={<TbViewfinder size={18} title={"Add Research"} />}
+                onClick={() => {
+                  output?.addOutput("research_agent", "Research Agent", {
+                    id: uuidv4(),
+                    title: "Research Agent",
+                    value: 1,
+                    data: researchData,
+                    children: [],
+                  });
+                }}
+                title={"Add Research"}
+              />
+            </>
+          ) : (
+            <></>
+          )}
           <VoiceTool onClick={() => handleVoice()} />
         </Actions>
-        <Settings>
-          <Setting
-            id={"voice-settings"}
-            icon={<TbSettingsCog size={18} />}
-            className={styles.voice}
-          >
-            <VoiceSettings />
-          </Setting>
-          <Setting
-            id={"voice-agent-settings"}
-            icon={<TbArticle size={18} />}
-            className={styles.editor}
-          >
-            <AgentEditor />
-          </Setting>
-        </Settings>
+        {flags.includes("tools") ? (
+          <Settings>
+            <Setting
+              id={"voice-settings"}
+              icon={<TbSettingsCog size={18} />}
+              className={styles.voice}
+            >
+              <VoiceSettings />
+            </Setting>
+            <Setting
+              id={"voice-agent-settings"}
+              icon={<TbArticle size={18} />}
+              className={styles.editor}
+            >
+              <AgentEditor />
+            </Setting>
+          </Settings>
+        ) : (
+          <></>
+        )}
       </main>
       <VideoImagePicker
         show={showCapture}

@@ -32,8 +32,8 @@ h1, h2, h3, h4, h5, h6 {
   padding: 10px;
   overflow-x: hidden;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: $color-zinc-300 $color-zinc-50;
+  scrollbar-width: none;
+  //scrollbar-color: $color-zinc-300 $color-zinc-50;
   mask-image: linear-gradient(180deg, transparent, black 2%);
-  height: 100%;
+  height: calc(100% - 26px);
 }

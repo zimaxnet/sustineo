@@ -5,7 +5,6 @@ import useDimensions from "store/usedimensions";
 import { type OutputNode, type Data, Dimensions } from "store/output";
 import TextOutput from "./output/textoutput";
 import { API_ENDPOINT } from "store/endpoint";
-import { v4 as uuidv4 } from "uuid";
 import OutputDisplay, { type OuptutDisplayHandle } from "./output/outputdisplay";
 
 type Props = {
@@ -72,7 +71,7 @@ const Output: React.FC<Props> = ({ data }: Props) => {
             <foreignObject
               x={10}
               y={0}
-              width={width - 10}
+              width={Math.max(width - 12, 1)}
               height={height}
               clipPath={`clip-${id}`}
             >
