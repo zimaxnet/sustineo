@@ -1,4 +1,4 @@
-name: Azure AI Foundry Agent Evluations
+name: Azure AI Foundry Agent Evaluations
 
 on:
   workflow_dispatch:
@@ -12,6 +12,8 @@ jobs:
     name: Run Azure AI Foundry Agent Evaluations
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
     - name: Log in to Azure
       uses: azure/login@v2
       with:
@@ -26,5 +28,5 @@ jobs:
         deployment-name: "gpt-40-mini"
         azure-aiproject-connection-string: ${{ secrets.AZURE_AI_PROJECT_CONNECTION_STRING }}
         agent-ids: ${{ secrets.AZURE_AI_AGENT_IDS }}
-        evaluation-result-view: "all"
-        data-path: "data/agent-evals"
+        evaluation-result-view: "all-scores"
+        data-path: "data/agent-evals.json"
