@@ -35,6 +35,9 @@ export interface TextData {
       url: string;
       title: string;
     };
+    file_citation?: {
+      file_id: string;
+    };
   }[];
 }
 
@@ -62,6 +65,7 @@ export interface OutputNode {
 
 export interface OutputStore {
   output: OutputNode;
+  addRoot: (newRoot: OutputNode) => void;
   addOutput: (parentId: string, parentTitle: string, newOutput: OutputNode) => void;
   addLeaf: (parentId: string, newLeaf: OutputNode) => void;
   removeLeaf: (id: string) => void;
@@ -80,6 +84,10 @@ export const useOutputStore = create<OutputStore>()(
           value: 1,
           children: [],
         },
+        addRoot: (newRoot) =>
+          set((state) => {
+            state.output = newRoot;
+          }),
         addOutput: (parentId, parentTitle, newOutput) =>
           set((state) => {
             const parentOutput = state.output.children.find((child) => child.id === parentId);

@@ -6,6 +6,7 @@ import {
   TbSettingsCog,
   TbViewfinder,
   TbImageInPicture,
+  TbAirBalloon,
 } from "react-icons/tb";
 import { VscClearAll } from "react-icons/vsc";
 import VoiceSettings from "components/voice/voicesettings";
@@ -30,7 +31,7 @@ import Tool from "components/tool";
 import { useOutputStore } from "store/output";
 import { v4 as uuidv4 } from "uuid";
 import Output from "components/output";
-import { imageData, researchData, writerData } from "store/data";
+import { imageData, researchData, scenarioEffort, scenarioOutput, writerData } from "store/data";
 import VideoImagePicker from "components/videoimagepicker";
 import { HiOutlineVideoCamera } from "react-icons/hi2";
 import { IoCameraOutline } from "react-icons/io5";
@@ -189,7 +190,6 @@ export default function Home() {
   return (
     <QueryClientProvider client={queryClient}>
       <main className={styles.home}>
-
         <Title
           text="BuildEvents"
           subtitle="by Contoso"
@@ -275,6 +275,16 @@ export default function Home() {
                   });
                 }}
                 title={"Add Research"}
+              />
+              <Tool
+                icon={<TbAirBalloon size={18} title={"Reset Event Scenario"} />}
+                onClick={() => {
+                  output?.reset();
+                  output?.addRoot(scenarioOutput);
+                  effort?.clearEfforts();
+                  effort?.addEffortList(scenarioEffort);
+                }}
+                title={"Reset Event Scenario"}
               />
             </>
           ) : (

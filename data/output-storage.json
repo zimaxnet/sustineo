@@ -1,0 +1,60 @@
+{
+  "state": {
+    "output": {
+      "id": "root",
+      "title": "root",
+      "value": 1,
+      "children": [
+        {
+          "id": "event_venue_agent_",
+          "title": "Event Venue Agent ",
+          "value": 1,
+          "children": [
+            {
+              "id": "0eb0a05e-f2bc-45cc-96ff-90181e17b89d",
+              "title": "Event Venue Agent ",
+              "value": 1,
+              "data": {
+                "id": "32f562f8-a5f2-4e84-80c3-f63160e519ae",
+                "type": "text",
+                "value": "Based on the provided options, here are venues in San Francisco that accommodate 200 attendees and fit within your $30,000 budget for May 16th, 2025:\n\n1. **The Hibernia SF**\n   - **Location:** San Francisco\n   - **Capacity:** Up to 1,500 (standing) / 600+ (seated)\n   - **Cost:** $2,500 to $30,000\n   - **Features:** Historic building, flexible space suitable for hackathons.\n\n2. **Terra Gallery & Event Venue**\n   - **Location:** San Francisco\n   - **Capacity:** Up to 725\n   - **Cost:** $8,000 to $9,500\n   - **Features:** Contemporary setup with versatile indoor spaces.\n\n3. **The San Francisco Mint**\n   - **Location:** San Francisco\n   - **Capacity:** Up to 700\n   - **Cost:** From $2,895\n   - **Features:** Unique historic setting, adaptable layout.\n\n4. **The Fillmore**\n   - **Location:** San Francisco\n   - **Capacity:** Up to 1,000\n   - **Cost:** Approx. $15,000\n   - **Features:** Iconic music venue with wide open space.\n\n5. **The Great American Music Hall**\n   - **Location:** San Francisco\n   - **Capacity:** Up to 650\n   - **Cost:** $9,000 to $11,000\n   - **Features:** Atmospheric, historic ambiance.\n\n**Best Fit Recommendations:**\n- **The Hibernia SF**: Provides the most flexibility in budget allocation for both the venue and additional setup.\n- **Terra Gallery & Event Venue or The Fillmore**: Both offer unique yet spacious setups well-suited for a hackathon setting【4:0†source】.",
+                "annotations": [
+                  {
+                    "type": "file_citation",
+                    "text": "【4:0†source】",
+                    "start_index": 1386,
+                    "end_index": 1398,
+                    "file_citation": {
+                      "file_id": "assistant-75cVYfZdnmqLn3fMH2NxbU"
+                    }
+                  }
+                ]
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "rsvp_agent",
+          "title": "RSVP Agent",
+          "value": 1,
+          "children": [
+            {
+              "id": "21d71ec2-f665-4181-83d0-bce7062c1670",
+              "title": "RSVP Agent",
+              "value": 1,
+              "data": {
+                "id": "6750c7ad-dcb8-4fa0-8f99-84f99e92fa08",
+                "type": "text",
+                "value": "The calendar invite for the Hackathon at The Hibernia SF in San Francisco on May 16th, 2025, has been successfully created and sent to all attendees on the existing invite list. \n\nThe event details are as follows:\n- **Date:** May 16, 2025\n- **Time:** 9:00 AM - 6:00 PM\n- **Location:** The Hibernia SF, San Francisco\n\nInvitations were sent to:\n- Seth Juarez (seth.juarez@microsoft.com)\n- Marco Casalaina (mcasalaina@microsoft.com)\n- Mads Bolaris (mabolan@microsoft.com)\n- Elijah Straight (estraight@microsoft.com)\n- Linda Li (zhuoqunli@microsoft.com) .",
+                "annotations": []
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "version": 0
+}

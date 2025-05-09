@@ -26,6 +26,8 @@ Output example
 ]
 ```
 
+This will give you the revision name you need to restart.
+
 Restart Revision:
 ```bash
 az containerapp revision restart --name sustineo-api --resource-group contoso-concierge --revision sustineo-api--0000008
