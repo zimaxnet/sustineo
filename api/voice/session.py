@@ -97,13 +97,13 @@ class RealtimeSession:
             session: Session = Session(
                 input_audio_format="pcm16",
                 turn_detection=SessionTurnDetection(
-                    prefix_padding_ms=prefix_padding_ms,
-                    silence_duration_ms=silence_duration_ms,
-                    threshold=threshold,
-                    type="server_vad",
+                    type="semantic_vad",
+                    eagerness="low",
+                    create_response=True,
+                    interrupt_response=True,
                 ),
                 input_audio_transcription=SessionInputAudioTranscription(
-                    model="whisper-1",
+                    model="gpt-4o-transcribe",
                 ),
                 voice=voice,
                 instructions=instructions,
@@ -225,7 +225,7 @@ class RealtimeSession:
     ):
         if event.transcript is None or len(event.transcript.strip()) == 0:
             return
-        
+
         await self.connection.send_update(Update.message(
             id=event.item_id,
             role="user",
