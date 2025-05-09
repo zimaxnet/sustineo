@@ -13,7 +13,7 @@ import VoiceSettings from "components/voice/voicesettings";
 import Actions from "components/actions";
 import { version } from "store/version";
 import Title from "components/title";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Update } from "store/voice/voice-client";
 import { useUser } from "store/useuser";
 import { useRealtime } from "components/voice/userealtime";
@@ -290,7 +290,7 @@ export default function Home() {
           ) : (
             <></>
           )}
-          <VoiceTool onClick={() => handleVoice()} />
+          <VoiceTool onClick={() => handleVoice()} className={callState === "idle" ? styles.idle : styles.call} />
         </Actions>
         {flags.includes("tools") ? (
           <Settings>

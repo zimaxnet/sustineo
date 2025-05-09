@@ -9,7 +9,7 @@ interface Props {
 }
 
 const VoiceTool: React.FC<Props> = ({ onClick, className }) => {
-  const style = className ? clsx(styles.button, className) : styles.button;
+  const style = className || styles.button;
   return (
     <div className={style} onClick={onClick}>
       <HiMiniMicrophone size={48} />
