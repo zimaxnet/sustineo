@@ -3,6 +3,8 @@ import styles from "./outputdisplay.module.scss";
 import React, { useEffect, useImperativeHandle } from "react";
 import { VscChromeClose } from "react-icons/vsc";
 import TextOutput from "./textoutput";
+import { image } from "d3";
+import { API_ENDPOINT } from "store/endpoint";
 
 export interface OuptutDisplayHandle {
   activateOutputDisplay: (data: Data) => void;
@@ -55,13 +57,25 @@ const OutputDisplay = React.forwardRef<OuptutDisplayHandle, {}>((_, ref) => {
       case "text":
         return <TextOutput text={data} />;
       case "image":
-        return (
-          <img
-            src={data.image_url}
-            alt={data.description}
-            style={{ width: "auto", height: "960px" }}
-          />
-        );
+        const imageUrl = data.image_url;
+        if (data.image_url.startsWith("http")) {
+          return (
+            <img
+              src={data.image_url}
+              alt={data.description}
+              style={{ width: "auto", height: "960px" }}
+            />
+          );
+        } else {
+          return (
+            <img
+              src={`${API_ENDPOINT}/${data.image_url}`}
+              alt={data.description}
+              style={{ width: "auto", height: "960px" }}
+            />
+          );
+        }
+        
       default:
         return <></>;
     }

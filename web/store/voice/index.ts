@@ -44,9 +44,7 @@ export class Player {
     analyser.minDecibels = -90;
     analyser.maxDecibels = -10;
     analyser.smoothingTimeConstant = 0.85;
-    console.log("Analyser", analyser);
     this.playbackNode.connect(analyser);
-    //analyser.connect(this.playbackNode);
     this.setAnalyzer(analyser);
   }
 

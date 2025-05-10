@@ -26,6 +26,14 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.25;
 }
 
+ol li,
+ul li {
+  margin: 0 0 4px;
+  margin-left: -1rem;
+  text-indent: 0;
+  padding-left: 0;
+}
+
 
 .container {
   color: $color-zinc-600;

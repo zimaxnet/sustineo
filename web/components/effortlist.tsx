@@ -41,7 +41,7 @@ const EffortList = () => {
   }, [effort?.efforts.length]);
 
   return (
-    <div className={clsx(styles.container, styles.scrollbarHide)} ref={ref}>
+    <div className={clsx(styles.effortlist, styles.scrollbarHide)} ref={ref}>
       {effort?.efforts.map((item, index) => {
         return <div key={index}>{getContent(item)}</div>;
       })}

@@ -1,19 +1,22 @@
 @use "../defaults.scss" as *;
+@use 'sass:color';
 
 .home {
   width: 100wv;
   height: 100vh;
-  background-image: url('/images/background.svg');
+  background-image: url('/images/background.jpg');
+  background-color: color.change($color-zinc-800, $alpha: 0.75);
   background-position: top left;
   background-repeat: no-repeat;
   background-size: cover;
+  background-blend-mode: darken;
 }
 
 .scratch {
   position: fixed;
   top: 0;
   left: 0;
-  border: solid 1px $color-fuchsia-100;
+  //border: solid 1px $color-fuchsia-100;
   width: calc(100vw - 0.2rem);
   height: calc(100vh - 0.2rem);
   display: flex;
@@ -25,10 +28,11 @@
 .effort {
   //border: solid 1px $color-fuchsia-100;
   width: 20rem;
-  padding-top: 6rem;
+  margin-top: 6rem;
   display: flex;
   flex-direction: column;
   margin-left: 2.5rem;
+  //background-color: color.change($color-zinc-800, $alpha: 0.5);
 }
 
 .output {
@@ -50,57 +54,35 @@
 
 .voice {
   width: 640px;
-  right: 24px;
+  right: 12px;
 }
 
-.canvas {
-  //border: solid 1px $color-fuchsia-100;
-  background-color: transparent;
-  z-index: 5000;
+.tools {
   position: fixed;
-  top: 0;
-  left: 0;
-  left: 500px;
-  top: 100px;
-}
-
-.idle {
-  background-color: $color-zinc-50;
-  color: $color-zinc-800;
-  border: solid 8px $color-zinc-300;
-  border-radius: 50%;
-  width: 6rem;
-  height: 6rem;
+  bottom: 12px;
+  right: 12px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
+  gap: 0.5rem;
 }
 
-.idle:hover {
-  background-color: $color-zinc-300;
-  border-color: $color-zinc-600;
+.textInput {
+  display: block;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  border: 0px;
+  color: $color-zinc-50;
+  //border: solid 1px color.change($color-zinc-100, $alpha: 0.2);
+  outline: 2px solid color.change($color-zinc-100, $alpha: 0.2);
+  font-size: large;
+  background-color: transparent;
+  width: calc(100% - 32px);
+  margin: 0px auto;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  //transition: outline-color 0.2s ease-in-out;
+
+  &::placeholder {
+    color: color.change($color-zinc-100, $alpha: 0.2);
+  }
 }
 
-.call {
-  background-color: $color-zinc-300;
-  border: solid 8px $color-fuchsia-600;
-  
-  color: $color-zinc-800;
-  border-radius: 50%;
-  width: 6rem;
-  height: 6rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-}
-
-.call:hover {
-  background-color: $color-zinc-50;
-  border-color: $color-zinc-300;
-}

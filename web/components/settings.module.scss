@@ -1,13 +1,8 @@
 
-.container {
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  z-index: 1000;
-  width: calc(100vw - 2rem);
+.settings {
+  //width: calc(100vw - 2rem);
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   flex-wrap: nowrap;
   gap: 0.5rem;
-  padding-left: 1rem;
 }

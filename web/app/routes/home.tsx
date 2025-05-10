@@ -26,7 +26,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { API_ENDPOINT } from "store/endpoint";
 
 import VoiceTool from "components/voicetool";
-import Effort from "components/effortlist";
+import EffortList from "components/effortlist";
 import Tool from "components/tool";
 import { useOutputStore } from "store/output";
 import { v4 as uuidv4 } from "uuid";
@@ -56,7 +56,6 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const flags =
@@ -141,13 +140,15 @@ export default function Home() {
         break;
       case "function":
         // no need to await for this, just send it to the server
-        sendRealtime({
+        
+        await sendRealtime({
           id: serverEvent.id,
           type: "function_completion",
           call_id: serverEvent.call_id,
           output:
-            "This is a message from the function call that it is in progress. Acknowledge it internally but you don't have to say anything.",
+            "This is a message from the function call that it is in progress. You can ignore it and continue the conversation until the function call is completed.",
         });
+        
 
         effort?.addEffort(serverEvent);
 
@@ -186,60 +187,12 @@ export default function Home() {
   );
 
   const handleVoice = async () => {
-    if (callState === "idle") {
-      effort?.clearEfforts();
-      output?.reset();
-    }
+    
     toggleRealtime();
   };
 
-  useEffect(() => {
-    if (callState === "call" && analyzer && canvasRef.current) {
-      console.log("Starting audio visualization");
-      const canvas = canvasRef.current;
-      const context = canvas.getContext("2d");
-      const bufferLength = analyzer.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      const width = canvas.width;
-      const height = canvas.height;
-      console.log("canvas", width, height);
-      if (context) {
-        const draw = () => {
-          if (callState === "call" && analyzer) {
-            requestAnimationFrame(draw);
-          }
-          if (!analyzer) return;
-
-          context.clearRect(0, 0, width, height);
-          context.fillStyle = "rgb(255, 255, 255, 0)";
-          context.fillRect(0, 0, width, height);
-
-          analyzer.getByteFrequencyData(dataArray);
-          //console.log("Data Array", dataArray);
-          context.strokeStyle = "rgb(255, 255, 255, 0.1)";
-          for (let i = 0; i < bufferLength; i++) {
-            const barHeight = dataArray[i];
-            context.beginPath();
-
-            context.arc(width / 2, height / 2, barHeight, 0, Math.PI * 2);
-            context.stroke();
-
-            //context.fillRect(i * 2, height - barHeight, 1, barHeight);
-          }
-        };
-        draw();
-      }
-    }
-  }, [analyzer, callState]);
-
   return (
     <QueryClientProvider client={queryClient}>
-      <canvas
-        ref={canvasRef}
-        className={styles.canvas}
-        width={300}
-        height={300}
-      />
       <main className={styles.home}>
         <Title
           text="BuildEvents"
@@ -247,9 +200,17 @@ export default function Home() {
           version={version}
           user={user}
         />
+
         <div className={styles.scratch}>
           <div className={styles.effort}>
-            <Effort />
+            <EffortList />
+            
+            <input type="text" placeholder={"Send a message"} className={styles.textInput}/>
+            <VoiceTool
+              onClick={handleVoice}
+              callState={callState}
+              analyzer={analyzer}
+            />
           </div>
           <div className={styles.output}>
             {output && output.output && output.output.children.length > 0 && (
@@ -257,9 +218,27 @@ export default function Home() {
             )}
           </div>
         </div>
-        <Actions>
+        <div className={styles.tools}>
           {flags.includes("debug") ? (
-            <>
+            <Actions>
+              <Tool
+                icon={<VscClearAll size={18} title={"Reset"} />}
+                onClick={() => {
+                  effort?.clearEfforts();
+                  output?.reset();
+                }}
+                title={"Reset"}
+              />
+              <Tool
+                icon={<TbAirBalloon size={18} title={"Reset Event Scenario"} />}
+                onClick={() => {
+                  output?.reset();
+                  output?.addRoot(scenarioOutput);
+                  effort?.clearEfforts();
+                  effort?.addEffortList(scenarioEffort);
+                }}
+                title={"Reset Event Scenario"}
+              />
               <Tool
                 icon={<IoCameraOutline size={18} title={"Capture Image"} />}
                 onClick={() => {
@@ -276,14 +255,7 @@ export default function Home() {
                 }}
                 title={"Capture Image"}
               />
-              <Tool
-                icon={<VscClearAll size={18} title={"Reset"} />}
-                onClick={() => {
-                  effort?.clearEfforts();
-                  output?.reset();
-                }}
-                title={"Reset"}
-              />
+
               <Tool
                 icon={<TbImageInPicture size={18} title={"Add Image"} />}
                 onClick={() => {
@@ -327,46 +299,34 @@ export default function Home() {
                 }}
                 title={"Add Research"}
               />
-              <Tool
-                icon={<TbAirBalloon size={18} title={"Reset Event Scenario"} />}
-                onClick={() => {
-                  output?.reset();
-                  output?.addRoot(scenarioOutput);
-                  effort?.clearEfforts();
-                  effort?.addEffortList(scenarioEffort);
-                }}
-                title={"Reset Event Scenario"}
-              />
-            </>
+            </Actions>
           ) : (
             <></>
           )}
-          <VoiceTool
-            onClick={() => handleVoice()}
-            className={callState === "idle" ? styles.idle : styles.call}
-          />
-        </Actions>
-        {flags.includes("tools") ? (
-          <Settings>
-            <Setting
-              id={"voice-settings"}
-              icon={<TbSettingsCog size={18} />}
-              className={styles.voice}
-            >
-              <VoiceSettings />
-            </Setting>
-            <Setting
-              id={"voice-agent-settings"}
-              icon={<TbArticle size={18} />}
-              className={styles.editor}
-            >
-              <AgentEditor />
-            </Setting>
-          </Settings>
-        ) : (
-          <></>
-        )}
+
+          {flags.includes("tools") ? (
+            <Settings>
+              <Setting
+                id={"voice-agent-settings"}
+                icon={<TbArticle size={18} />}
+                className={styles.editor}
+              >
+                <AgentEditor />
+              </Setting>
+              <Setting
+                id={"voice-settings"}
+                icon={<TbSettingsCog size={18} />}
+                className={styles.voice}
+              >
+                <VoiceSettings />
+              </Setting>
+            </Settings>
+          ) : (
+            <></>
+          )}
+        </div>
       </main>
+
       <VideoImagePicker
         show={showCapture}
         setShow={setShowCapture}

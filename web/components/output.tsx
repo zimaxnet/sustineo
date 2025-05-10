@@ -12,14 +12,12 @@ type Props = {
 };
 
 const Output: React.FC<Props> = ({ data }: Props) => {
-  //const output = usePersistStore(useOutputStore, (state) => state);
   const chartRef = useRef<HTMLDivElement>(null);
   const outputDisplayRef = useRef<OuptutDisplayHandle>(null);
   const dms = useDimensions(chartRef, {
     marginBottom: 100,
   });
 
-  const color = d3.scaleSequential([8, 0], d3.interpolateMagma);
   const treemap = (data: OutputNode) =>
     d3
       .treemap<OutputNode>()
@@ -55,7 +53,7 @@ const Output: React.FC<Props> = ({ data }: Props) => {
             id={id + "_rect"}
             width={d.x1 - d.x0}
             height={d.y1 - d.y0}
-            fill={"white"}
+            fill={"#FFFFFF"}
             rx={8}
             ry={8}
           />
@@ -143,7 +141,7 @@ const Output: React.FC<Props> = ({ data }: Props) => {
                     id={`rect-${d.data.id}`}
                     width={d.x1 - d.x0}
                     height={d.y1 - d.y0}
-                    fill={"#B7AEF0"}
+                    fill={"#1A1617AA"}
                     rx={8}
                     ry={8}
                     opacity={0.75}
@@ -193,7 +191,7 @@ const Output: React.FC<Props> = ({ data }: Props) => {
                           id={child.id + "_rect"}
                           width={child.x1 - child.x0}
                           height={child.y1 - d.y0}
-                          fill={"#6d3131"}
+                          fill={"#000000"}
                           rx={8}
                           ry={8}
                           opacity={0.5}
