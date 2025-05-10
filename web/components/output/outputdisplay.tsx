@@ -57,7 +57,6 @@ const OutputDisplay = React.forwardRef<OuptutDisplayHandle, {}>((_, ref) => {
       case "text":
         return <TextOutput text={data} />;
       case "image":
-        const imageUrl = data.image_url;
         if (data.image_url.startsWith("http")) {
           return (
             <img
