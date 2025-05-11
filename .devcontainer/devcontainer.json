@@ -1,0 +1,35 @@
+{
+	"name": "BuildEvents 2025",
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+	"features": {
+		"ghcr.io/devcontainers/features/python:1": {}
+	},
+  "hostRequirements": {
+    "cpus": 4
+  },
+  "postCreateCommand": "cd api && pip3 install --break-system-packages -r requirements.txt && cd .. && cd web && npm install",
+  "postAttachCommand": "./start.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot-chat",
+        "GitHub.copilot",
+        "GitHub.vscode-pull-request-github",
+        "ms-python.debugpy"
+      ],
+      "settings": {
+        "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+        "github.copilot.nextEditSuggestions.enabled": true
+      }
+    } 
+  },
+  "portsAttributes": {
+    "5173": {
+      "label": "Application",
+      "onAutoForward": "openPreview"
+    }
+  },
+  "forwardPorts": [
+    5173
+  ]
+}
