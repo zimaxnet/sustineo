@@ -1,4 +1,7 @@
 {
+  "workbench.colorTheme": "Default Light+",
+  "editor.tabSize": 2,
+  "editor.stickyScroll.enabled": false,
   "python.testing.pytestArgs": ["api"],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
