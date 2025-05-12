@@ -14,4 +14,11 @@ if [ -f .node.pid ]; then
     rm .node.pid
 fi
 
+# Kill any other processes that might be running
+kill $(lsof -t -i:5173)
+kill $(lsof -t -i:8000)
+kill $(lsof -t -i:5678)
+
+# Optionally, you can add a command to stop any other services you might have started
+
 echo "Services stopped"

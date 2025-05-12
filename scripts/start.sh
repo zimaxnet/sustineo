@@ -4,7 +4,7 @@
 echo "Starting services..."
 
 # Start Python development server and save PID
-python start_api.py & 
+python ./scripts/start_api.py & 
 echo $! > .python.pid
 
 # Start Node.js development server and save PID

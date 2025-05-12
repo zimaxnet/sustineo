@@ -1,0 +1,14 @@
+// Place your key bindings in this file to override the defaults
+[
+    {
+        "key": "ctrl+shift+s",
+        "command": "simpleBrowser.show",
+        "args": "http://localhost:5173"
+    },
+    // open MicIcon.tsx file in editor
+    {
+        "key": "ctrl+shift+m",
+        "command": "workbench.action.quickOpen",
+        "args": "MicIcon.tsx"
+    }
+]

@@ -11,16 +11,17 @@
   "hostRequirements": {
     "cpus": 4
   },
-  "postCreateCommand": "./postCreate.sh",
-  "postAttachCommand": "./start.sh",
+  "postCreateCommand": "./scripts/postCreate.sh",
+  "postAttachCommand": "./scripts/start.sh",
   "customizations": {
     "vscode": {
       "extensions": [
-        "GitHub.copilot-chat",
-        "GitHub.copilot",
-        "GitHub.vscode-pull-request-github",
-        "ms-python.debugpy"
-      ],
+		"GitHub.copilot-chat",
+		"GitHub.copilot",
+		"GitHub.vscode-pull-request-github",
+		"ms-python.debugpy",
+		"ms-python.python"
+	],
       "settings": {
         "github.copilot.chat.codeGeneration.useInstructionFiles": true,
         "github.copilot.nextEditSuggestions.enabled": true

@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 def run_with_debugger():
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+    current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     venv_python = os.path.join(current_dir, 'api', '.venv', 'bin', 'python')
     
     if not os.path.exists(venv_python):
