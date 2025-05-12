@@ -9,6 +9,8 @@
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "mypy-type-checker.args": ["--check-untyped-defs"],
+  "python.defaultInterpreterPath": "${workspaceFolder}/api/.venv/bin/python",
+  "python.terminal.activateEnvironment": true,
   // Copilot settings
   "github.copilot.chat.codeGeneration.instructions": [
     {

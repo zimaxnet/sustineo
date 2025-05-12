@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# This script is executed after the container is created and started.
-# It installs the necessary dependencies for both the API and web applications.
+# Create and activate virtual environment for the API
+cd api
+echo "Creating virtual environment..."
+python3 -m venv .venv
+source .venv/bin/activate
 
-# Install Python dependencies
-cd api 
-pip3 install --break-system-packages -r requirements.txt 
+# Install Python dependencies into the virtual environment
+echo "Installing Python dependencies..."        
+pip install -r requirements.txt debugpy
 
 # Install Node.js dependencies
-cd .. 
-cd web 
+cd ../web
+echo "Installing Node.js dependencies..."
 npm install
