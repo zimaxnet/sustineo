@@ -1,10 +1,13 @@
-import MicIcon from '../../components/micicon';
+import Header from '../components/Header';
+import MicIcon from '../components/MicIcon';
+import Social from '../components/Social';
 import styles from './home.module.scss';
 
 export default function Landing() {
   return (
     <div className={styles.landing}>
       <div className={styles.root}>
+        <Header />
         <div className={styles.container}>
           <h1>What can we<br />start working on?</h1>
           <p>Talk through your ideas and let's make them reality.</p>
@@ -19,6 +22,7 @@ export default function Landing() {
             />
           </div>
         </a>
+        <Social />
       </div>
     </div>
   );
