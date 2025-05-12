@@ -2,10 +2,10 @@ Sustineo
 
 ## Repo Information
 
-Owner: sethjuarez
-Repo: sustineo
+Owner: contoso
+Repo: buildevents
 
-If I say "Let's work on issue 2", use the github tools to find issue 2 in the sethjuarez/sustineo repo.
+If I say "Let's work on issue 2", use the github tools to find issue 2 in the contoso/buildevents repo.
 
 2. Tell the user that you see there is a figma design for the microphone icon in issue 2 and then use the figma tools to find the design for the microphone icon and download the assets.
 

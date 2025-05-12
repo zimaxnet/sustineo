@@ -1,16 +1,18 @@
 {
   // vscode settings
   "workbench.colorTheme": "Default Light+",
+  "workbench.startupEditor": "none",
   "editor.tabSize": 2,
   "editor.stickyScroll.enabled": false,
-  "github.copilot.chat.codeGeneration.instructions": [
-    {
-      "file": ".demo.md"
-    }
-  ],
   // python
   "python.testing.pytestArgs": ["api"],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
-  "mypy-type-checker.args": ["--check-untyped-defs"]
+  "mypy-type-checker.args": ["--check-untyped-defs"],
+  // Copilot settings
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "file": ".vscode/docs.md"
+    }
+  ],
 }
