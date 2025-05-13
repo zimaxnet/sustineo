@@ -112,7 +112,9 @@ export class VoiceClient {
 
     this.recorder = new Recorder((buffer: any) => {
       const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-      this.socket!.send({ id: "audio", type: "audio", content: base64 });
+      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.socket!.send({ id: "audio", type: "audio", content: base64 });
+      }
     });
 
     let audio: object = {
@@ -183,7 +185,7 @@ export class VoiceClient {
   }
 
   async sendCreateResponse() {
-    this.send({ id:"interrupt", type: "interrupt" });
+    this.send({ id: "interrupt", type: "interrupt" });
   }
 }
 

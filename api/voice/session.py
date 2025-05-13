@@ -131,7 +131,8 @@ class RealtimeSession:
 
                 match event.type:
                     case "error":
-                        await self._handle_error(event)
+                        print(json.dumps(event.model_dump(), indent=2))
+                        #await self._handle_error(event)
                     case "session.created":
                         await self._session_created(event)
                     case "session.updated":

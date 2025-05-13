@@ -13,7 +13,7 @@ export interface OuptutDisplayHandle {
 const OutputDisplay = React.forwardRef<OuptutDisplayHandle, {}>((_, ref) => {
   const [data, setData] = React.useState<Data | null>(null);
   const [isOpen, setIsOpen] = React.useState(false);
-  
+
   useImperativeHandle(ref, () => ({
     activateOutputDisplay: (data: Data) => {
       setData(data);
@@ -38,18 +38,22 @@ const OutputDisplay = React.forwardRef<OuptutDisplayHandle, {}>((_, ref) => {
     };
   }, []);
 
+
   if (!isOpen) return null;
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
+    const div = event.target as HTMLDivElement;
+    if(div.className.includes(styles.modal)) {
+      closeModal();
+    }
   };
 
   const handleClose = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
+    console.log("Clicked close button");
     closeModal();
   };
-
-
 
   const renderContent = () => {
     if (!data) return null;
@@ -74,7 +78,7 @@ const OutputDisplay = React.forwardRef<OuptutDisplayHandle, {}>((_, ref) => {
             />
           );
         }
-        
+
       default:
         return <></>;
     }

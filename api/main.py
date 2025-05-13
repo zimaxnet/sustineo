@@ -58,6 +58,10 @@ class SimpleMessage(BaseModel):
     name: str
     text: str
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 
 @app.get("/")
 async def root():

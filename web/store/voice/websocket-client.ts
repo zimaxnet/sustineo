@@ -121,4 +121,8 @@ export class WebSocketClient<U, D> implements AsyncIterable<D> {
     this.socket.close();
     await this.closedPromise;
   }
+
+  get readyState(): number {
+    return this.socket.readyState;
+  }
 }

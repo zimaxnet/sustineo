@@ -106,12 +106,14 @@ export default function Home() {
           children: [],
         });
       } else if (item.type === "image") {
+        
         await sendRealtime({
           id: uuidv4(),
           type: "function_completion",
           call_id: call_id,
           output: `Generated image as described by ${item.description}. It is ${item.size} and ${item.quality}. It has been saved and is currently being displayed to ${user.name}.`,
         });
+        
         output?.addOutput(parent, agent, {
           id: uuidv4(),
           title: agent,
@@ -146,7 +148,8 @@ export default function Home() {
           type: "function_completion",
           call_id: serverEvent.call_id,
           output:
-            "This is a message from the function call that it is in progress. You can ignore it and continue the conversation until the function call is completed.",
+            `This is a message from the function call that it is in progress. 
+            You can ignore it and continue the conversation until the function call is completed.`,
         });
         
 
@@ -187,7 +190,18 @@ export default function Home() {
   );
 
   const handleVoice = async () => {
-    
+    if (callState === "idle") {
+      console.log("Starting voice call");
+    } else if (callState === "call") {
+      const response = confirm(
+        "Are you sure you want to end the voice call? You will not be able to send messages until you start a new call.");
+      if (response) {
+        console.log("Ending voice call");
+      } else {
+        console.log("Not ending voice call");
+        return;
+      }
+    }
     toggleRealtime();
   };
 
