@@ -122,3 +122,22 @@ async def gpt_image_generation(
                 status="run completed",
                 information="Image generation complete",
             )
+
+
+@agent(
+    name="Image Editing Agent",
+    description="This Agent can generate a number of images based upon a detailed description AND a starting image to edit. This agent is based on the GPT-Image-1 model and is capable of editing generated images in a variety of styles. It can also edit images in a specific style, such as a painting or a photograph. The agent can also generate images with different levels of detail and complexity.",
+)
+async def gpt_image_edit(
+    description: Annotated[
+        str,
+        "The detailed description of the image to be generated. The more detailed the description, the better the image will be. Make sure to include the style of the image, the colors, and any other details that will help the model generate a better image.",
+    ],
+    image: Annotated[
+        str,
+        "The base64 encoded image to be used as a starting point for the generation. This image will be used as a reference for the model to generate the new image.",
+    ],
+    n: Annotated[int, "number of images to generate"],
+    notify: AgentUpdateEvent,
+):
+    pass

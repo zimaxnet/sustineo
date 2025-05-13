@@ -21,12 +21,13 @@ foundry_agents: dict[str, Agent] = {}
 custom_agents: dict[str, Prompty] = {}
 
 
+
 # load agents from prompty files in directory
 async def get_custom_agents() -> dict[str, Prompty]:
     global custom_agents
     agents_dir = Path(__file__).parent / "agents"
     if not agents_dir.exists():
-        print(f"Agents directory does not exist: {agents_dir}")
+        #print(f"No custom agents found in {agents_dir}")
         return {}
 
     custom_agents.clear()
@@ -37,6 +38,26 @@ async def get_custom_agents() -> dict[str, Prompty]:
         print(f"Loaded agent: {agent_name}")
 
     return custom_agents
+
+def get_client_agents() -> dict[str, Agent]:
+    selection_agent = Agent(
+        id="client_image_selection",
+        name="Client Image Selection Task",
+        type="client-agent",
+        description="If the user needs to provide an image, call this agent to select the image. This agent will return the selected image.",
+        parameters=[
+            {
+                "name": "image",
+                "type": "string",
+                "description": "The exact imnage url selected by the user. Use whatever is returned EXACTLY as it is.",
+                "required": True,
+            },
+        ],
+    )
+    
+    return {
+        #"selection_agent": selection_agent,
+    }
 
 
 @contextlib.asynccontextmanager
@@ -116,7 +137,6 @@ async def execute_foundry_agent(
 
 
 async def create_foundry_thread():
-    """Create a Foundry thread."""
     async with get_foundry_project_client() as project_client:
         thread = await project_client.agents.create_thread()
         return thread.id
@@ -129,25 +149,6 @@ async def create_thread_message(
     attachments: list[MessageAttachment] = [],
     metadata: dict[str, str] = {},
 ):
-    """
-    Create a message in a Foundry thread.
-
-    Args:
-        thread_id (str): The ID of the thread to add the message to.
-        role (str): The role of the entity sending the message (e.g., 'user', 'assistant').
-        content (Union[str, list[MessageInputContentBlock]]): The content of the message.
-            Can be a simple string or a list of content blocks.
-        attachments (list[MessageAttachment], optional): Files to attach to the message.
-            Defaults to an empty list.
-        metadata (dict[str, str], optional): Additional metadata for the message.
-            Defaults to an empty dictionary.
-
-    Returns:
-        str: The ID of the created message.
-
-    Note:
-        This function requires an active Foundry project client connection.
-    """
     async with get_foundry_project_client() as project_client:
         message = await project_client.agents.create_message(
             thread_id=thread_id,

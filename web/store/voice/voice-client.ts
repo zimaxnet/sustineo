@@ -180,6 +180,17 @@ export class VoiceClient {
     }
   }
 
+  mute_microphone() {
+    if (this.recorder) {
+      this.recorder.mute();
+    }
+  }
+  unmute_microphone() {
+    if (this.recorder) {
+      this.recorder.unmute();
+    }
+  }
+
   async sendUserMessage(message: string) {
     this.send({ id: "message", type: "message", role: "user", content: message });
   }

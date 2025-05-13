@@ -67,6 +67,7 @@ export class Recorder {
   private mediaStream: MediaStream | null = null;
   private mediaStreamSource: MediaStreamAudioSourceNode | null = null;
   private workletNode: AudioWorkletNode | null = null;
+  private muted: boolean = false;
 
   public constructor(onDataAvailable: (buffer: ArrayBuffer) => void) {
     this.onDataAvailable = onDataAvailable;
@@ -90,7 +91,11 @@ export class Recorder {
       let buffer: Uint8Array[] = [];
       let bufferSize = 0;
       const targetSize = 4800;
+
       this.workletNode.port.onmessage = (event) => {
+        if (this.muted) {
+          return;
+        }
         const data = new Uint8Array(event.data.buffer);
         buffer.push(data);
         bufferSize += data.byteLength;
@@ -107,12 +112,23 @@ export class Recorder {
           bufferSize = 0;
         }
       };
+
       this.mediaStreamSource.connect(this.workletNode);
       this.workletNode.connect(this.audioContext.destination);
     } catch {
       this.stop();
     }
   }
+
+  mute() {
+    this.muted = true;
+  }
+
+
+
+  unmute() {
+    this.muted = false;
+  } 
 
   stop() {
     if (this.mediaStream) {

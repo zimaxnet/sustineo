@@ -45,6 +45,8 @@ import FileImagePicker, {
   type FileInputHandle,
 } from "components/fileimagepicker";
 import { useLocation } from "react-router";
+import clsx from "clsx";
+import { BsMicMute, BsMic } from "react-icons/bs";
 
 const queryClient = new QueryClient();
 
@@ -63,7 +65,6 @@ export default function Home() {
       .get("flags")
       ?.split(",")
       .map((i) => i.toLocaleLowerCase().trim()) || [];
-  //console.log("Flags", flags);
 
   const { user, error } = useUser();
   const [showCapture, setShowCapture] = useState(false);
@@ -106,14 +107,13 @@ export default function Home() {
           children: [],
         });
       } else if (item.type === "image") {
-        
         await sendRealtime({
           id: uuidv4(),
           type: "function_completion",
           call_id: call_id,
           output: `Generated image as described by ${item.description}. It is ${item.size} and ${item.quality}. It has been saved and is currently being displayed to ${user.name}.`,
         });
-        
+
         output?.addOutput(parent, agent, {
           id: uuidv4(),
           title: agent,
@@ -141,34 +141,35 @@ export default function Home() {
         }
         break;
       case "function":
-        // no need to await for this, just send it to the server
-        
-        await sendRealtime({
-          id: serverEvent.id,
-          type: "function_completion",
-          call_id: serverEvent.call_id,
-          output:
-            `This is a message from the function call that it is in progress. 
-            You can ignore it and continue the conversation until the function call is completed.`,
-        });
-        
-
-        effort?.addEffort(serverEvent);
-
-        const api = `${API_ENDPOINT}/api/agent/${user.key}`;
-        console.log("Sending function call to agent", api, serverEvent);
-        await fetch(api, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            call_id: serverEvent.call_id,
+        // check for client side agents
+        if (serverEvent.name.startsWith("client_")) {
+          console.log("Client side agent", serverEvent.name);
+        } else {
+          await sendRealtime({
             id: serverEvent.id,
-            name: serverEvent.name,
-            arguments: serverEvent.arguments,
-          }),
-        });
+            type: "function_completion",
+            call_id: serverEvent.call_id,
+            output: `This is a message from the function call that it is in progress. 
+            You can ignore it and continue the conversation until the function call is completed.`,
+          });
+
+          effort?.addEffort(serverEvent);
+
+          const api = `${API_ENDPOINT}/api/agent/${user.key}`;
+          console.log("Sending function call to agent", api, serverEvent);
+          await fetch(api, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              call_id: serverEvent.call_id,
+              id: serverEvent.id,
+              name: serverEvent.name,
+              arguments: serverEvent.arguments,
+            }),
+          });
+        }
         break;
       case "agent":
         effort?.addEffort(serverEvent);
@@ -184,17 +185,17 @@ export default function Home() {
     }
   };
 
-  const { toggleRealtime, analyzer, sendRealtime, callState } = useRealtime(
-    user,
-    handleServerMessage
-  );
+  const { toggleRealtime, analyzer, sendRealtime, muted, setMuted, callState } =
+    useRealtime(user, handleServerMessage);
 
   const handleVoice = async () => {
     if (callState === "idle") {
       console.log("Starting voice call");
+      setMuted(true);
     } else if (callState === "call") {
       const response = confirm(
-        "Are you sure you want to end the voice call? You will not be able to send messages until you start a new call.");
+        "Are you sure you want to end the voice call? You will not be able to send messages until you start a new call."
+      );
       if (response) {
         console.log("Ending voice call");
       } else {
@@ -218,8 +219,12 @@ export default function Home() {
         <div className={styles.scratch}>
           <div className={styles.effort}>
             <EffortList />
-            
-            <input type="text" placeholder={"Send a message"} className={styles.textInput}/>
+
+            <input
+              type="text"
+              placeholder={"Send a message"}
+              className={styles.textInput}
+            />
             <VoiceTool
               onClick={handleVoice}
               callState={callState}
@@ -354,6 +359,17 @@ export default function Home() {
           console.log("Image selected", image);
         }}
       />
+      {callState === "call" && (
+        <div
+          className={clsx(
+            styles.mutebutton,
+            muted ? styles.muted : styles.unmuted
+          )}
+          onClick={() => setMuted((muted) => !muted)}
+        >
+          {muted ? <BsMicMute size={24} /> : <BsMic size={24} />}
+        </div>
+      )}
     </QueryClientProvider>
   );
 }

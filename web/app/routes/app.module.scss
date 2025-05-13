@@ -86,3 +86,29 @@
   }
 }
 
+.mutebutton {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: solid 1px $color-zinc-100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+}
+
+.muted {
+  background-color: $color-zinc-800;
+  border: solid 1px color.change($color-zinc-100, $alpha: 0.5);
+  color: $color-zinc-100;
+}
+
+.unmuted {
+  background-color: $color-red-800;
+  border: solid 1px color.change($color-zinc-100, $alpha: 0.5);
+  color: $color-zinc-100;
+}

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { WS_ENDPOINT } from "store/endpoint";
 import { useLocalStorage } from "store/uselocalstorage";
 import type { User } from "store/useuser";
@@ -17,6 +17,7 @@ export const useRealtime = (
 
   const [callState, setCallState] = useState<"idle" | "call">("idle");
   const [analyzer, setAnalyzer] = useState<AnalyserNode | null>(null);
+  const [muted, setMuted] = useState(false);
   const voiceRef = useRef<VoiceClient | null>(null);
 
   const startRealtime = async () => {
@@ -54,7 +55,7 @@ export const useRealtime = (
       };
 
       console.log("Sending settings", values);
-      
+
       await voiceRef.current.send(values);
       await voiceRef.current.sendCreateResponse();
       setCallState("call");
@@ -84,11 +85,25 @@ export const useRealtime = (
     }
   };
 
+   useEffect(() => {
+    if (voiceRef.current) {
+      if (muted) {
+        console.log("muting");
+        voiceRef.current.mute_microphone();
+      } else {
+        console.log("unmuting");
+        voiceRef.current.unmute_microphone();
+      }
+    }
+  }, [muted]);
+
   return {
     startRealtime,
     stopRealtime,
     toggleRealtime,
     sendRealtime,
+    muted,
+    setMuted,
     analyzer,
     callState,
   };

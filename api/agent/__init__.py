@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from api.agent.decorators import function_agents, function_calls
 from api.model import Agent, AgentUpdate, AgentUpdateEvent, Content
 from api.agent.common import (
+    get_client_agents,
     get_foundry_agents,
     get_custom_agents,
     custom_agents,
@@ -84,7 +85,7 @@ async def get_agents():
         for agent in agents.values()
     ]
 
-    return [*f, *a, *function_agents.values()]
+    return [*f, *a, *function_agents.values(), *get_client_agents().values()]
 
 
 @router.get("/function")
