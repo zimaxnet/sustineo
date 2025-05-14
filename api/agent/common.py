@@ -1,5 +1,6 @@
 import os
 import prompty
+from prompty.tracer import trace
 import contextlib
 from pathlib import Path
 from typing import Union
@@ -107,7 +108,7 @@ async def get_foundry_agents() -> dict[str, Agent]:
 
         return foundry_agents
 
-
+@trace
 async def execute_foundry_agent(
     agent: Agent,
     additional_instructions: str,

@@ -17,7 +17,7 @@ export const useRealtime = (
 
   const [callState, setCallState] = useState<"idle" | "call">("idle");
   const [analyzer, setAnalyzer] = useState<AnalyserNode | null>(null);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true);
   const voiceRef = useRef<VoiceClient | null>(null);
 
   const startRealtime = async () => {

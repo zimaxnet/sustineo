@@ -247,7 +247,6 @@ class RealtimeSession:
                 },
             )
 
-    @trace(name="conversation.item.input_audio_transcription.delta")
     async def _conversation_item_input_audio_transcription_delta(
         self, event: ConversationItemInputAudioTranscriptionDeltaEvent
     ):
@@ -376,7 +375,6 @@ class RealtimeSession:
     async def _response_content_part_done(self, event: ResponseContentPartDoneEvent):
         pass
 
-    @trace(name="response.text.delta")
     async def _response_text_delta(self, event: ResponseTextDeltaEvent):
         pass
 
@@ -384,7 +382,6 @@ class RealtimeSession:
     async def _response_text_done(self, event: ResponseTextDoneEvent):
         pass
 
-    @trace(name="response.audio.transcript.delta")
     async def _response_audio_transcript_delta(
         self, event: ResponseAudioTranscriptDeltaEvent
     ):
@@ -396,7 +393,6 @@ class RealtimeSession:
     ):
         pass
 
-    @trace(name="response.audio.delta")
     async def _response_audio_delta(self, event: ResponseAudioDeltaEvent):
         await self.connection.send_update(
             Update.audio(id=event.event_id, data=event.delta)
@@ -406,7 +402,6 @@ class RealtimeSession:
     async def _response_audio_done(self, event: ResponseAudioDoneEvent):
         pass
 
-    @trace(name="response.function_call_arguments.delta")
     async def _response_function_call_arguments_delta(
         self, event: ResponseFunctionCallArgumentsDeltaEvent
     ):

@@ -70,7 +70,7 @@ export class Recorder {
   private mediaStream: MediaStream | null = null;
   private mediaStreamSource: MediaStreamAudioSourceNode | null = null;
   private workletNode: AudioWorkletNode | null = null;
-  private muted: boolean = false;
+  private muted: boolean = true;
 
   public constructor(onDataAvailable: (buffer: ArrayBuffer) => void) {
     this.onDataAvailable = onDataAvailable;

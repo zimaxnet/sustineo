@@ -12,11 +12,13 @@ from fastapi import FastAPI, Response, WebSocket, WebSocketDisconnect
 from api.agent.storage import get_storage_client
 from api.connection import connections
 from api.model import Update
+from api.telemetry import init_tracing
 from api.voice.common import get_default_configuration_data
 from api.voice.session import RealtimeSession
 from api.voice import router as voice_configuration_router
 from api.agent import router as agent_router
 from api.agent.common import get_custom_agents, create_foundry_thread
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from dotenv import load_dotenv
 
@@ -24,9 +26,11 @@ load_dotenv()
 
 AZURE_VOICE_ENDPOINT = os.getenv("AZURE_VOICE_ENDPOINT") or ""
 AZURE_VOICE_KEY = os.getenv("AZURE_VOICE_KEY", "fake_key")
-LOCAL_TRACING_ENABLED = os.getenv("LOCAL_TRACING_ENABLED", "false").lower() == "true"
 COSMOSDB_CONNECTION = os.getenv("COSMOSDB_CONNECTION", "fake_connection")
 SUSTINEO_STORAGE = os.environ.get("SUSTINEO_STORAGE", "EMPTY")
+LOCAL_TRACING_ENABLED = os.getenv("LOCAL_TRACING_ENABLED", "false").lower() == "true"
+
+init_tracing(local_tracing=LOCAL_TRACING_ENABLED)
 
 base_path = Path(__file__).parent
 
@@ -80,7 +84,7 @@ async def get_image(image_id: str):
         # check if the blob exists
         if not await blob_client.exists():
             return Response(status_code=404, content="Image not found")
-        
+
         # return bytes as png image
         image_data = await blob_client.download_blob()
         image_bytes = await image_data.readall()
@@ -99,8 +103,7 @@ async def voice_endpoint(id: str, websocket: WebSocket):
             api_version="2025-04-01-preview",
         )
         async with client.beta.realtime.connect(
-            model="gpt-4o-realtime-preview",
-            extra_query={"debug": "elvis"}
+            model="gpt-4o-realtime-preview", extra_query={"debug": "elvis"}
         ) as realtime_client:
 
             # get current username and receive any parameters
@@ -155,10 +158,8 @@ async def voice_endpoint(id: str, websocket: WebSocket):
                 thread_id=thread_id,
             )
 
-            eagerness: Literal['low', 'medium', 'high', 'auto'] = (
-                settings["eagerness"]
-                if "eagerness" in settings
-                else "auto"
+            eagerness: Literal["low", "medium", "high", "auto"] = (
+                settings["eagerness"] if "eagerness" in settings else "auto"
             )
 
             await session.update_realtime_session(
@@ -177,3 +178,6 @@ async def voice_endpoint(id: str, websocket: WebSocket):
     except WebSocketDisconnect as e:
         connections.remove(id)
         print("Voice Socket Disconnected", e)
+
+
+FastAPIInstrumentor.instrument_app(app, exclude_spans=["send", "receive"])
