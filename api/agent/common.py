@@ -40,20 +40,20 @@ async def get_custom_agents() -> dict[str, Prompty]:
     return custom_agents
 
 def get_client_agents() -> dict[str, Agent]:
-    selection_agent = Agent(
-        id="client_image_selection",
-        name="Client Image Selection Task",
-        type="client-agent",
-        description="If the user needs to provide an image, call this agent to select the image. This agent will return the selected image.",
-        parameters=[
-            {
-                "name": "image",
-                "type": "string",
-                "description": "The exact imnage url selected by the user. Use whatever is returned EXACTLY as it is.",
-                "required": True,
-            },
-        ],
-    )
+    #selection_agent = Agent(
+    #    id="client_image_selection",
+    #    name="Client Image Selection Task",
+    #    type="client-agent",
+    #    description="If the user needs to provide an image, call this agent to select the image. This agent will return the selected image.",
+    #    parameters=[
+    #        {
+    #            "name": "image",
+    #            "type": "string",
+    #            "description": "The exact imnage url selected by the user. Use whatever is returned EXACTLY as it is.",
+    #            "required": True,
+    #        },
+    #    ],
+    #)
     
     return {
         #"selection_agent": selection_agent,

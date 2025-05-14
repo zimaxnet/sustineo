@@ -155,6 +155,16 @@ export default function Home() {
 
           effort?.addEffort(serverEvent);
 
+          // check for `image_url` in the arguments
+          if (serverEvent.arguments?.image_url) {
+            console.log("Image URL found in arguments", serverEvent.arguments);
+            const images = output?.getAllImages();
+            // if there's only one image, set the image_url to the first image
+            if (images && images.length === 1) {
+              serverEvent.arguments.image_url = `${API_ENDPOINT}/${images[0].image_url}`;
+            }
+          }
+
           const api = `${API_ENDPOINT}/api/agent/${user.key}`;
           console.log("Sending function call to agent", api, serverEvent);
           await fetch(api, {
@@ -240,6 +250,17 @@ export default function Home() {
         <div className={styles.tools}>
           {flags.includes("debug") ? (
             <Actions>
+              <Tool
+                icon={<TbViewfinder size={18} title={"Reset"} />}
+                onClick={() => {
+                  const images = output?.getAllImages();
+                  
+                  if (images) {
+                    console.log("Images", images);
+                  }
+                }}
+                title={"Reset"}
+              />
               <Tool
                 icon={<VscClearAll size={18} title={"Reset"} />}
                 onClick={() => {

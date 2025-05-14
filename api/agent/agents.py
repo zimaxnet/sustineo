@@ -141,3 +141,19 @@ async def gpt_image_edit(
     notify: AgentUpdateEvent,
 ):
     pass
+
+
+
+@agent(
+    name="Sora Video Generation Agent",
+    description="This agent can generate a number of videos based upon a detailed description. This agent is based on the Sora model and is capable of generating videos in a variety of styles. It can also generate videos in a specific style, such as a painting or a photograph. The agent can also generate videos with different levels of detail and complexity.",
+)
+async def sora_video_generation(
+    description: Annotated[
+        str,
+        "The detailed description of the video to be generated. The more detailed the description, the better the video will be. Make sure to include the style of the video, the colors, and any other details that will help the model generate a better video.",
+    ],
+    n: Annotated[int, "number of videos to generate"],
+    notify: AgentUpdateEvent,
+):
+    pass

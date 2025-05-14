@@ -71,6 +71,7 @@ export interface OutputStore {
   removeLeaf: (id: string) => void;
   changeValue: (id: string, value: number) => void;
   addOrUpdateRootLeaf: (newLeaf: OutputNode) => void;
+  getAllImages: () => ImageData[];
   reset: () => void;
 }
 
@@ -162,6 +163,17 @@ export const useOutputStore = create<OutputStore>()(
               };
             }
           });
+        },
+        getAllImages: () => {
+          const images: ImageData[] = [];
+          const getImagesRecursively = (node: OutputNode) => {
+            if (node.data && node.data.type === "image") {
+              images.push(node.data);
+            }
+            node.children.forEach(getImagesRecursively);
+          };
+          getImagesRecursively(useOutputStore.getState().output);
+          return images;
         },
         reset: () => {
           set((state) => {
