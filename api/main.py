@@ -2,6 +2,7 @@ import os
 import json
 import asyncio
 from pathlib import Path
+from typing import Literal
 from openai import AsyncAzureOpenAI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
@@ -58,8 +59,10 @@ class SimpleMessage(BaseModel):
     name: str
     text: str
 
+
 @app.get("/health")
-async def health():
+async def health(response: Response):
+    response.status_code = 200
     return {"status": "ok"}
 
 
@@ -82,7 +85,6 @@ async def get_image(image_id: str):
         image_data = await blob_client.download_blob()
         image_bytes = await image_data.readall()
         return Response(content=image_bytes, media_type="image/png")
-
 
 
 @app.websocket("/api/voice/{id}")
@@ -153,13 +155,15 @@ async def voice_endpoint(id: str, websocket: WebSocket):
                 thread_id=thread_id,
             )
 
+            eagerness: Literal['low', 'medium', 'high', 'auto'] = (
+                settings["eagerness"]
+                if "eagerness" in settings
+                else "auto"
+            )
+
             await session.update_realtime_session(
                 instructions=prompt_settings.system_message,
-                threshold=settings["threshold"] if "threshold" in settings else 0.8,
-                silence_duration_ms=(
-                    settings["silence"] if "silence" in settings else 500
-                ),
-                prefix_padding_ms=(settings["prefix"] if "prefix" in settings else 300),
+                eagerness=eagerness,
                 voice=settings["voice"] if "voice" in settings else "sage",
                 tools=prompt_settings.tools,
             )

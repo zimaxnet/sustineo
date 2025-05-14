@@ -1,7 +1,5 @@
 export interface VoiceConfiguration {
-  threshold: number;
-  silence: number;
-  prefix: number;
+  eagerness: "low" | "medium" | "high" | "auto"
   inputDeviceId: string;
   voice: string;
 }
@@ -17,11 +15,16 @@ export const defaultVoices = [
   { name: "Verse", value: "verse" }
 ];
 
+export const defaultEagerness = [
+  { name: "Low", value: "low" },
+  { name: "Medium", value: "medium" },
+  { name: "High", value: "high" },
+  { name: "Auto", value: "auto" }
+];
+
 
 export const defaultConfiguration: VoiceConfiguration = {
-  threshold: 0.8,
-  silence: 500,
-  prefix: 300,
+  eagerness: "auto",
   inputDeviceId: "default",
   voice: "sage"
 };
@@ -128,7 +131,7 @@ export class Recorder {
 
   unmute() {
     this.muted = false;
-  } 
+  }
 
   stop() {
     if (this.mediaStream) {

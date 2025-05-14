@@ -47,9 +47,7 @@ export const useRealtime = (
           user: user!.name,
           date: currentDate.toLocaleDateString(),
           time: currentDate.toLocaleTimeString(),
-          threshold: settings.threshold,
-          silence: settings.silence,
-          prefix: settings.prefix,
+          eagerness: settings.eagerness,
           voice: settings.voice,
         },
       };

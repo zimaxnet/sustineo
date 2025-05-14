@@ -1,5 +1,5 @@
 import json
-from typing import Union
+from typing import Literal, Union
 from prompty.tracer import trace
 from api.connection import Connection
 from fastapi import WebSocketDisconnect
@@ -87,9 +87,7 @@ class RealtimeSession:
     async def update_realtime_session(
         self,
         instructions: str,
-        threshold: float = 0.8,
-        silence_duration_ms: int = 500,
-        prefix_padding_ms: int = 300,
+        eagerness: Literal['low', 'medium', 'high', 'auto'] = "auto",
         voice: str = "sage",
         tools: list[SessionTool] = [],
     ):
@@ -98,12 +96,12 @@ class RealtimeSession:
                 input_audio_format="pcm16",
                 turn_detection=SessionTurnDetection(
                     type="semantic_vad",
-                    eagerness="low",
+                    eagerness=eagerness,
                     create_response=True,
                     interrupt_response=True,
                 ),
                 input_audio_transcription=SessionInputAudioTranscription(
-                    model="gpt-4o-transcribe",
+                    model="whisper-1",
                 ),
                 voice=voice,
                 instructions=instructions,
@@ -132,7 +130,7 @@ class RealtimeSession:
                 match event.type:
                     case "error":
                         print(json.dumps(event.model_dump(), indent=2))
-                        #await self._handle_error(event)
+                        # await self._handle_error(event)
                     case "session.created":
                         await self._session_created(event)
                     case "session.updated":

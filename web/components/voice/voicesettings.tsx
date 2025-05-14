@@ -2,7 +2,12 @@ import { useLocalStorage } from "store/uselocalstorage";
 import { useMediaDevices } from "store/usemediadevice";
 import { GrPowerReset } from "react-icons/gr";
 import styles from "./voicesettings.module.scss";
-import { defaultConfiguration, defaultVoices, type VoiceConfiguration } from "store/voice";
+import {
+  defaultConfiguration,
+  defaultEagerness,
+  defaultVoices,
+  type VoiceConfiguration,
+} from "store/voice";
 
 const VoiceSettings = () => {
   const {
@@ -42,91 +47,53 @@ const VoiceSettings = () => {
             })}
         </select>
       </div>
-
       <div className={styles.control}>
         <div
           className={styles.label}
           title={
-            "The activation threshold for the server VAD turn detection. In noisy environments, you might need to increase the threshold to avoid false positives. In quiet environments, you might need to decrease the threshold to avoid false negatives.\n\nDefaults to 0.5. You can set the threshold to a value between 0.0 and 1.0."
+            'The eagerness of the model to respond. \"low\" will wait longer for the user to continue speaking, high will respond more quickly.\n "auto" is the default and is equivalent to "medium".'
           }
         >
-          Sensitivity Threshold (between 0 - 1):
+          Eagerness:
         </div>
-        <input
-          id="threshold"
-          name="threshold"
-          type="number"
-          title="Sensitivity Threshold"
-          min={0}
-          max={1}
-          step={0.1}
-          className={styles.textInput}
-          value={settings.threshold}
+        <select
+          id="eagerness"
+          name="eagerness"
+          className={styles.mediaselect}
+          value={settings.eagerness}
+          title="Select a voice"
           onChange={(e) =>
-            setSettings({ ...settings, threshold: +e.target.value })
-          }
-        />
-      </div>
-
-      <div className={styles.control}>
-        <div
-          className={styles.label}
-          title={
-            "The duration of speech audio (in milliseconds) to include before the start of detected speech.\n\nDefaults to 300."
+            setSettings({
+              ...settings,
+              eagerness: e.target.value as "low" | "medium" | "high" | "auto",
+            })
           }
         >
-          Prefix Padding (in ms):
-        </div>
-        <input
-          id="prefix"
-          name="chat"
-          type="number"
-          title="Prefix Padding"
-          min={0}
-          max={3000}
-          step={50}
-          className={styles.textInput}
-          value={settings.prefix}
-          onChange={(e) =>
-            setSettings({ ...settings, prefix: +e.target.value })
-          }
-        />
+          {defaultEagerness.map((voice) => {
+            return (
+              <option key={voice.value} value={voice.value}>
+                {voice.name}
+              </option>
+            );
+          })}
+        </select>
       </div>
       <div className={styles.control}>
         <div
           className={styles.label}
           title={
-            "The duration of silence (in milliseconds) to detect the end of speech. You want to detect the end of speech as soon as possible, but not too soon to avoid cutting off the last part of the speech.\n\nThe model will respond more quickly if you set this value to a lower number, but it might cut off the last part of the speech. If you set this value to a higher number, the model will wait longer to detect the end of speech, but it might take longer to respond."
+            "The voice used for the model response for the session.\n\nOnce the voice is used in the session for the model's audio response, it can't be changed."
           }
         >
-          Silence Duration (in ms):
+          Voice:
         </div>
-        <input
-          id="silence"
-          name="chat"
-          type="number"
-          title="Silence Duration"
-          min={0}
-          max={3000}
-          step={50}
-          className={styles.textInput}
-          value={settings.silence}
-          onChange={(e) =>
-            setSettings({ ...settings, silence: +e.target.value })
-          }
-        />
-      </div>
-      <div className={styles.control}>
-        <div className={styles.label} title={"The voice used for the model response for the session.\n\nOnce the voice is used in the session for the model's audio response, it can't be changed."}>Voice:</div>
         <select
           id="voice"
           name="voice"
           className={styles.mediaselect}
           value={settings.voice}
           title="Select a voice"
-          onChange={(e) =>
-            setSettings({ ...settings, voice: e.target.value })
-          }
+          onChange={(e) => setSettings({ ...settings, voice: e.target.value })}
         >
           {defaultVoices.map((voice) => {
             return (

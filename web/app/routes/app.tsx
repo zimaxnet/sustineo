@@ -251,17 +251,6 @@ export default function Home() {
           {flags.includes("debug") ? (
             <Actions>
               <Tool
-                icon={<TbViewfinder size={18} title={"Reset"} />}
-                onClick={() => {
-                  const images = output?.getAllImages();
-                  
-                  if (images) {
-                    console.log("Images", images);
-                  }
-                }}
-                title={"Reset"}
-              />
-              <Tool
                 icon={<VscClearAll size={18} title={"Reset"} />}
                 onClick={() => {
                   effort?.clearEfforts();
