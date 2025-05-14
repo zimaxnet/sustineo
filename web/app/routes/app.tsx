@@ -160,8 +160,8 @@ export default function Home() {
             console.log("Image URL found in arguments", serverEvent.arguments);
             const images = output?.getAllImages();
             // if there's only one image, set the image_url to the first image
-            if (images && images.length === 1) {
-              serverEvent.arguments.image_url = `${API_ENDPOINT}/${images[0].image_url}`;
+            if (images && images.length > 0) {
+              serverEvent.arguments.image_url = `${API_ENDPOINT}/${images[images.length - 1].image_url}`;
             }
           }
 
