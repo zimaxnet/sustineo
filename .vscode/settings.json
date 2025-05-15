@@ -1,6 +1,6 @@
 {
   // vscode settings
-  //"workbench.colorTheme": "Default Light+",
+  "workbench.colorTheme": "Default Light+",
   "workbench.startupEditor": "none",
   "editor.tabSize": 2,
   "editor.stickyScroll.enabled": false,
