@@ -158,12 +158,35 @@ async def voice_endpoint(id: str, websocket: WebSocket):
                 thread_id=thread_id,
             )
 
+            detection_type: Literal["semantic_vad", "server_vad"] = (
+                settings["detection_type"]
+                if "detection_type" in settings
+                else "server_vad"
+            )
+
             eagerness: Literal["low", "medium", "high", "auto"] = (
                 settings["eagerness"] if "eagerness" in settings else "auto"
             )
 
             await session.update_realtime_session(
                 instructions=prompt_settings.system_message,
+                detection_type=detection_type,
+                transcription_model=(
+                    settings["transcription_model"]
+                    if "transcription_model" in settings
+                    else "whisper-1"
+                ),
+                threshold=settings["threshold"] if "threshold" in settings else 0.8,
+                silence_duration_ms=(
+                    settings["silence_duration"]
+                    if "silence_duration_ms" in settings
+                    else 500
+                ),
+                prefix_padding_ms=(
+                    settings["prefix_padding"]
+                    if "prefix_padding_ms" in settings
+                    else 300
+                ),
                 eagerness=eagerness,
                 voice=settings["voice"] if "voice" in settings else "sage",
                 tools=prompt_settings.tools,

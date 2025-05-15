@@ -1,6 +1,11 @@
 export interface VoiceConfiguration {
-  eagerness: "low" | "medium" | "high" | "auto"
   inputDeviceId: string;
+  detectionType: "semantic_vad" | "server_vad",
+  transcriptionModel: string;
+  threshold: number;
+  silenceDuration: number;
+  prefixPadding: number;
+  eagerness: "low" | "medium" | "high" | "auto"
   voice: string;
 }
 
@@ -24,8 +29,13 @@ export const defaultEagerness = [
 
 
 export const defaultConfiguration: VoiceConfiguration = {
-  eagerness: "auto",
   inputDeviceId: "default",
+  detectionType: "server_vad",
+  transcriptionModel: "gpt-4o-transcribe",
+  threshold: 0.8,
+  silenceDuration: 500,
+  prefixPadding: 300,
+  eagerness: "auto",
   voice: "sage"
 };
 
