@@ -25,7 +25,7 @@ jobs:
     - name: Azure AI Agent Evaluation
       uses: microsoft/ai-agent-evals@v1-beta
       with:
-        deployment-name: "gpt-4o-mini"
+        deployment-name: "gpt-4o"
         azure-aiproject-connection-string: ${{ secrets.AZURE_AI_PROJECT_CONNECTION_STRING }}
         agent-ids: ${{ secrets.AZURE_AI_AGENT_IDS }}
         evaluation-result-view: "all-scores"
