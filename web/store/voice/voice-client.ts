@@ -121,7 +121,7 @@ export class VoiceClient {
       sampleRate: 24000,
       echoCancellation: true,
       noiseSuppression: true,
-      autoGainControl: false,
+      autoGainControl: true,
     };
 
     if (deviceId) {

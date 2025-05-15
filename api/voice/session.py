@@ -87,7 +87,12 @@ class RealtimeSession:
     async def update_realtime_session(
         self,
         instructions: str,
-        eagerness: Literal['low', 'medium', 'high', 'auto'] = "auto",
+        detection_type: Literal["semantic_vad", "server_vad"] = "semantic_vad",
+        transcription_model: str = "whisper-1",
+        threshold: float = 0.8,
+        silence_duration_ms: int = 500,
+        prefix_padding_ms: int = 300,
+        eagerness: Literal["low", "medium", "high", "auto"] = "auto",
         voice: str = "sage",
         tools: list[SessionTool] = [],
     ):
@@ -95,13 +100,16 @@ class RealtimeSession:
             session: Session = Session(
                 input_audio_format="pcm16",
                 turn_detection=SessionTurnDetection(
-                    type="semantic_vad",
+                    type=detection_type,
+                    threshold=threshold,
+                    silence_duration_ms=silence_duration_ms,
+                    prefix_padding_ms=prefix_padding_ms,
                     eagerness=eagerness,
                     create_response=True,
                     interrupt_response=True,
                 ),
                 input_audio_transcription=SessionInputAudioTranscription(
-                    model="whisper-1",
+                    model=transcription_model,
                 ),
                 voice=voice,
                 instructions=instructions,
@@ -375,6 +383,7 @@ class RealtimeSession:
     async def _response_content_part_done(self, event: ResponseContentPartDoneEvent):
         pass
 
+    @trace(name="response.text.delta")
     async def _response_text_delta(self, event: ResponseTextDeltaEvent):
         pass
 
