@@ -1,6 +1,7 @@
 import inspect
 import json
 from typing import Any, Union
+from prompty.tracer import trace
 
 from azure.ai.projects.models import (
     AsyncAgentEventHandler,
@@ -31,6 +32,7 @@ class SustineoAgentEventHandler(AsyncAgentEventHandler[str]):
         self.project_client = project_client
         self.history: list[dict[str, Any]] = []
 
+    @trace(name="send_agent_status")
     async def add_message(
         self,
         message: Union[ThreadMessage, ThreadRun, RunStep],
@@ -161,14 +163,14 @@ class SustineoAgentEventHandler(AsyncAgentEventHandler[str]):
             arguments = json.loads(tool_call.function.arguments)
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON arguments: {e}") from e
-        
+
         if function_name not in self.tools:
             raise ValueError(f"Function {function_name} not found in tools.")
-        
+
         function = self.tools[function_name]
         if not inspect.iscoroutinefunction(function.func):
             raise ValueError(f"Function {function_name} is not a coroutine function (or awaitable).")
-        
+
         arguments["notify"] = self.notify
         # Implement the logic to execute the tool call here
         # This is a placeholder implementation and should be replaced with actual logic

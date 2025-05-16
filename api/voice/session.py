@@ -106,7 +106,7 @@ class RealtimeSession:
                     create_response=True,
                     interrupt_response=True,
                 )
-            
+
             elif detection_type == "server_vad":
                 vad = SessionTurnDetection(
                     type=detection_type,
@@ -119,7 +119,7 @@ class RealtimeSession:
                     f"Invalid detection type: {detection_type}. "
                     "Must be 'semantic_vad' or 'server_vad'."
                 )
-            
+
             session: Session = Session(
                 input_audio_format="pcm16",
                 turn_detection=vad,
@@ -142,12 +142,15 @@ class RealtimeSession:
     @trace
     async def receive_realtime(self):
         # signature = "api.session.RealtimeSession.receive_realtime"
-        #while self.realtime is not None:
+        # while self.realtime is not None:
         async for event in self.realtime:
             if "delta" not in event.type:
                 print(event.type)
             self.active = True
-            if self.realtime is None or self.connection.state != WebSocketState.CONNECTED:
+            if (
+                self.realtime is None
+                or self.connection.state != WebSocketState.CONNECTED
+            ):
                 break
 
             match event.type:
@@ -167,9 +170,7 @@ class RealtimeSession:
                         event
                     )
                 case "conversation.item.input_audio_transcription.delta":
-                    await self._conversation_item_input_audio_transcription_delta(
-                        event
-                    )
+                    await self._conversation_item_input_audio_transcription_delta(event)
                 case "conversation.item.input_audio_transcription.failed":
                     await self._conversation_item_input_audio_transcription_failed(
                         event
@@ -221,7 +222,6 @@ class RealtimeSession:
                         f"Unhandled event type {event.type}",
                     )
 
-
     @trace(name="error")
     async def _handle_error(self, event: ErrorEvent):
         print("Error event", event.error)
@@ -249,11 +249,13 @@ class RealtimeSession:
         if event.transcript is None or len(event.transcript.strip()) == 0:
             return
 
-        await self.connection.send_update(Update.message(
-            id=event.item_id,
-            role="user",
-            content=event.transcript.strip(),
-        ))
+        await self.connection.send_update(
+            Update.message(
+                id=event.item_id,
+                role="user",
+                content=event.transcript.strip(),
+            )
+        )
 
         if self.thread_id is not None:
             await create_thread_message(

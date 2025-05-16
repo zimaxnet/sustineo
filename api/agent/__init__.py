@@ -107,7 +107,7 @@ async def get_agent(id: str):
 def send_agent_status(connection_id: str, name: str, call_id: str) -> AgentUpdateEvent:
     global connections
 
-    async def status_fn(
+    async def send_status(
         id: str,
         status: str,
         information: str | None = None,
@@ -140,7 +140,7 @@ def send_agent_status(connection_id: str, name: str, call_id: str) -> AgentUpdat
             print(f"Agent {name} ({id}) - {status}")
 
     # return status function
-    return status_fn
+    return send_status
 
 
 class FunctionCall(BaseModel):
