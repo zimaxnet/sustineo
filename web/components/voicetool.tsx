@@ -15,15 +15,12 @@ const VoiceTool: React.FC<Props> = ({ onClick, callState, analyzer }) => {
 
   useEffect(() => {
     if (callState === "call" && analyzer && canvasRef.current) {
-      console.log("Starting audio visualization");
       const canvas = canvasRef.current;
       const context = canvas.getContext("2d");
       const bufferLength = analyzer.frequencyBinCount;
-      console.log("bufferLength", bufferLength);
       const dataArray = new Uint8Array(bufferLength);
       const width = canvas.width;
       const height = canvas.height;
-      console.log("canvas", width, height);
       let sum = 0;
       if (context) {
         const draw = () => {

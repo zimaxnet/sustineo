@@ -504,6 +504,7 @@ class RealtimeSession:
 
         except WebSocketDisconnect:
             print("Realtime Socket Disconnected")
+            await self.close()
 
     async def close(self):
         try:

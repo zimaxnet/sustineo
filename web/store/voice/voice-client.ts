@@ -82,6 +82,8 @@ export type Update =
 
 
 export class VoiceClient {
+  //private updateQueue: Update[] = [];
+  //private started: boolean = false;
   url: string | URL;
   socket: WebSocketClient<Update, Update> | null;
   player: Player | null;
@@ -156,6 +158,8 @@ export class VoiceClient {
           // handle interrupt case internally
           this.player!.clear();
         } else {
+          // add to update queue
+          //this.updateQueue.push(serverEvent);
           this.handleServerMessage(serverEvent);
         }
       }
@@ -165,6 +169,8 @@ export class VoiceClient {
       }
     }
   }
+
+    
 
   async stop() {
     if (this.socket) {
