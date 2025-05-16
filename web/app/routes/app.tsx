@@ -142,7 +142,7 @@ export default function Home() {
         break;
       case "function":
         // check for client side agents
-        await sendRealtime({
+        sendRealtime({
           id: serverEvent.id,
           type: "function_completion",
           call_id: serverEvent.call_id,
@@ -166,7 +166,8 @@ export default function Home() {
 
         const api = `${API_ENDPOINT}/api/agent/${user.key}`;
         console.log("Sending function call to agent", api, serverEvent);
-        await fetch(api, {
+        // execute agent
+        fetch(api, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
