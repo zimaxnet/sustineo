@@ -97,17 +97,32 @@ class RealtimeSession:
         tools: list[SessionTool] = [],
     ):
         if self.realtime is not None:
-            session: Session = Session(
-                input_audio_format="pcm16",
-                turn_detection=SessionTurnDetection(
+
+            vad: SessionTurnDetection | None = None
+            if detection_type == "semantic_vad":
+                vad = SessionTurnDetection(
+                    type=detection_type,
+                    eagerness=eagerness,
+                    create_response=True,
+                    interrupt_response=True,
+                )
+            
+            elif detection_type == "server_vad":
+                vad = SessionTurnDetection(
                     type=detection_type,
                     threshold=threshold,
                     silence_duration_ms=silence_duration_ms,
                     prefix_padding_ms=prefix_padding_ms,
-                    eagerness=eagerness,
-                    create_response=True,
-                    interrupt_response=True,
-                ),
+                )
+            else:
+                raise ValueError(
+                    f"Invalid detection type: {detection_type}. "
+                    "Must be 'semantic_vad' or 'server_vad'."
+                )
+            
+            session: Session = Session(
+                input_audio_format="pcm16",
+                turn_detection=vad,
                 input_audio_transcription=SessionInputAudioTranscription(
                     model=transcription_model,
                 ),
@@ -127,88 +142,85 @@ class RealtimeSession:
     @trace
     async def receive_realtime(self):
         # signature = "api.session.RealtimeSession.receive_realtime"
-        try:
-            while self.realtime is not None:
-                async for event in self.realtime:
-                    if "delta" not in event.type:
-                        print(event.type)
-                    self.active = True
-                    if self.realtime is None or self.connection.state != WebSocketState.CONNECTED:
-                        break
+        #while self.realtime is not None:
+        async for event in self.realtime:
+            if "delta" not in event.type:
+                print(event.type)
+            self.active = True
+            if self.realtime is None or self.connection.state != WebSocketState.CONNECTED:
+                break
 
-                    match event.type:
-                        case "error":
-                            print(json.dumps(event.model_dump(), indent=2))
-                            # await self._handle_error(event)
-                        case "session.created":
-                            await self._session_created(event)
-                        case "session.updated":
-                            await self._session_updated(event)
-                        case "conversation.created":
-                            await self._conversation_created(event)
-                        case "conversation.item.created":
-                            await self._conversation_item_created(event)
-                        case "conversation.item.input_audio_transcription.completed":
-                            await self._conversation_item_input_audio_transcription_completed(
-                                event
-                            )
-                        case "conversation.item.input_audio_transcription.delta":
-                            await self._conversation_item_input_audio_transcription_delta(
-                                event
-                            )
-                        case "conversation.item.input_audio_transcription.failed":
-                            await self._conversation_item_input_audio_transcription_failed(
-                                event
-                            )
-                        case "conversation.item.truncated":
-                            await self._conversation_item_truncated(event)
-                        case "conversation.item.deleted":
-                            await self._conversation_item_deleted(event)
-                        case "input_audio_buffer.committed":
-                            await self._input_audio_buffer_committed(event)
-                        case "input_audio_buffer.cleared":
-                            await self._input_audio_buffer_cleared(event)
-                        case "input_audio_buffer.speech_started":
-                            await self._input_audio_buffer_speech_started(event)
-                        case "input_audio_buffer.speech_stopped":
-                            await self._input_audio_buffer_speech_stopped(event)
-                        case "response.created":
-                            await self._response_created(event)
-                        case "response.done":
-                            await self._response_done(event)
-                        case "response.output_item.added":
-                            await self._response_output_item_added(event)
-                        case "response.output_item.done":
-                            await self._response_output_item_done(event)
-                        case "response.content_part.added":
-                            await self._response_content_part_added(event)
-                        case "response.content_part.done":
-                            await self._response_content_part_done(event)
-                        case "response.text.delta":
-                            await self._response_text_delta(event)
-                        case "response.text.done":
-                            await self._response_text_done(event)
-                        case "response.audio_transcript.delta":
-                            await self._response_audio_transcript_delta(event)
-                        case "response.audio_transcript.done":
-                            await self._response_audio_transcript_done(event)
-                        case "response.audio.delta":
-                            await self._response_audio_delta(event)
-                        case "response.audio.done":
-                            await self._response_audio_done(event)
-                        case "response.function_call_arguments.delta":
-                            await self._response_function_call_arguments_delta(event)
-                        case "response.function_call_arguments.done":
-                            await self._response_function_call_arguments_done(event)
-                        case "rate_limits.updated":
-                            await self._rate_limits_updated(event)
-                        case _:
-                            print(
-                                f"Unhandled event type {event.type}",
-                            )
-        except Exception as e:
-            print("Error in receive_realtime", e)
-            await self.connection.close()
+            match event.type:
+                case "error":
+                    print(json.dumps(event.model_dump(), indent=2))
+                    # await self._handle_error(event)
+                case "session.created":
+                    await self._session_created(event)
+                case "session.updated":
+                    await self._session_updated(event)
+                case "conversation.created":
+                    await self._conversation_created(event)
+                case "conversation.item.created":
+                    await self._conversation_item_created(event)
+                case "conversation.item.input_audio_transcription.completed":
+                    await self._conversation_item_input_audio_transcription_completed(
+                        event
+                    )
+                case "conversation.item.input_audio_transcription.delta":
+                    await self._conversation_item_input_audio_transcription_delta(
+                        event
+                    )
+                case "conversation.item.input_audio_transcription.failed":
+                    await self._conversation_item_input_audio_transcription_failed(
+                        event
+                    )
+                case "conversation.item.truncated":
+                    await self._conversation_item_truncated(event)
+                case "conversation.item.deleted":
+                    await self._conversation_item_deleted(event)
+                case "input_audio_buffer.committed":
+                    await self._input_audio_buffer_committed(event)
+                case "input_audio_buffer.cleared":
+                    await self._input_audio_buffer_cleared(event)
+                case "input_audio_buffer.speech_started":
+                    await self._input_audio_buffer_speech_started(event)
+                case "input_audio_buffer.speech_stopped":
+                    await self._input_audio_buffer_speech_stopped(event)
+                case "response.created":
+                    await self._response_created(event)
+                case "response.done":
+                    await self._response_done(event)
+                case "response.output_item.added":
+                    await self._response_output_item_added(event)
+                case "response.output_item.done":
+                    await self._response_output_item_done(event)
+                case "response.content_part.added":
+                    await self._response_content_part_added(event)
+                case "response.content_part.done":
+                    await self._response_content_part_done(event)
+                case "response.text.delta":
+                    await self._response_text_delta(event)
+                case "response.text.done":
+                    await self._response_text_done(event)
+                case "response.audio_transcript.delta":
+                    await self._response_audio_transcript_delta(event)
+                case "response.audio_transcript.done":
+                    await self._response_audio_transcript_done(event)
+                case "response.audio.delta":
+                    await self._response_audio_delta(event)
+                case "response.audio.done":
+                    await self._response_audio_done(event)
+                case "response.function_call_arguments.delta":
+                    await self._response_function_call_arguments_delta(event)
+                case "response.function_call_arguments.done":
+                    await self._response_function_call_arguments_done(event)
+                case "rate_limits.updated":
+                    await self._rate_limits_updated(event)
+                case _:
+                    print(
+                        f"Unhandled event type {event.type}",
+                    )
+
 
     @trace(name="error")
     async def _handle_error(self, event: ErrorEvent):
