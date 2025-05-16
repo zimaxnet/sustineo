@@ -181,7 +181,16 @@ export default function Home() {
         break;
       case "agent":
         effort?.addEffort(serverEvent);
-        if (serverEvent.content) {
+        if(serverEvent.status.toLowerCase().includes("failed")) {
+          await sendRealtime({
+            id: serverEvent.id,
+            type: "function_completion",
+            call_id: serverEvent.call_id,
+            output: `The ${serverEvent.name} has failed. Please let the user know there may be issues with this agent in the service and are happy to help in any other way available to you.`,
+          });
+          break;
+        }
+        if (serverEvent.output && serverEvent.content) {
           addOutput(
             serverEvent.name.toLowerCase().replaceAll(" ", "_"),
             serverEvent.name,
