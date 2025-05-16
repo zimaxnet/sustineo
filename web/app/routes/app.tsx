@@ -142,44 +142,42 @@ export default function Home() {
         break;
       case "function":
         // check for client side agents
-        if (serverEvent.name.startsWith("client_")) {
-          console.log("Client side agent", serverEvent.name);
-        } else {
-          await sendRealtime({
-            id: serverEvent.id,
-            type: "function_completion",
-            call_id: serverEvent.call_id,
-            output: `This is a message from the function call that it is in progress. 
+        await sendRealtime({
+          id: serverEvent.id,
+          type: "function_completion",
+          call_id: serverEvent.call_id,
+          output: `This is a message from the function call that it is in progress. 
             You can ignore it and continue the conversation until the function call is completed.`,
-          });
+        });
 
-          effort?.addEffort(serverEvent);
+        effort?.addEffort(serverEvent);
 
-          // check for `image_url` in the arguments
-          if (serverEvent.arguments?.image_url) {
-            console.log("Image URL found in arguments", serverEvent.arguments);
-            const images = output?.getAllImages();
-            // if there's only one image, set the image_url to the first image
-            if (images && images.length > 0) {
-              serverEvent.arguments.image_url = `${API_ENDPOINT}/${images[images.length - 1].image_url}`;
-            }
+        // check for `image_url` in the arguments
+        if (serverEvent.arguments?.image_url) {
+          console.log("Image URL found in arguments", serverEvent.arguments);
+          const images = output?.getAllImages();
+          // if there's only one image, set the image_url to the first image
+          if (images && images.length > 0) {
+            serverEvent.arguments.image_url = `${API_ENDPOINT}/${
+              images[images.length - 1].image_url
+            }`;
           }
-
-          const api = `${API_ENDPOINT}/api/agent/${user.key}`;
-          console.log("Sending function call to agent", api, serverEvent);
-          await fetch(api, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              call_id: serverEvent.call_id,
-              id: serverEvent.id,
-              name: serverEvent.name,
-              arguments: serverEvent.arguments,
-            }),
-          });
         }
+
+        const api = `${API_ENDPOINT}/api/agent/${user.key}`;
+        console.log("Sending function call to agent", api, serverEvent);
+        await fetch(api, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            call_id: serverEvent.call_id,
+            id: serverEvent.id,
+            name: serverEvent.name,
+            arguments: serverEvent.arguments,
+          }),
+        });
         break;
       case "agent":
         effort?.addEffort(serverEvent);

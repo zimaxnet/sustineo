@@ -31,7 +31,7 @@ export const defaultEagerness = [
 export const defaultConfiguration: VoiceConfiguration = {
   inputDeviceId: "default",
   detectionType: "server_vad",
-  transcriptionModel: "gpt-4o-transcribe",
+  transcriptionModel: "whisper-1",
   threshold: 0.8,
   silenceDuration: 500,
   prefixPadding: 300,
