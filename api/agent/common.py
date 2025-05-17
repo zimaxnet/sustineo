@@ -22,7 +22,6 @@ foundry_agents: dict[str, Agent] = {}
 custom_agents: dict[str, Prompty] = {}
 
 
-
 # load agents from prompty files in directory
 async def get_custom_agents() -> dict[str, Prompty]:
     global custom_agents
@@ -108,9 +107,10 @@ async def get_foundry_agents() -> dict[str, Agent]:
 
         return foundry_agents
 
+
 @trace
 async def execute_foundry_agent(
-    agent: Agent,
+    agent_id: str,
     additional_instructions: str,
     query: str,
     tools: dict[str, Function],
@@ -119,7 +119,7 @@ async def execute_foundry_agent(
     """Execute a Foundry agent."""
 
     async with get_foundry_project_client() as project_client:
-        server_agent = await project_client.agents.get_agent(agent.id)
+        server_agent = await project_client.agents.get_agent(agent_id)
         thread = await project_client.agents.create_thread()
         await project_client.agents.create_message(
             thread_id=thread.id,

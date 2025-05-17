@@ -7,6 +7,7 @@ from api.agent.decorators import agent
 
 from api.agent.storage import get_storage_client
 from api.model import AgentUpdateEvent, Content
+from api.agent.common import execute_foundry_agent
 
 
 AZURE_IMAGE_ENDPOINT = os.environ.get("AZURE_IMAGE_ENDPOINT", "EMPTY").rstrip("/")
@@ -143,7 +144,6 @@ async def gpt_image_edit(
     pass
 
 
-
 @agent(
     name="Sora Video Generation Agent",
     description="This agent can generate a number of videos based upon a detailed description. This agent is based on the Sora model and is capable of generating videos in a variety of styles. It can also generate videos in a specific style, such as a painting or a photograph. The agent can also generate videos with different levels of detail and complexity.",
@@ -157,3 +157,37 @@ async def sora_video_generation(
     notify: AgentUpdateEvent,
 ):
     pass
+
+
+@agent(
+    name="BuildEvents - Post to LinkedIn Agent - Local",
+    description="""
+You are a publishing agent responsible for posting finalized and approved LinkedIn posts. 
+
+You will receive as input:
+- title (string): Title of the post.
+- content (string): Body of the post or finalized draft.
+- image_url (string, optional): Format should always start with https://sustineo-api.jollysmoke-a2364653.eastus2.azurecontainerapps.io/images/
+- example image_url: https://sustineo-api.jollysmoke-a2364653.eastus2.azurecontainerapps.io/images/acd7fe97-8d22-48ca-a06c-d38b769a8924.png
+- use the provided image_url
+
+You will take the draft and publish the post on Linkedln by calling the OpenAPI tool.""")
+async def publish_linkedin_post(
+    content: Annotated[str, "Body of the post or finalized draft in markdown."],
+    image_url: Annotated[
+        str,
+        "Format should always start with https://sustineo-api.jollysmoke-a2364653.eastus2.azurecontainerapps.io/images/",
+    ],
+    notify: AgentUpdateEvent):
+    instructions = f"""
+Use the following `image_url`: {image_url}
+Use this `image_url` exactly as it is. Do not change the image_url or the content of the post.
+The post should be in markdown format.
+"""
+    await execute_foundry_agent(
+        agent_id="asst_MbvKNQxeTr5DL1wuE8DRYR3M",
+        additional_instructions=instructions,
+        query=f"Can you write a LinkedIn post based on the following content?\n\n{content}",
+        tools={},
+        notify=notify,
+    )
