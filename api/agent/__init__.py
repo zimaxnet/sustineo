@@ -164,7 +164,7 @@ async def execute_agent(id: str, function: FunctionCall):
         # execute foundry agent
         foundry_agent = foundry_agents[function.name]
         await execute_foundry_agent(
-            foundry_agent,
+            foundry_agent.id,
             function.arguments["additional_instructions"],
             function.arguments["query"],
             function_calls,
