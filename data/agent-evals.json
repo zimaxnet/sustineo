@@ -5,13 +5,7 @@
     "TaskAdherenceEvaluator",
     "CoherenceEvaluator",
     "RelevanceEvaluator",
-    "FluencyEvaluator",
-    "ViolenceEvaluator",
-    "SexualEvaluator",
-    "SelfHarmEvaluator",
-    "HateUnfairnessEvaluator",
-    "IndirectAttackEvaluator",
-    "ProtectedMaterialEvaluator"
+    "FluencyEvaluator"
   ],
   "data": [
     {
