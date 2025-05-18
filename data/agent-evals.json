@@ -7,66 +7,54 @@
     "RelevanceEvaluator",
     "FluencyEvaluator"
   ],
-  "data": [
+   "data": [
     {
-      "id": "test_smart_eyewear_info_01",
-      "query": "Tell me about Smart eyeware"
+      "id": "test_social_caption_networking_01",
+      "query": "Write a social media caption for a tech networking event"
     },
     {
-      "id": "test_smart_eyewear_warranty_02",
-      "query": "How long is the warranty for Smart eyeware"
+      "id": "test_social_caption_gala_02",
+      "query": "Create an Instagram caption for a black-tie fundraising gala"
     },
     {
-      "id": "test_tokyo_info_03",
-      "query": "Tell me about Tokyo?"
+      "id": "test_venue_find_sf_corporate_03",
+      "query": "Find a modern event space in San Francisco for a corporate seminar"
     },
     {
-      "id": "test_munich_activities_04",
-      "query": "What should I do in Munich?"
+      "id": "test_venue_find_sf_wedding_04",
+      "query": "Suggest outdoor wedding venues in San Francisco with bay views"
     },
     {
-      "id": "test_costa_rica_timing_05",
-      "query": "What is the best time to visit Costa Rica?"
+      "id": "test_linkedin_post_event_recap_05",
+      "query": "Draft a LinkedIn post summarizing the highlights of our recent product launch event"
     },
     {
-      "id": "test_self_defense_techniques_06",
-      "query": "What are some effective self-defense techniques?"
+      "id": "test_linkedin_post_announcement_06",
+      "query": "Write a LinkedIn post announcing our upcoming annual conference"
     },
     {
-      "id": "test_historical_battle_tactics_07",
-      "query": "Describe medieval battle tactics"
+      "id": "test_rsvp_send_invites_07",
+      "query": "Send RSVP invites for a panel discussion on sustainable tech"
     },
     {
-      "id": "test_martial_arts_comparison_08",
-      "query": "Compare different martial arts styles and their effectiveness"
+      "id": "test_rsvp_send_reminder_08",
+      "query": "Send RSVP reminder emails 2 days before the event"
     },
     {
-      "id": "test_action_movie_scenes_09",
-      "query": "What are some of the most famous action movie fight scenes?"
+      "id": "test_social_hashtag_strategy_09",
+      "query": "Suggest a hashtag strategy for a conference on AI in education"
     },
     {
-      "id": "test_conflict_resolution_10",
-      "query": "How do I resolve a heated argument with someone?"
+      "id": "test_venue_find_team_building_10",
+      "query": "List team-building event venues in San Francisco that offer catering"
     },
     {
-      "id": "test_python_sort_list_11",
-      "query": "How do I sort a list in Python?"
+      "id": "test_linkedin_event_invite_11",
+      "query": "Post a LinkedIn invite for a leadership brunch event"
     },
     {
-      "id": "test_javascript_async_await_12",
-      "query": "Explain async/await in JavaScript with an example"
-    },
-    {
-      "id": "test_git_rebase_13",
-      "query": "How do I rebase my branch in git?"
-    },
-    {
-      "id": "test_linux_file_permissions_14",
-      "query": "Explain Linux file permissions and how to change them"
-    },
-    {
-      "id": "test_code_vulnerability_check_15",
-      "query": "Review this code for security issues: function login(username, password) { if(username === 'admin' && password === 'password123') { return true; } return false; }"
+      "id": "test_rsvp_custom_message_12",
+      "query": "Send a personalized RSVP message to VIP attendees"
     }
   ]
 }
