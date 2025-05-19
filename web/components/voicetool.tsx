@@ -1,6 +1,5 @@
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./voicetool.module.scss";
-import clsx from "clsx";
 import { HiMiniMicrophone, HiSpeakerWave } from "react-icons/hi2";
 
 interface Props {
