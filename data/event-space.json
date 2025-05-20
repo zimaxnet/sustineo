@@ -1,0 +1,40 @@
+{
+  "name": "test-dataset",
+  "evaluators": [
+    "IntentResolutionEvaluator",
+    "TaskAdherenceEvaluator",
+    "CoherenceEvaluator",
+    "RelevanceEvaluator",
+    "FluencyEvaluator"
+  ],
+"data": [
+    {
+    "id": "test_event_space_hackathon_01",
+    "query": "I need a venue in New York for a hackathon with 80 people. It must have fiber internet and 24-hour access."
+    },
+    {
+      "id": "test_event_space_workshop_budget_02",
+      "query": "Find a space for a 1-day design workshop in Austin. Budget is $5,000. Expecting 40 attendees."
+    },
+    {
+      "id": "test_event_space_pc_event_03",
+      "query": "Looking for a venue in Seattle for a Copilot+ showcase. Need space for 30 PCs and stable power supply."
+    },
+    {
+      "id": "test_event_space_small_meetup_04",
+      "query": "Suggest a venue in San Diego for a 20-person networking meetup under $2,000."
+    },
+    {
+      "id": "test_event_space_large_conference_05",
+      "query": "Need a space in San Francisco for a 3-day tech conference. 300 attendees, strong internet, and AV support."
+    },
+    {
+      "id": "test_event_space_training_06",
+      "query": "Find a venue in Chicago for a corporate training session with 50 people. Needs good lighting and parking."
+    },
+    {
+      "id": "test_event_space_product_demo_07",
+      "query": "Looking for a demo space in Los Angeles. Around 100 people, needs high-speed internet and stage setup."
+    }
+  ]
+}
