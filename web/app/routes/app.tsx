@@ -7,6 +7,7 @@ import {
   TbViewfinder,
   TbImageInPicture,
   TbAirBalloon,
+  TbId,
 } from "react-icons/tb";
 import { VscClearAll } from "react-icons/vsc";
 import VoiceSettings from "components/voice/voicesettings";
@@ -224,6 +225,10 @@ export default function Home() {
     toggleRealtime();
   };
 
+  const sendImageRequest = async () => {
+    
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <main className={styles.home}>
@@ -265,6 +270,13 @@ export default function Home() {
                   output?.reset();
                 }}
                 title={"Reset"}
+              />
+              <Tool
+                icon={<TbId size={18} title={"Image Edit"} />}
+                onClick={() => {
+                  console.log("Image edit clicked");
+                }}
+                title={"Image Edit"}
               />
               <Tool
                 icon={<TbAirBalloon size={18} title={"Reset Event Scenario"} />}
