@@ -1,18 +1,14 @@
 import os
-import uuid
-import base64
-import aiohttp
 from typing import Annotated
 from api.agent.decorators import agent
 
-from api.agent.storage import get_storage_client
 from api.model import AgentUpdateEvent, Content
-from api.agent.common import execute_foundry_agent
+from api.agent.storage import save_image_blobs
+from api.agent.common import execute_foundry_agent, post_request
 
 
 AZURE_IMAGE_ENDPOINT = os.environ.get("AZURE_IMAGE_ENDPOINT", "EMPTY").rstrip("/")
 AZURE_IMAGE_API_KEY = os.environ.get("AZURE_IMAGE_API_KEY", "EMPTY")
-SUSTINEO_STORAGE = os.environ.get("SUSTINEO_STORAGE", "EMPTY")
 
 
 @agent(
@@ -44,85 +40,76 @@ async def gpt_image_generation(
         id="image_generation", status="step in_progress", information="Executing Model"
     )
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            endpoint,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {AZURE_IMAGE_API_KEY}",
-            },
-            json={
-                "prompt": description,
-                "size": size,
-                "quality": quality,
-                "output_compression": 100,
-                "output_format": "png",
-                "n": n,
-            },
-        ) as response:
-            if response.status != 200:
-                print(f"Error: {response.status}")
-                await notify(
-                    id="image_generation",
-                    status="step failed",
-                    information=f"Error: {response.status}",
-                )
-                return []
-
+    async with post_request(
+        endpoint,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {AZURE_IMAGE_API_KEY}",
+        },
+        json={
+            "prompt": description,
+            "size": size,
+            "quality": quality,
+            "output_compression": 100,
+            "output_format": "png",
+            "n": n,
+        },
+    ) as response:
+        if "error" in response:
+            print(response["error"])
             await notify(
                 id="image_generation",
-                status="step in_progress",
-                information="fetching images" if n > 1 else "fetching image",
+                status="step failed",
+                information=response["error"],
             )
+            return []
 
-            image = await response.json()
-            # save the image to a file
-            # iterate through the images and save them
-            if not image["data"]:
-                print("No images found in the response.")
-                return []
+        await notify(
+            id="image_generation",
+            status="step in_progress",
+            information="fetching images" if n > 1 else "fetching image",
+        )
 
+        # save the image to a file
+        # iterate through the images and save them
+        if not response["data"]:
+            print("No images found in the response.")
+            return []
+
+        await notify(
+            id="image_generation",
+            status="step in_progress",
+            information="storing images" if n > 1 else "storing image",
+        )
+
+        base64_images = [
+            item["b64_json"] for item in response["data"] if item["b64_json"]
+        ]
+
+        async for blob_name in save_image_blobs(base64_images):
             await notify(
                 id="image_generation",
-                status="step in_progress",
-                information="storing images" if n > 1 else "storing image",
+                status="step completed",
+                content=Content(
+                    type="image",
+                    content=[
+                        {
+                            "type": "image",
+                            "description": description,
+                            "size": size,
+                            "quality": quality,
+                            "image_url": blob_name,
+                        }
+                    ],
+                ),
+                output=True,
             )
 
-            async with get_storage_client("sustineo") as container_client:
-                images = []
-                for item in image["data"]:
-                    if item["b64_json"]:
-                        base_64image = item["b64_json"]
-                        image_bytes = base64.b64decode(base_64image)
-                        blob_name = f"images/{str(uuid.uuid4())}.png"
-                        await container_client.upload_blob(
-                            name=blob_name, data=image_bytes, overwrite=True
-                        )
-
-                        await notify(
-                            id="image_generation",
-                            status="step completed",
-                            content=Content(
-                                type="image",
-                                content=[
-                                    {
-                                        "type": "image",
-                                        "description": description,
-                                        "size": size,
-                                        "quality": quality,
-                                        "image_url": blob_name,
-                                    }
-                                ],
-                            ),
-                            output=True,
-                        )
-                        images.append(blob_name)
-
-            await notify(
-                id="image_generation",
-                status="run completed",
-                information="Image generation complete",
-            )
+        await notify(
+            id="image_generation",
+            status="run completed",
+            information="Image generation complete",
+        )
 
 
 @agent(
@@ -171,14 +158,16 @@ You will receive as input:
 - example image_url: https://sustineo-api.jollysmoke-a2364653.eastus2.azurecontainerapps.io/images/acd7fe97-8d22-48ca-a06c-d38b769a8924.png
 - use the provided image_url
 
-You will take the draft and publish the post on Linkedln by calling the OpenAPI tool.""")
+You will take the draft and publish the post on Linkedln by calling the OpenAPI tool.""",
+)
 async def publish_linkedin_post(
     content: Annotated[str, "Body of the post or finalized draft in markdown."],
     image_url: Annotated[
         str,
         "Format should always start with https://sustineo-api.jollysmoke-a2364653.eastus2.azurecontainerapps.io/images/",
     ],
-    notify: AgentUpdateEvent):
+    notify: AgentUpdateEvent,
+):
     instructions = f"""
 Use the following `image_url`: {image_url}
 Use this `image_url` exactly as it is. Do not change the image_url or the content of the post.

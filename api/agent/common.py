@@ -1,9 +1,11 @@
 import os
+import aiohttp
 import prompty
 from prompty.tracer import trace
 import contextlib
 from pathlib import Path
-from typing import Union
+from typing import AsyncGenerator, Union, Unpack, Any
+from aiohttp.client import _RequestOptions
 
 from azure.ai.projects.aio import AIProjectClient
 from azure.ai.projects.models import (
@@ -27,7 +29,7 @@ async def get_custom_agents() -> dict[str, Prompty]:
     global custom_agents
     agents_dir = Path(__file__).parent / "agents"
     if not agents_dir.exists():
-        #print(f"No custom agents found in {agents_dir}")
+        # print(f"No custom agents found in {agents_dir}")
         return {}
 
     custom_agents.clear()
@@ -39,8 +41,9 @@ async def get_custom_agents() -> dict[str, Prompty]:
 
     return custom_agents
 
+
 def get_client_agents() -> dict[str, Agent]:
-    #selection_agent = Agent(
+    # selection_agent = Agent(
     #    id="client_image_selection",
     #    name="Client Image Selection Task",
     #    type="client-agent",
@@ -53,10 +56,10 @@ def get_client_agents() -> dict[str, Agent]:
     #            "required": True,
     #        },
     #    ],
-    #)
-    
+    # )
+
     return {
-        #"selection_agent": selection_agent,
+        # "selection_agent": selection_agent,
     }
 
 
@@ -159,3 +162,19 @@ async def create_thread_message(
             attachments=attachments,
         )
         return message.id
+
+
+@contextlib.asynccontextmanager
+async def post_request(
+    url: str, **kwargs: Unpack[_RequestOptions]
+) -> AsyncGenerator[dict[str, Any], None]:
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, **kwargs) as response:
+            if response.status != 200:
+                yield {
+                    "error": f"Request failed with status {response.status}",
+                    "status": response.status,
+                }
+            else:
+                response_data = await response.json()
+                yield response_data
