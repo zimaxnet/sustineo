@@ -171,10 +171,8 @@ async def post_request(
     async with aiohttp.ClientSession() as session:
         async with session.post(url, **kwargs) as response:
             if response.status != 200:
-                yield {
-                    "error": f"Request failed with status {response.status}",
-                    "status": response.status,
-                }
+                state = await response.json()
+                yield state
             else:
                 response_data = await response.json()
                 yield response_data

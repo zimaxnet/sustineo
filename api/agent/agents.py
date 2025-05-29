@@ -1,5 +1,7 @@
-import base64
 import os
+import io
+import base64
+import json
 from typing import Annotated
 
 import aiohttp
@@ -24,7 +26,7 @@ async def gpt_image_generation(
     ],
     n: Annotated[int, "number of images to generate"],
     notify: AgentUpdateEvent,
-):
+) -> list[str]:
 
     await notify(
         id="image_generation",
@@ -33,7 +35,7 @@ async def gpt_image_generation(
     )
 
     size: str = "1024x1024"
-    quality: str = "medium"
+    quality: str = "low"
     api_version = "2025-04-01-preview"
     deployment_name = "gpt-image-1"
     endpoint = f"{AZURE_IMAGE_ENDPOINT}/openai/deployments/{deployment_name}/images/generations?api-version={api_version}"
@@ -88,7 +90,9 @@ async def gpt_image_generation(
             item["b64_json"] for item in response["data"] if item["b64_json"]
         ]
 
+        images = []
         async for blob_name in save_image_blobs(base64_images):
+            images.append(blob_name)
             await notify(
                 id="image_generation",
                 status="step completed",
@@ -113,6 +117,8 @@ async def gpt_image_generation(
             information="Image generation complete",
         )
 
+        return images
+
 
 @agent(
     name="Image Editing Agent",
@@ -127,9 +133,12 @@ async def gpt_image_edit(
         str,
         "The base64 encoded image to be used as a starting point for the generation. You do not need to include the image itself, you can add a placeholder here since the UI will handle the image upload.",
     ],
-    kind: Annotated[str, "This can be either a file upload or an image that is captured with the users camera. Choose \"FILE\" if the image is uploaded from the users device. Choose \"CAMERA\" if the image should be captured with the users camera."],
+    kind: Annotated[
+        str,
+        'This can be either a file upload or an image that is captured with the users camera. Choose "FILE" if the image is uploaded from the users device. Choose "CAMERA" if the image should be captured with the users camera.',
+    ],
     notify: AgentUpdateEvent,
-):
+) -> list[str]:
     await notify(
         id="image_edit",
         status="run in_progress",
@@ -138,79 +147,88 @@ async def gpt_image_edit(
 
     api_version = "2025-04-01-preview"
     deployment_name = "gpt-image-1"
-    endpoint = f"{AZURE_IMAGE_ENDPOINT}/openai/deployments/{deployment_name}/images/edit?api-version={api_version}"
+    endpoint = f"{AZURE_IMAGE_ENDPOINT}/openai/deployments/{deployment_name}/images/edits?api-version={api_version}"
 
     await notify(
         id="image_edit", status="step in_progress", information="Executing Model"
     )
 
-    async with aiohttp.ClientSession() as session:
-        # send image as multipart/form-data
-        form_data = aiohttp.FormData()
-        form_data.add_field("prompt", description)
-        form_data.add_field("image", base64.b64decode(image))
+    size: str = "1024x1024"
+    quality: str = "low"
 
-        async with session.post(
-            endpoint,
-            headers={
-                "Authorization": f"Bearer {AZURE_IMAGE_API_KEY}",
-            },
-            data=form_data
-        ) as response:
-            if response.status != 200:
-                print(f"Error: {response.status}")
-                await notify(
-                    id="image_edit",
-                    status="step failed",
-                    information=f"Error: {response.status}",
-                )
-                return []
+    # send image as multipart/form-data
+    form_data = aiohttp.FormData()
+    img = io.BytesIO(base64.b64decode(image))
+    form_data.add_field("image", img, filename="image.jpg", content_type="image/jpeg")
+    form_data.add_field("prompt", description, content_type="text/plain")
+    form_data.add_field("size", size, content_type="text/plain")
+    form_data.add_field("quality", quality, content_type="text/plain")
 
+    async with post_request(
+        endpoint,
+        headers={
+            "Authorization": f"Bearer {AZURE_IMAGE_API_KEY}",
+        },
+        data=form_data,
+    ) as response:
+        if "error" in response:
+            print(json.dumps(response, indent=2))
+            await notify(
+                id="image_generation",
+                status="step failed",
+                information=response["error"],
+            )
+            return []
+
+        await notify(
+            id="image_edit",
+            status="step in_progress",
+            information="fetching image",
+        )
+
+        # save the image to a file
+        # iterate through the images and save them
+        if not response["data"]:
+            print("No images found in the response.")
+            return []
+
+        await notify(
+            id="image_edit",
+            status="step in_progress",
+            information="storing image",
+        )
+
+        base64_images = [
+            item["b64_json"] for item in response["data"] if item["b64_json"]
+        ]
+
+        images = []
+        async for blob in save_image_blobs(base64_images):
+            images.append(blob)
             await notify(
                 id="image_edit",
-                status="step in_progress",
-                information="fetching image",
+                status="step completed",
+                content=Content(
+                    type="image",
+                    content=[
+                        {
+                            "type": "image",
+                            "description": description,
+                            "image_url": blob,
+                            "kind": kind,
+                        }
+                    ],
+                ),
+                output=True,
             )
 
-            img = await response.json()
-            # save the image to a file
-            # iterate through the images and save them
-            if not img["data"]:
-                print("No images found in the response.")
-                return []
+        await notify(
+            id="image_edit",
+            status="run completed",
+            information="Image edit complete",
+        )
 
-            await notify(
-                id="image_edit",
-                status="step in_progress",
-                information="storing image",
-            )
-
-            base64_images = [
-                item["b64_json"] for item in img["data"] if item["b64_json"]
-            ]
-            async for blob in save_image_blobs(base64_images):
-                await notify(
-                    id="image_edit",
-                    status="step completed",
-                    content=Content(
-                        type="image",
-                        content=[
-                            {
-                                "type": "image",
-                                "description": description,
-                                "image_url": blob,
-                                "kind": kind,
-                            }
-                        ],
-                    ),
-                    output=True,
-                )
-
-            await notify(
-                id="image_edit",
-                status="run completed",
-                information="Image edit complete",
-            )
+        return images
 
 
 @agent(
