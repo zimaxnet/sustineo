@@ -1,17 +1,16 @@
-import os
 import base64
-import aiohttp
+import os
 from typing import Annotated
-from api.agent.decorators import agent
 
-from api.agent.storage import upload_base64_image
+import aiohttp
+from api.agent.decorators import agent
 from api.model import AgentUpdateEvent, Content
-from api.agent.common import execute_foundry_agent
+from api.agent.storage import save_image_blobs
+from api.agent.common import execute_foundry_agent, post_request
 
 
 AZURE_IMAGE_ENDPOINT = os.environ.get("AZURE_IMAGE_ENDPOINT", "EMPTY").rstrip("/")
 AZURE_IMAGE_API_KEY = os.environ.get("AZURE_IMAGE_API_KEY", "EMPTY")
-SUSTINEO_STORAGE = os.environ.get("SUSTINEO_STORAGE", "EMPTY")
 
 
 @agent(
@@ -43,77 +42,76 @@ async def gpt_image_generation(
         id="image_generation", status="step in_progress", information="Executing Model"
     )
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            endpoint,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {AZURE_IMAGE_API_KEY}",
-            },
-            json={
-                "prompt": description,
-                "size": size,
-                "quality": quality,
-                "output_compression": 100,
-                "output_format": "png",
-                "n": n,
-            },
-        ) as response:
-            if response.status != 200:
-                print(f"Error: {response.status}")
-                await notify(
-                    id="image_generation",
-                    status="step failed",
-                    information=f"Error: {response.status}",
-                )
-                return []
-
+    async with post_request(
+        endpoint,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {AZURE_IMAGE_API_KEY}",
+        },
+        json={
+            "prompt": description,
+            "size": size,
+            "quality": quality,
+            "output_compression": 100,
+            "output_format": "png",
+            "n": n,
+        },
+    ) as response:
+        if "error" in response:
+            print(response["error"])
             await notify(
                 id="image_generation",
-                status="step in_progress",
-                information="fetching images" if n > 1 else "fetching image",
+                status="step failed",
+                information=response["error"],
             )
+            return []
 
-            image = await response.json()
-            # save the image to a file
-            # iterate through the images and save them
-            if not image["data"]:
-                print("No images found in the response.")
-                return []
+        await notify(
+            id="image_generation",
+            status="step in_progress",
+            information="fetching images" if n > 1 else "fetching image",
+        )
 
+        # save the image to a file
+        # iterate through the images and save them
+        if not response["data"]:
+            print("No images found in the response.")
+            return []
+
+        await notify(
+            id="image_generation",
+            status="step in_progress",
+            information="storing images" if n > 1 else "storing image",
+        )
+
+        base64_images = [
+            item["b64_json"] for item in response["data"] if item["b64_json"]
+        ]
+
+        async for blob_name in save_image_blobs(base64_images):
             await notify(
                 id="image_generation",
-                status="step in_progress",
-                information="storing images" if n > 1 else "storing image",
+                status="step completed",
+                content=Content(
+                    type="image",
+                    content=[
+                        {
+                            "type": "image",
+                            "description": description,
+                            "size": size,
+                            "quality": quality,
+                            "image_url": blob_name,
+                        }
+                    ],
+                ),
+                output=True,
             )
 
-            base64_images = [
-                item["b64_json"] for item in image["data"] if item["b64_json"]
-            ]
-            async for blob in upload_base64_image(base64_images):
-                await notify(
-                    id="image_generation",
-                    status="step completed",
-                    content=Content(
-                        type="image",
-                        content=[
-                            {
-                                "type": "image",
-                                "description": description,
-                                "size": size,
-                                "quality": quality,
-                                "image_url": blob,
-                            }
-                        ],
-                    ),
-                    output=True,
-                )
-
-            await notify(
-                id="image_generation",
-                status="run completed",
-                information="Image generation complete",
-            )
+        await notify(
+            id="image_generation",
+            status="run completed",
+            information="Image generation complete",
+        )
 
 
 @agent(
@@ -190,7 +188,7 @@ async def gpt_image_edit(
             base64_images = [
                 item["b64_json"] for item in img["data"] if item["b64_json"]
             ]
-            async for blob in upload_base64_image(base64_images):
+            async for blob in save_image_blobs(base64_images):
                 await notify(
                     id="image_edit",
                     status="step completed",

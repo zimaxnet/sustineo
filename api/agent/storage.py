@@ -8,8 +8,7 @@ from azure.storage.blob.aio import BlobServiceClient
 
 
 SUSTINEO_STORAGE = os.environ.get("SUSTINEO_STORAGE", "EMPTY")
-STORAGE_CONTAINER = "sustineo"
-
+SUSTINEO_CONTAINER = "sustineo"
 
 @contextlib.asynccontextmanager
 async def get_storage_client(container: str):
@@ -21,8 +20,12 @@ async def get_storage_client(container: str):
     try:
         # Create the container if it doesn't exist
         container_client = blob_service_client.get_container_client(container)
-        if not await container_client.exists():
-            await container_client.create_container()
+
+        # remove the comment below if you want to ensure 
+        # the container exists. commenting to avoid unnecessary 
+        # creation
+        #if not await container_client.exists():
+        #    await container_client.create_container()
 
         yield container_client
     finally:
@@ -30,8 +33,9 @@ async def get_storage_client(container: str):
         await blob_service_client.close()
 
 
-async def upload_base64_image(images: list[str]) -> AsyncGenerator[str, None]:
-    async with get_storage_client(STORAGE_CONTAINER) as container_client:
+
+async def save_image_blobs(images: list[str]) -> AsyncGenerator[str, None]:
+    async with get_storage_client(SUSTINEO_CONTAINER) as container_client:
         for image in images:
             image_bytes = base64.b64decode(image)
             blob_name = f"images/{str(uuid.uuid4())}.png"
