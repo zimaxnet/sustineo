@@ -68,7 +68,7 @@ jobs:
                                 "AZURE_IMAGE_ENDPOINT=secretref:azure-image-endpoint" \
                                 "AZURE_IMAGE_API_KEY=secretref:azure-image-api-key" \
                                 "SUSTINEO_STORAGE=secretref:sustineo-storage" \
-                                "LOCAL_TRACING_ENABLED=false"
+                                "LOCAL_TRACING_ENABLED=true"
 
       - name: Logout
         run: |
