@@ -1,0 +1,40 @@
+{
+  "name": "test-dataset",
+  "evaluators": [
+    "IntentResolutionEvaluator",
+    "TaskAdherenceEvaluator",
+    "CoherenceEvaluator",
+    "RelevanceEvaluator",
+    "FluencyEvaluator"
+  ],
+"data": [
+    {
+    "id": "test_content_writer_hackathon_01",
+    "query": "Create a LinkedIn post draft promoting our upcoming Hackathon: Build the Future, May 10, 2025, in NYC."
+    },
+    {
+      "id": "test_content_writer_launch_announcement_02",
+      "query": "Write a draft LinkedIn post for the launch of Copilot Studio Beta on June 1st."
+    },
+    {
+      "id": "test_content_writer_recap_post_03",
+      "query": "Write a LinkedIn recap post for BuildEvents Europe 2025. Highlight the turnout and feedback."
+    },
+    {
+      "id": "test_content_writer_invite_04",
+      "query": "Draft a post inviting people to our AI Ethics Roundtable, June 15, virtual event."
+    },
+    {
+      "id": "test_content_writer_general_promo_05",
+      "query": "Create a general promotional post for BuildEvents. Focus on networking and learning opportunities."
+    },
+    {
+      "id": "test_content_writer_career_fair_06",
+      "query": "Write a LinkedIn draft announcing Contoso’s presence at the Global Tech Career Fair this August."
+    },
+    {
+      "id": "test_content_writer_event_series_07",
+      "query": "Generate a draft post introducing our new monthly event series: TechTalk Thursdays."
+    }
+  ]
+}

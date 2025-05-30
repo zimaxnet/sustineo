@@ -1,6 +1,7 @@
-name: Azure AI Foundry Agent Evaluations
+name: Event Space Evals
 
 on:
+  push:
   workflow_dispatch:
     
 permissions:
@@ -25,7 +26,7 @@ jobs:
     - name: store eval data
       id: store-eval-data
       run: |
-        DATA_FILE=$(cat data/agent-evals.json)
+        DATA_FILE=$(cat data/event-space.json)
         echo DATA_FILE=$DATA_FILE >> $GITHUB_OUTPUT
 
     - name: GitHub Models Eval Summary
@@ -54,6 +55,6 @@ jobs:
       with:
         deployment-name: "gpt-4o-mini"
         azure-aiproject-connection-string: ${{ secrets.AZURE_AI_PROJECT_CONNECTION_STRING }}
-        agent-ids: ${{ secrets.AZURE_AI_AGENT_IDS }}
+        agent-ids: ${{ secrets.EVENT_AGENT_IDS }}
         # evaluation-result-view: "all-scores"
         data-path: "data/agent-evals.json"
