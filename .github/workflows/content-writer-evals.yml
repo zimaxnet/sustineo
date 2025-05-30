@@ -2,6 +2,8 @@ name: Content Writer Evaluation
 
 on:
   push:
+    branches:
+      - release
   workflow_dispatch:
     
 permissions:

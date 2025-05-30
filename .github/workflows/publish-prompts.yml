@@ -2,6 +2,8 @@ name: Publish Prompts Evaluation
 
 on:
   push:
+    branches:
+      - release
   workflow_dispatch:
     
 permissions:
