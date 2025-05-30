@@ -4,7 +4,7 @@ import logging
 import contextlib
 from pathlib import Path
 from typing import Union
-from prompty.tracer import Tracer #, PromptyTracer
+from prompty.tracer import Tracer, PromptyTracer
 from opentelemetry import trace as oteltrace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -66,9 +66,8 @@ def init_tracing(local_tracing: bool = True):
     """
 
     if local_tracing:
-        #local_trace = PromptyTracer()
-        #Tracer.add("PromptyTracer", local_trace.tracer)
-        return
+        local_trace = PromptyTracer()
+        Tracer.add("PromptyTracer", local_trace.tracer)
     else:
         # Initialize OpenTelemetry Tracer
         otel_genai_mapper = GenAIOTel(base_path / "semantic-mapper.json")
