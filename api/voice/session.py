@@ -155,95 +155,93 @@ class RealtimeSession:
 
             match event.type:
                 case "error":
-                    print(json.dumps(event.model_dump(), indent=2))
-                    # await self._handle_error(event)
+
+                    await self.handle_error(event)
                 case "session.created":
-                    await self._session_created(event)
+                    await self.session_created(event)
                 case "session.updated":
-                    await self._session_updated(event)
+                    await self.session_updated(event)
                 case "conversation.created":
-                    await self._conversation_created(event)
+                    await self.conversation_created(event)
                 case "conversation.item.created":
-                    await self._conversation_item_created(event)
+                    await self.conversation_item_created(event)
                 case "conversation.item.input_audio_transcription.completed":
-                    await self._conversation_item_input_audio_transcription_completed(
+                    await self.conversation_item_input_audio_transcription_completed(
                         event
                     )
                 case "conversation.item.input_audio_transcription.delta":
-                    await self._conversation_item_input_audio_transcription_delta(event)
+                    await self.conversation_item_input_audio_transcription_delta(event)  # type: ignore
                 case "conversation.item.input_audio_transcription.failed":
-                    await self._conversation_item_input_audio_transcription_failed(
-                        event
-                    )
+                    await self.conversation_item_input_audio_transcription_failed(event)
                 case "conversation.item.truncated":
-                    await self._conversation_item_truncated(event)
+                    await self.conversation_item_truncated(event)
                 case "conversation.item.deleted":
-                    await self._conversation_item_deleted(event)
+                    await self.conversation_item_deleted(event)
                 case "input_audio_buffer.committed":
-                    await self._input_audio_buffer_committed(event)
+                    await self.input_audio_buffer_committed(event)
                 case "input_audio_buffer.cleared":
-                    await self._input_audio_buffer_cleared(event)
+                    await self.input_audio_buffer_cleared(event)
                 case "input_audio_buffer.speech_started":
-                    await self._input_audio_buffer_speech_started(event)
+                    await self.input_audio_buffer_speech_started(event)
                 case "input_audio_buffer.speech_stopped":
-                    await self._input_audio_buffer_speech_stopped(event)
+                    await self.input_audio_buffer_speech_stopped(event)
                 case "response.created":
-                    await self._response_created(event)
+                    await self.response_created(event)
                 case "response.done":
-                    await self._response_done(event)
+                    await self.response_done(event)
                 case "response.output_item.added":
-                    await self._response_output_item_added(event)
+                    await self.response_output_item_added(event)
                 case "response.output_item.done":
-                    await self._response_output_item_done(event)
+                    await self.response_output_item_done(event)
                 case "response.content_part.added":
-                    await self._response_content_part_added(event)
+                    await self.response_content_part_added(event)
                 case "response.content_part.done":
-                    await self._response_content_part_done(event)
+                    await self.response_content_part_done(event)
                 case "response.text.delta":
-                    await self._response_text_delta(event)
+                    await self.response_text_delta(event)  # type: ignore
                 case "response.text.done":
-                    await self._response_text_done(event)
+                    await self.response_text_done(event)
                 case "response.audio_transcript.delta":
-                    await self._response_audio_transcript_delta(event)
+                    await self.response_audio_transcript_delta(event)  # type: ignore
                 case "response.audio_transcript.done":
-                    await self._response_audio_transcript_done(event)
+                    await self.response_audio_transcript_done(event)
                 case "response.audio.delta":
-                    await self._response_audio_delta(event)
+                    await self.response_audio_delta(event)  # type: ignore
                 case "response.audio.done":
-                    await self._response_audio_done(event)
+                    await self.response_audio_done(event)  # type: ignore
                 case "response.function_call_arguments.delta":
-                    await self._response_function_call_arguments_delta(event)
+                    await self.response_function_call_arguments_delta(event)  # type: ignore
                 case "response.function_call_arguments.done":
-                    await self._response_function_call_arguments_done(event)
+                    await self.response_function_call_arguments_done(event)  # type: ignore
                 case "rate_limits.updated":
-                    await self._rate_limits_updated(event)
+                    await self.rate_limits_updated(event)
                 case _:
                     print(
                         f"Unhandled event type {event.type}",
                     )
 
-    @trace(name="error")
-    async def _handle_error(self, event: ErrorEvent):
-        print("Error event", event.error)
+    @trace
+    async def handle_error(self, event: ErrorEvent):
+        print(json.dumps(event.model_dump(), indent=2))
 
-    @trace(name="session.created")
-    async def _session_created(self, event: SessionCreatedEvent):
+    @trace
+    async def session_created(self, event: SessionCreatedEvent):
         pass
 
-    @trace(name="session.updated")
-    async def _session_updated(self, event: SessionUpdatedEvent):
+    @trace
+    async def session_updated(self, event: SessionUpdatedEvent):
         pass
 
-    @trace(name="conversation.created")
-    async def _conversation_created(self, event: ConversationCreatedEvent):
+    @trace
+    async def conversation_created(self, event: ConversationCreatedEvent):
         pass
 
-    @trace(name="conversation.item.created")
-    async def _conversation_item_created(self, event: ConversationItemCreatedEvent):
+    @trace
+    async def conversation_item_created(self, event: ConversationItemCreatedEvent):
         pass
 
-    @trace(name="conversation.item.input_audio_transcription.completed")
-    async def _conversation_item_input_audio_transcription_completed(
+    @trace
+    async def conversation_item_input_audio_transcription_completed(
         self, event: ConversationItemInputAudioTranscriptionCompletedEvent
     ):
         if event.transcript is None or len(event.transcript.strip()) == 0:
@@ -269,53 +267,51 @@ class RealtimeSession:
                 },
             )
 
-    async def _conversation_item_input_audio_transcription_delta(
+    async def conversation_item_input_audio_transcription_delta(
         self, event: ConversationItemInputAudioTranscriptionDeltaEvent
     ):
         pass
 
-    @trace(name="conversation.item.input_audio_transcription.failed")
-    async def _conversation_item_input_audio_transcription_failed(
+    @trace
+    async def conversation_item_input_audio_transcription_failed(
         self, event: ConversationItemInputAudioTranscriptionFailedEvent
     ):
         pass
 
-    @trace(name="conversation.item.truncated")
-    async def _conversation_item_truncated(self, event: ConversationItemTruncatedEvent):
+    @trace
+    async def conversation_item_truncated(self, event: ConversationItemTruncatedEvent):
         pass
 
-    @trace(name="conversation.item.deleted")
-    async def _conversation_item_deleted(self, event: ConversationItemDeletedEvent):
+    @trace
+    async def conversation_item_deleted(self, event: ConversationItemDeletedEvent):
         pass
 
-    @trace(name="input_audio_buffer.committed")
-    async def _input_audio_buffer_committed(
-        self, event: InputAudioBufferCommittedEvent
-    ):
+    @trace
+    async def input_audio_buffer_committed(self, event: InputAudioBufferCommittedEvent):
         pass
 
-    @trace(name="input_audio_buffer.cleared")
-    async def _input_audio_buffer_cleared(self, event: InputAudioBufferClearedEvent):
+    @trace
+    async def input_audio_buffer_cleared(self, event: InputAudioBufferClearedEvent):
         pass
 
-    @trace(name="input_audio_buffer.speech_started")
-    async def _input_audio_buffer_speech_started(
+    @trace
+    async def input_audio_buffer_speech_started(
         self, event: InputAudioBufferSpeechStartedEvent
     ):
         await self.connection.send_update(Update.interrupt())
 
-    @trace(name="input_audio_buffer.speech_stopped")
-    async def _input_audio_buffer_speech_stopped(
+    @trace
+    async def input_audio_buffer_speech_stopped(
         self, event: InputAudioBufferSpeechStoppedEvent
     ):
         pass
 
-    @trace(name="response.created")
-    async def _response_created(self, event: ResponseCreatedEvent):
+    @trace
+    async def response_created(self, event: ResponseCreatedEvent):
         pass
 
-    @trace(name="response.done")
-    async def _response_done(self, event: ResponseDoneEvent):
+    @trace
+    async def response_done(self, event: ResponseDoneEvent):
         if event.response.output is not None and len(event.response.output) > 0:
             output = event.response.output[0]
             match output.type:
@@ -361,19 +357,24 @@ class RealtimeSession:
 
         self.active = False
 
-    @trace(name="response.output_item.added")
-    async def _response_output_item_added(self, event: ResponseOutputItemAddedEvent):
+    @trace
+    async def response_output_item_added(self, event: ResponseOutputItemAddedEvent):
         pass
 
-    @trace(name="response.output_item.done")
-    async def _response_output_item_done(self, event: ResponseOutputItemDoneEvent):
+    @trace
+    async def response_output_item_done(self, event: ResponseOutputItemDoneEvent):
         if event.item.type == "function_call":
+            try:
+                args = json.loads(event.item.arguments or "{}")
+            except json.JSONDecodeError:
+                args = {}
+
             await self.connection.send_update(
                 Update.function(
                     id=str(event.item.id),
                     call_id=str(event.item.call_id),
                     name=str(event.item.name),
-                    arguments=json.loads(event.item.arguments or "{}"),
+                    arguments=args,
                 )
             )
 
@@ -389,55 +390,54 @@ class RealtimeSession:
                     },
                 )
 
-    @trace(name="response.content_part.added")
-    async def _response_content_part_added(self, event: ResponseContentPartAddedEvent):
+    @trace
+    async def response_content_part_added(self, event: ResponseContentPartAddedEvent):
         pass
 
-    @trace(name="response.content_part.done")
-    async def _response_content_part_done(self, event: ResponseContentPartDoneEvent):
+    @trace
+    async def response_content_part_done(self, event: ResponseContentPartDoneEvent):
         pass
 
-    @trace(name="response.text.delta")
-    async def _response_text_delta(self, event: ResponseTextDeltaEvent):
+    async def response_text_delta(self, event: ResponseTextDeltaEvent):
         pass
 
-    @trace(name="response.text.done")
-    async def _response_text_done(self, event: ResponseTextDoneEvent):
+    @trace
+    async def response_text_done(self, event: ResponseTextDoneEvent):
         pass
 
-    async def _response_audio_transcript_delta(
+    async def response_audio_transcript_delta(
         self, event: ResponseAudioTranscriptDeltaEvent
     ):
         pass
 
-    @trace(name="response.audio.transcript.done")
-    async def _response_audio_transcript_done(
+    @trace
+    async def response_audio_transcript_done(
         self, event: ResponseAudioTranscriptDoneEvent
     ):
         pass
 
-    async def _response_audio_delta(self, event: ResponseAudioDeltaEvent):
+    async def response_audio_delta(self, event: ResponseAudioDeltaEvent):
         await self.connection.send_update(
             Update.audio(id=event.event_id, data=event.delta)
         )
 
-    @trace(name="response.audio.done")
-    async def _response_audio_done(self, event: ResponseAudioDoneEvent):
+    @trace
+    async def response_audio_done(self, event: ResponseAudioDoneEvent):
         pass
 
-    async def _response_function_call_arguments_delta(
+    async def response_function_call_arguments_delta(
         self, event: ResponseFunctionCallArgumentsDeltaEvent
     ):
         pass
 
-    @trace(name="response.function_call_arguments.done")
-    async def _response_function_call_arguments_done(
+    @trace
+    async def response_function_call_arguments_done(
         self, event: ResponseFunctionCallArgumentsDoneEvent
     ):
         pass
 
-    @trace(name="rate_limits.updated")
-    async def _rate_limits_updated(self, event: RateLimitsUpdatedEvent):
+    @trace
+    async def rate_limits_updated(self, event: RateLimitsUpdatedEvent):
         pass
 
     @trace

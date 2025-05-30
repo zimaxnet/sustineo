@@ -71,6 +71,7 @@ class SustineoAgentEventHandler(AsyncAgentEventHandler[str]):
                         **{
                             key: value
                             for key, value in tool_call[tool_call["type"]].items()
+                            if tool_call["type"] in tool_call
                         },
                     }
                     for tool_call in tool_calls
