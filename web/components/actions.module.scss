@@ -1,14 +1,8 @@
 @use "../app/defaults.scss" as *;
 
-.container {
-  position: fixed;
-  right: 3rem;
-  bottom: 3rem;
-  z-index: 1000;
+.actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex-wrap: nowrap;
-  justify-content: flex-end;
-  align-items: center;
   gap: 0.5rem;
 }

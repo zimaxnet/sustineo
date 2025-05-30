@@ -1,38 +1,11 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-
-export interface Message {
-  id: string;
-  type: "message";
-  content: string;
-  role: "user" | "assistant";
-}
-
-export interface Function {
-  id: string;
-  type: "function";
-  name: string;
-  arguments: Record<string, any>;
-}
-
-export interface Agent {
-  id: string;
-  type: "agent";
-  agentName: string;
-  callId: string;
-  name: "run" | "step" | "message";
-  status: string;
-  statusType?: string;
-  content?: object;
-}
-
-
-export type Effort = Message | Function | Agent;
-
+import type { Update } from "./voice/voice-client";
 
 export interface EffortStore {
-  efforts: Effort[];
-  addEffort: (effort: Effort) => void;
+  efforts: Update[];
+  addEffortList: (updates: Update[]) => void;
+  addEffort: (update: Update) => void;
   removeEffort: (index: number) => void;
   clearEfforts: () => void;
 }
@@ -41,8 +14,10 @@ export const useEffortStore = create<EffortStore>()(
   persist(
     (set) => ({
       efforts: [],
-      addEffort: (effort) =>
-        set((state) => ({ efforts: [...state.efforts, effort] })),
+      addEffortList: (updates) =>
+        set((state) => ({ efforts: [...state.efforts, ...updates] })),
+      addEffort: (update) =>
+        set((state) => ({ efforts: [...state.efforts, update] })),
       removeEffort: (index) =>
         set((state) => ({
           efforts: state.efforts.filter((_, i) => i !== index),

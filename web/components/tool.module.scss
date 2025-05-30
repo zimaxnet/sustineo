@@ -3,7 +3,7 @@
 .button {
   background-color: $color-zinc-50;
   color: $color-zinc-800;
-  border: solid 3px $color-zinc-300;
+  border: solid 3px $color-zinc-100;
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -16,6 +16,6 @@
 }
 
 .button:hover {
-  background-color: $color-fuchsia-300;
-  border-color: $color-fuchsia-600;
+  background-color: $color-zinc-300;
+  border-color: $color-zinc-600;
 }

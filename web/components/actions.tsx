@@ -15,7 +15,7 @@ const Actions: React.FC<Props> = ({ children }) => {
     children = [children];
   }
   return (
-    <div className={styles.container}>
+    <div className={styles.actions}>
       {children.map((child) => {
         return child;
       })}

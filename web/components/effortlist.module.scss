@@ -1,18 +1,15 @@
 @use "../app/defaults.scss" as *;
 @use 'sass:color';
 
-.container {
+.effortlist {
   overflow-y: auto;
   overflow-x: hidden;
   color: $color-zinc-100;
   display: flex;
   flex-direction: column;
-  //justify-content: flex-end;
-  gap: 10px;
+  gap: 1rem;
   padding: 10px;
-  margin-bottom: 3rem;
-  mask-image: linear-gradient(180deg, transparent, black 5%);
-  height: 100%;
+  height: calc(100% - 16rem);
 }
 
 .scrollbarHide {

@@ -14,7 +14,7 @@ const Settings: React.FC<Props> = ({ children }) => {
     children = [children];
   }
   return (
-    <div className={styles.container}>
+    <div className={styles.settings}>
       {children.map((child) => {
         return child;
       })}

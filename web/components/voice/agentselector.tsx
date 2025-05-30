@@ -4,7 +4,6 @@ import type { Configuration } from "store/voice/configuration";
 import {
   useEffect,
   useState,
-  type ChangeEvent,
   type Dispatch,
   type SetStateAction,
 } from "react";

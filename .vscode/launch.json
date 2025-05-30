@@ -12,6 +12,21 @@
       "cwd": "${workspaceFolder}",
       "args": ["api.main:app", "--reload"],
       "jinja": true
+    },
+    {
+      "name": "Python: Attach to FastAPI",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+        "host": "127.0.0.1",
+        "port": 5678
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/api",
+          "remoteRoot": "."
+        }
+      ]
     }
   ]
 }

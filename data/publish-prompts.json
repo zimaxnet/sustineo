@@ -1,0 +1,40 @@
+{
+  "name": "test-dataset",
+  "evaluators": [
+    "IntentResolutionEvaluator",
+    "TaskAdherenceEvaluator",
+    "CoherenceEvaluator",
+    "RelevanceEvaluator",
+    "FluencyEvaluator"
+  ],
+"data": [
+    {
+      "id": "test_publish_post_simple_01",
+      "query": "Publish this post: 'Excited to share our latest product launch!' with image_url: 'https://contoso.com/images/launch.jpg'"
+    },
+    {
+      "id": "test_publish_event_announcement_02",
+      "query": "Post the following LinkedIn content: 'Join us for our annual BuildEvents conference in Chicago!' with image_url: 'https://contoso.com/images/conference.jpg'"
+    },
+    {
+      "id": "test_publish_text_only_03",
+      "query": "Post this finalized draft to LinkedIn: 'We’ve reached 10,000 customers thanks to you!'"
+    },
+    {
+      "id": "test_publish_with_image_url_04",
+      "query": "Publish the following post: 'The future of AI starts now.' with image_url: 'https://contoso.com/images/ai_future.png'"
+    },
+    {
+      "id": "test_publish_no_image_05",
+      "query": "Publish this finalized LinkedIn text: 'Our team just wrapped up a major milestone in product development.'"
+    },
+    {
+      "id": "test_publish_announcement_06",
+      "query": "Post: 'We’re hiring! Explore opportunities at Contoso.' with image_url: 'https://contoso.com/images/hiring_banner.png'"
+    },
+    {
+      "id": "test_publish_launch_post_07",
+      "query": "Publish this LinkedIn update: 'Contoso BuildEvents 2025 is officially live!' with image_url: 'https://contoso.com/images/buildevents_launch.jpg'"
+    }
+  ]
+}

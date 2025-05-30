@@ -4,6 +4,8 @@
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  user-select: none;
+  cursor: pointer;
 }
 
 .control {
@@ -58,4 +60,18 @@
 
 .mediaselect:focus-visible {
   outline: 2px solid $color-sky-500;
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-items: center;
+  gap: 1rem;
+  cursor: pointer;
+
+  & label {
+    user-select: none;
+    cursor: pointer;
+  }
 }

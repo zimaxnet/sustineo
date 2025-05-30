@@ -1,19 +1,20 @@
-from datetime import datetime
 import os
-from pathlib import Path
-from typing import Union
-from prompty import _load_with_slots
 import prompty
-from prompty.utils import parse
-from azure.cosmos import PartitionKey
-from azure.cosmos.aio import CosmosClient, ContainerProxy
 import aiofiles
 import contextlib
+from pathlib import Path
+from typing import Union
+from datetime import datetime
+
+from prompty.utils import parse
 from prompty.core import Prompty
+from prompty import _load_with_slots
+
+from azure.cosmos import PartitionKey
+from azure.cosmos.aio import CosmosClient, ContainerProxy
 
 from openai.types.beta.realtime.session_update_event import SessionTool
-
-from api.voice.model import Configuration, DefaultConfiguration
+from api.model import Configuration, DefaultConfiguration
 
 
 COSMOSDB_CONNECTION = os.getenv("COSMOSDB_CONNECTION", "fake_connection")
@@ -143,9 +144,6 @@ async def get_default_configuration() -> Union[Configuration, None]:
                 tools=item["tools"] if "tools" in item else [],
             )
         return None
-
-
-
 
 
 def convert_function_params(params: list[dict]) -> dict:

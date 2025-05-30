@@ -2,7 +2,7 @@
 @use 'sass:color';
 
 .container {
-  //padding-top: 1.5rem;
+  padding-top: 1.5rem;
   height: 3.5rem;
   z-index: 1500;
   color: $color-zinc-400;
@@ -27,10 +27,23 @@
 }
 
 .title {
-  font-size: 2rem;
-  font-weight: bold;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
   color: $color-zinc-100;
-  margin: 0;
+  gap: 5px;
+}
+
+.maintitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: $color-zinc-100;
+  padding-bottom: 0.25rem;
 }
 
 .version {
@@ -66,23 +79,23 @@
 
 .avatar {
   border-radius: 50%;
-  height: 32px;
-  width: 32px;
+  height: 48px;
+  width: 48px;
   margin-right: 1rem;
 }
 
 .userIcon {
-      background-color: $color-zinc-100;
-      color: $color-zinc-800;
-      border: solid 1px $color-zinc-300;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-      margin-right: 1rem;
+  background-color: $color-zinc-100;
+  color: $color-zinc-800;
+  border: solid 1px $color-zinc-300;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  margin-right: 1rem;
 }

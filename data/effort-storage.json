@@ -1,0 +1,330 @@
+{
+  "state": {
+    "efforts": [
+      {
+        "id": "item_BV9gx1HNnajgrsjMOfEYB",
+        "type": "message",
+        "role": "assistant",
+        "content": "Tell me more about the event you're planning."
+      },
+      {
+        "id": "item_BV9h1G4AAQQYSxaoCUp2l",
+        "type": "message",
+        "role": "user",
+        "content": "Hi, I'd like help planning a hackathon in San Francisco on May 16th, 2025. My budget's around $30,000 and we're trying to accommodate 200 people. Could you help me finding an event space?"
+      },
+      {
+        "id": "item_BV9hH0O0XcTRsyLgIfijh",
+        "type": "function",
+        "call_id": "call_XsULMy5XQH6eroTH",
+        "name": "event_venue_agent",
+        "arguments": {
+          "additional_instructions": "Find a venue suitable for a hackathon in San Francisco on May 16th, 2025. The venue should accommodate 200 attendees and fit within a budget of $30,000.",
+          "query": "Hackathon event space for 200 people in San Francisco, within a $30,000 budget, for May 16th, 2025."
+        }
+      },
+      {
+        "id": "item_BV9hErdWUMxCUpmEbOaIx",
+        "type": "message",
+        "role": "assistant",
+        "content": "Sure! I'll start by searching for an event space in San Francisco for your hackathon on May 16th, 2025. With a budget of around $30,000 and an attendee count of 200, I'll look for a venue that fits these criteria."
+      },
+      {
+        "id": "item_BV9hI7V1AIC3KdhaagwlX",
+        "type": "message",
+        "role": "assistant",
+        "content": "I'm searching for the perfect venue for your hackathon. I'll let you know as soon as I have some options."
+      },
+      {
+        "id": "run_P5fbBG7K8uUa4BLXIhK62B9P",
+        "type": "agent",
+        "call_id": "call_XsULMy5XQH6eroTH",
+        "name": "Event Venue Agent ",
+        "status": "run queued",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "run_P5fbBG7K8uUa4BLXIhK62B9P",
+        "type": "agent",
+        "call_id": "call_XsULMy5XQH6eroTH",
+        "name": "Event Venue Agent ",
+        "status": "run in progress",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "step_sSkZI7BqDByROGQrh5ZoDoGQ",
+        "type": "agent",
+        "call_id": "call_XsULMy5XQH6eroTH",
+        "name": "Event Venue Agent ",
+        "status": "step \"tool calls\" in progress",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "step_sSkZI7BqDByROGQrh5ZoDoGQ",
+        "type": "agent",
+        "call_id": "call_XsULMy5XQH6eroTH",
+        "name": "Event Venue Agent ",
+        "status": "step \"tool calls\" completed",
+        "information": null,
+        "content": {
+          "type": "tool_calls",
+          "content": [
+            {
+              "id": "call_OhAPlmTMQNN7oNb85esFGSng",
+              "type": "file_search",
+              "ranking_options": {
+                "ranker": "default_2024_08_21",
+                "score_threshold": 0
+              },
+              "results": [
+                {
+                  "file_id": "assistant-75cVYfZdnmqLn3fMH2NxbU",
+                  "file_name": "Event_Venues.docx",
+                  "score": 0.03333333507180214,
+                  "attributes": {}
+                }
+              ]
+            }
+          ]
+        },
+        "output": false
+      },
+      {
+        "id": "step_J4S2JZrFApWA2CyPj8NYwxiZ",
+        "type": "agent",
+        "call_id": "call_XsULMy5XQH6eroTH",
+        "name": "Event Venue Agent ",
+        "status": "step \"message creation\" in progress",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "msg_5qdHEy3aN6vSMlmPBioowhrH",
+        "type": "agent",
+        "call_id": "call_XsULMy5XQH6eroTH",
+        "name": "Event Venue Agent ",
+        "status": "message in progress",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "msg_5qdHEy3aN6vSMlmPBioowhrH",
+        "type": "agent",
+        "call_id": "call_XsULMy5XQH6eroTH",
+        "name": "Event Venue Agent ",
+        "status": "message completed",
+        "information": "Acquired Result",
+        "content": {
+          "type": "text",
+          "content": [
+            {
+              "type": "text",
+              "value": "Based on the provided options, here are venues in San Francisco that accommodate 200 attendees and fit within your $30,000 budget for May 16th, 2025:\n\n1. **The Hibernia SF**\n   - **Location:** San Francisco\n   - **Capacity:** Up to 1,500 (standing) / 600+ (seated)\n   - **Cost:** $2,500 to $30,000\n   - **Features:** Historic building, flexible space suitable for hackathons.\n\n2. **Terra Gallery & Event Venue**\n   - **Location:** San Francisco\n   - **Capacity:** Up to 725\n   - **Cost:** $8,000 to $9,500\n   - **Features:** Contemporary setup with versatile indoor spaces.\n\n3. **The San Francisco Mint**\n   - **Location:** San Francisco\n   - **Capacity:** Up to 700\n   - **Cost:** From $2,895\n   - **Features:** Unique historic setting, adaptable layout.\n\n4. **The Fillmore**\n   - **Location:** San Francisco\n   - **Capacity:** Up to 1,000\n   - **Cost:** Approx. $15,000\n   - **Features:** Iconic music venue with wide open space.\n\n5. **The Great American Music Hall**\n   - **Location:** San Francisco\n   - **Capacity:** Up to 650\n   - **Cost:** $9,000 to $11,000\n   - **Features:** Atmospheric, historic ambiance.\n\n**Best Fit Recommendations:**\n- **The Hibernia SF**: Provides the most flexibility in budget allocation for both the venue and additional setup.\n- **Terra Gallery & Event Venue or The Fillmore**: Both offer unique yet spacious setups well-suited for a hackathon setting【4:0†source】.",
+              "annotations": [
+                {
+                  "type": "file_citation",
+                  "text": "【4:0†source】",
+                  "start_index": 1386,
+                  "end_index": 1398,
+                  "file_citation": {
+                    "file_id": "assistant-75cVYfZdnmqLn3fMH2NxbU"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "output": true
+      },
+      {
+        "id": "step_J4S2JZrFApWA2CyPj8NYwxiZ",
+        "type": "agent",
+        "call_id": "call_XsULMy5XQH6eroTH",
+        "name": "Event Venue Agent ",
+        "status": "step \"message creation\" completed",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "run_P5fbBG7K8uUa4BLXIhK62B9P",
+        "type": "agent",
+        "call_id": "call_XsULMy5XQH6eroTH",
+        "name": "Event Venue Agent ",
+        "status": "run completed",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "item_BV9hSbKgjK0XmUP65uOf4",
+        "type": "message",
+        "role": "assistant",
+        "content": "Here are some venue options for your hackathon in San Francisco:\n\n1. **The Hibernia SF**: A historic building with flexible space.\n2. **Terra Gallery & Event Venue**: A contemporary setup with versatile indoor spaces.\n3. **The San Francisco Mint**: A unique historic setting with an adaptable layout.\n4. **The Fillmore**: An iconic music venue with wide open space.\n5. **The Great American Music Hall**: An atmospheric, historic ambiance.\n\nDo any of these venues sound like a good fit for your event?"
+      },
+      {
+        "id": "item_BV9hkkYxoF1ggIp7WzS6s",
+        "type": "message",
+        "role": "user",
+        "content": "The Hibernia SF sounds great, let's go with that. Now I'd like your help with creating the calendar invite and also sending out the invitations based on the default invite list I provided previously. Could you do that for me?"
+      },
+      {
+        "id": "item_BV9hzu9kdEmIls4psZrRi",
+        "type": "function",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "rsvp_agent",
+        "arguments": {
+          "additional_instructions": "Use the existing invite list for the hackathon event at The Hibernia SF in San Francisco.",
+          "query": "Create a calendar invite and send out invitations for a hackathon at The Hibernia SF, San Francisco, on May 16th, 2025. The event will accommodate 200 people, and the invitations should be sent to the existing invite list."
+        }
+      },
+      {
+        "id": "item_BV9hwf0ktiO6iumBrRbGT",
+        "type": "message",
+        "role": "assistant",
+        "content": "I'll create the calendar invite and send out the invitations using your default invite list for the hackathon at The Hibernia SF on May 16th, 2025. Let's get started!"
+      },
+      {
+        "id": "run_F5RWAJpKX299TIH8MLsMVArH",
+        "type": "agent",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "RSVP Agent",
+        "status": "run queued",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "item_BV9i0QbIQtMCOCA2qLhHY",
+        "type": "message",
+        "role": "assistant",
+        "content": "The calendar invite and invitations are being prepared and sent out to your invite list. Would you like assistance with promoting the event on social media as well?"
+      },
+      {
+        "id": "run_F5RWAJpKX299TIH8MLsMVArH",
+        "type": "agent",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "RSVP Agent",
+        "status": "run in progress",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "step_NZqZnlN09od6wVldNmn8G9ps",
+        "type": "agent",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "RSVP Agent",
+        "status": "step \"tool calls\" in progress",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "step_NZqZnlN09od6wVldNmn8G9ps",
+        "type": "agent",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "RSVP Agent",
+        "status": "step \"tool calls\" completed",
+        "information": null,
+        "content": {
+          "type": "tool_calls",
+          "content": [
+            {
+              "id": "call_ip0Oiv4CcJ6v1d2EyFxiDrVU",
+              "type": "connected_agent",
+              "name": "contact_agent",
+              "arguments": "{\"query\":\"Provide the contact details of everyone on the existing invite list for the hackathon event at The Hibernia SF in San Francisco.\"}",
+              "output": "Here are the contact details of the individuals on the existing invite list for the Hackathon event at The Hibernia SF in San Francisco:\n\n1. Seth Juarez  \n   - Email: seth.juarez@microsoft.com  \n\n2. Marco Casalaina  \n   - Email: mcasalaina@microsoft.com  \n\n3. Mads Bolaris  \n   - Email: mabolan@microsoft.com  \n\n4. Elijah Straight  \n   - Email: estraight@microsoft.com  \n\n5. Linda Li  \n   - Email: zhuoqunli@microsoft.com【4:0†contact_list.pdf】."
+            }
+          ]
+        },
+        "output": false
+      },
+      {
+        "id": "step_CYnZLJ28YrAIETfFon1OeQOm",
+        "type": "agent",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "RSVP Agent",
+        "status": "step \"tool calls\" in progress",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "step_m6WLvBLHrQEdjQv15NYgNNnD",
+        "type": "agent",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "RSVP Agent",
+        "status": "step \"message creation\" in progress",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "msg_jMEu6MmVxTNarMKxLJGqFQEm",
+        "type": "agent",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "RSVP Agent",
+        "status": "message in progress",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "msg_jMEu6MmVxTNarMKxLJGqFQEm",
+        "type": "agent",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "RSVP Agent",
+        "status": "message completed",
+        "information": "Acquired Result",
+        "content": {
+          "type": "text",
+          "content": [
+            {
+              "type": "text",
+              "value": "The calendar invite for the Hackathon at The Hibernia SF in San Francisco on May 16th, 2025, has been successfully created and sent to all attendees on the existing invite list. \n\nThe event details are as follows:\n- **Date:** May 16, 2025\n- **Time:** 9:00 AM - 6:00 PM\n- **Location:** The Hibernia SF, San Francisco\n\nInvitations were sent to:\n- Seth Juarez (seth.juarez@microsoft.com)\n- Marco Casalaina (mcasalaina@microsoft.com)\n- Mads Bolaris (mabolan@microsoft.com)\n- Elijah Straight (estraight@microsoft.com)\n- Linda Li (zhuoqunli@microsoft.com) .",
+              "annotations": []
+            }
+          ]
+        },
+        "output": true
+      },
+      {
+        "id": "step_m6WLvBLHrQEdjQv15NYgNNnD",
+        "type": "agent",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "RSVP Agent",
+        "status": "step \"message creation\" completed",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "run_F5RWAJpKX299TIH8MLsMVArH",
+        "type": "agent",
+        "call_id": "call_1qoIveDEJnaN3bj4",
+        "name": "RSVP Agent",
+        "status": "run completed",
+        "information": null,
+        "content": null,
+        "output": false
+      },
+      {
+        "id": "item_BV9iFIBj01cG0tiNd7bH3",
+        "type": "message",
+        "role": "assistant",
+        "content": "The calendar invite has been sent, and invitations have gone out to your list for the hackathon at The Hibernia SF on May 16th, 2025. Would you like to proceed with any other arrangements or perhaps promote the event on social media?"
+      }
+    ]
+  },
+  "version": 0
+}
