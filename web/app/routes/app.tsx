@@ -48,8 +48,17 @@ import FileImagePicker, {
 import { useLocation } from "react-router";
 import clsx from "clsx";
 import { BsMicMute, BsMic } from "react-icons/bs";
+import { fetchCachedImage } from "store/images";
 
 const queryClient = new QueryClient();
+
+interface ImageFunctionCall {
+  id: string;
+  call_id: string;
+  name: string;
+  arguments: Record<string, any>;
+  image?: string;
+}
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -69,6 +78,8 @@ export default function Home() {
 
   const { user, error } = useUser();
   const [showCapture, setShowCapture] = useState(false);
+  const [imageFunctionCall, setImageFunctionCall] =
+    useState<ImageFunctionCall>();
   const filePickerRef = useRef<FileInputHandle>(null);
 
   useEffect(() => {
@@ -142,48 +153,75 @@ export default function Home() {
         }
         break;
       case "function":
-        // check for client side agents
-        sendRealtime({
-          id: serverEvent.id,
-          type: "function_completion",
-          call_id: serverEvent.call_id,
-          output: `This is a message from the function call that it is in progress. 
-            You can ignore it and continue the conversation until the function call is completed.`,
-        });
-
-        effort?.addEffort(serverEvent);
-
-        // check for `image_url` in the arguments
-        if (serverEvent.arguments?.image_url) {
-          console.log("Image URL found in arguments", serverEvent.arguments);
-          const images = output?.getAllImages();
-          // if there's only one image, set the image_url to the first image
-          if (images && images.length > 0) {
-            serverEvent.arguments.image_url = `${API_ENDPOINT}/${
-              images[images.length - 1].image_url
-            }`;
-          }
-        }
-
-        const api = `${API_ENDPOINT}/api/agent/${user.key}`;
-        console.log("Sending function call to agent", api, serverEvent);
-        // execute agent
-        fetch(api, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            call_id: serverEvent.call_id,
+        if (serverEvent.arguments?.kind) {
+          setImageFunctionCall({
             id: serverEvent.id,
+            call_id: serverEvent.call_id,
             name: serverEvent.name,
             arguments: serverEvent.arguments,
-          }),
-        });
+          });
+          if (serverEvent.arguments.kind === "FILE") {
+            sendRealtime({
+              id: serverEvent.id,
+              type: "function_completion",
+              call_id: serverEvent.call_id,
+              output: `This is a message from the function call that it is in progress. Let the user know that they can upload a file and it will be processed by the agent.`,
+            });
+
+            filePickerRef.current?.activateFileInput();
+          } else {
+            sendRealtime({
+              id: serverEvent.id,
+              type: "function_completion",
+              call_id: serverEvent.call_id,
+              output: `This is a message from the function call that it is in progress. Let the user know to click on the camera to take a picture.`,
+            });
+            setShowCapture(true);
+          }
+        } else {
+          // check for client side agents
+          sendRealtime({
+            id: serverEvent.id,
+            type: "function_completion",
+            call_id: serverEvent.call_id,
+            output: `This is a message from the function call that it is in progress. 
+            You can ignore it and continue the conversation until the function call is completed.`,
+          });
+
+          effort?.addEffort(serverEvent);
+
+          // check for `image_url` in the arguments
+          if (serverEvent.arguments?.image_url) {
+            console.log("Image URL found in arguments", serverEvent.arguments);
+            const images = output?.getAllImages();
+            // if there's only one image, set the image_url to the first image
+            if (images && images.length > 0) {
+              serverEvent.arguments.image_url = `${API_ENDPOINT}/${
+                images[images.length - 1].image_url
+              }`;
+            }
+          }
+
+          const api = `${API_ENDPOINT}/api/agent/${user.key}`;
+          console.log("Sending function call to agent", api, serverEvent);
+          // execute agent
+          fetch(api, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              call_id: serverEvent.call_id,
+              id: serverEvent.id,
+              name: serverEvent.name,
+              arguments: serverEvent.arguments,
+            }),
+          });
+        }
         break;
       case "agent":
         effort?.addEffort(serverEvent);
-        if(serverEvent.status.toLowerCase().includes("failed")) {
+        if (serverEvent.status.toLowerCase().includes("failed")) {
           await sendRealtime({
             id: serverEvent.id,
             type: "function_completion",
@@ -225,8 +263,49 @@ export default function Home() {
     toggleRealtime();
   };
 
-  const sendImageRequest = async () => {
+  const setCurrentImage = (image: string) => {
+    if (!imageFunctionCall) {
+      console.log("No image function call to set image for");
+      return;
+    }
     
+
+    const setImage = (img: string) => {
+      const args = {
+        ...imageFunctionCall.arguments,
+        image: img,
+      };
+
+      sendRealtime({
+        id: imageFunctionCall.id,
+        type: "function_completion",
+        call_id: imageFunctionCall.call_id,
+        output: `This is a message from the function call that it is in progress. 
+        You can ignore it and continue the conversation until the function call is completed.`,
+      });
+
+      const api = `${API_ENDPOINT}/api/agent/${user.key}`;
+      console.log(
+        "Sending function call to agent",
+        api,
+        imageFunctionCall
+      );
+      // execute agent
+      fetch(api, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          call_id: imageFunctionCall.call_id,
+          id: imageFunctionCall.id,
+          name: imageFunctionCall.name,
+          arguments: args,
+        }),
+      });
+    };
+
+    fetchCachedImage(image, setImage);
   };
 
   return (
@@ -379,15 +458,11 @@ export default function Home() {
       <VideoImagePicker
         show={showCapture}
         setShow={setShowCapture}
-        setCurrentImage={(image) => {
-          console.log("Image selected", image);
-        }}
+        setCurrentImage={setCurrentImage}
       />
       <FileImagePicker
         ref={filePickerRef}
-        setCurrentImage={(image) => {
-          console.log("Image selected", image);
-        }}
+        setCurrentImage={setCurrentImage}
       />
       {callState === "call" && (
         <div

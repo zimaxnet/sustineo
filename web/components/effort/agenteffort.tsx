@@ -12,9 +12,14 @@ const AgentEffort = ({ agent }: Props) => {
         <span className={styles.agentName}>{agent.name}</span>
       </div>
       <div className={styles.title}>{agent.status}</div>
-      {agent.information && (
+      {agent.information && typeof agent.information === "string" && (
         <div className={styles.status} title={agent.information}>
           {agent.information}
+        </div>
+      )}
+      {agent.information && typeof agent.information === "object" && (
+        <div className={styles.status} title={agent.information["message"]}>
+          {agent.information["code"]}
         </div>
       )}
       {agent.content &&

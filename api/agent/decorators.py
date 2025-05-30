@@ -27,13 +27,16 @@ def agent(func: Union[Callable, None] = None, **kwargs: Any) -> Callable:
     # remove the return and notify arguments from the args dictionary
     args.pop("return", None)
     args.pop("notify", None)
+    if "kind" in args:
+        # remove kind from args if it exists
+        args.pop("image", None)
 
     if func.__name__ not in function_agents:
         function_agents[name.lower().replace(" ", "_")] = Agent(
             id=func.__name__,
             name=name,
             type="function_agent",
-            description=description,
+            description=" ".join(description.split()),
             parameters=[
                 {
                     "name": k,

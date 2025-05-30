@@ -122,7 +122,22 @@ async def gpt_image_generation(
 
 @agent(
     name="Image Editing Agent",
-    description="This agent can edit an image based upon a detailed description. Use this agent whenever the user wants to generate an image based on an existing image. This agent is based on the GPT-Image-1 model and is capable of generating images in a variety of styles. It can also generate images in a specific style, such as a painting or a photograph. The agent can also generate images with different levels of detail and complexity.",
+    description="""
+    This tool can edit an image based upon a detailed description and a provided image. 
+    Trigger this tool with a description of the edit to be made along with
+    a kind parameter that indicates whether the image is a file upload
+    or a camera capture. The image will be used as a starting point for the edit.
+    The more detailed the description, the better the image will be.
+    The image itself will be automatically provided as a file or a camera capture,
+    so you do not need to include the image in the request. If the user is uploading a file, 
+    set the kind to "FILE" - the user will explictly mention an "upload". If the user is 
+    capturing an image with their camera, set the kind to "CAMERA" - the user will explicitly 
+    mention a "camera capture" or say "take a picture". IMPORTANT: Do not ask the user to upload an image,
+    or to take a picture, as soon as you issue the function call the UI will handle this for 
+    you based on the kind parameter - it is important that you do not ask the user to upload an image or take a picture,
+    as this will cause the UI to not work correctly - just provide the description and the kind parameter.
+    The image will be edited based on the description provided.
+    """,
 )
 async def gpt_image_edit(
     description: Annotated[
@@ -157,6 +172,9 @@ async def gpt_image_edit(
     quality: str = "low"
 
     # send image as multipart/form-data
+    if image.startswith("data:image/jpeg;base64,"):
+        image = image.replace("data:image/jpeg;base64,", "")
+        
     form_data = aiohttp.FormData()
     img = io.BytesIO(base64.b64decode(image))
     form_data.add_field("image", img, filename="image.jpg", content_type="image/jpeg")
