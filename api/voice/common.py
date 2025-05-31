@@ -9,6 +9,7 @@ from datetime import datetime
 from prompty.utils import parse
 from prompty.core import Prompty
 from prompty import _load_with_slots
+from prompty.tracer import trace
 
 from azure.cosmos import PartitionKey
 from azure.cosmos.aio import CosmosClient, ContainerProxy
@@ -131,6 +132,7 @@ async def get_cosmos_container():
         await client.close()
 
 
+@trace
 async def get_default_configuration() -> Union[Configuration, None]:
     async with get_cosmos_container() as container:
         query = "SELECT * FROM c WHERE c.default = true"
@@ -161,7 +163,7 @@ def convert_function_params(params: list[dict]) -> dict:
         "required": [p["name"] for p in params if p["required"]],
     }
 
-
+@trace
 async def get_default_configuration_data(**args) -> Union[DefaultConfiguration, None]:
     config = await get_default_configuration()
     if config:

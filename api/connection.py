@@ -4,10 +4,6 @@ from dataclasses import asdict
 from fastapi.websockets import WebSocketState
 
 
-# MessageType: TypeAlias = Literal[
-#    "user", "assistant", "system", "audio", "console", "interrupt", "function", "agent"
-# ]
-
 class Connection:
     def __init__(self, websocket: WebSocket):
         self.websocket = websocket
@@ -28,6 +24,9 @@ class Connection:
         if self.websocket.client_state == WebSocketState.CONNECTED:
             await self.websocket.close()
 
+    async def get_state(self) -> WebSocketState:
+        return self.websocket.client_state
+
     @property
     def state(self) -> WebSocketState:
         return self.websocket.client_state
@@ -41,7 +40,8 @@ class ConnectionManager:
     async def connect(self, id: str, websocket: WebSocket) -> Connection:
         # destroy existing connection if it exists
         if id in self.active_connections:
-            await self.active_connections[id].close()
+            if self.active_connections[id].state == WebSocketState.CONNECTED:
+                await self.active_connections[id].close()
             del self.active_connections[id]
 
         await websocket.accept()

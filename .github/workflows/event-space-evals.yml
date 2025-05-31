@@ -2,6 +2,8 @@ name: Event Space Evals
 
 on:
   push:
+    branches:
+      - release
   workflow_dispatch:
     
 permissions:
