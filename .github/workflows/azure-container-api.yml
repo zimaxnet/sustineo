@@ -68,6 +68,8 @@ jobs:
                                 "AZURE_IMAGE_ENDPOINT=secretref:azure-image-endpoint" \
                                 "AZURE_IMAGE_API_KEY=secretref:azure-image-api-key" \
                                 "SUSTINEO_STORAGE=secretref:sustineo-storage" \
+                                "AZURE_SORA_ENDPOINT=secretref:azure-sora-endpoint" \
+                                "AZURE_SORA_API_KEY=secretref:azure-sora-api-key" \
                                 "LOCAL_TRACING_ENABLED=false"
 
       - name: Logout
