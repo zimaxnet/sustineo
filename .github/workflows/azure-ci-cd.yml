@@ -44,47 +44,39 @@ jobs:
 
       - name: Deploy API to Azure Container Instance
         run: |
-          # Uncomment and edit for env vars
+          az container delete --resource-group $RESOURCE_GROUP --name sustineo-api --yes || true
           az container create \
             --resource-group $RESOURCE_GROUP \
-            --name $API_CONTAINER_NAME \
+            --name sustineo-api \
             --image $API_IMAGE \
             --registry-login-server $REGISTRY \
             --registry-username $REGISTRY_USERNAME \
             --registry-password $REGISTRY_PASSWORD \
-            --dns-name-label $API_CONTAINER_NAME-${{ github.run_number }} \
+            --dns-name-label sustineo-api-${{ github.run_number }} \
             --ports 80 8000 \
             --location $LOCATION \
             --os-type Linux \
             --cpu 1 \
             --memory 1.5 \
-            --restart-policy Always \
-          || az container update \
-            --resource-group $RESOURCE_GROUP \
-            --name $API_CONTAINER_NAME \
-            --image $API_IMAGE
+            --restart-policy Always
 
       - name: Deploy Web to Azure Container Instance
         run: |
-          # Uncomment and edit for env vars
+          az container delete --resource-group $RESOURCE_GROUP --name sustineo-web --yes || true
           az container create \
             --resource-group $RESOURCE_GROUP \
-            --name $WEB_CONTAINER_NAME \
+            --name sustineo-web \
             --image $WEB_IMAGE \
             --registry-login-server $REGISTRY \
             --registry-username $REGISTRY_USERNAME \
             --registry-password $REGISTRY_PASSWORD \
-            --dns-name-label $WEB_CONTAINER_NAME-${{ github.run_number }} \
+            --dns-name-label sustineo-web-${{ github.run_number }} \
             --ports 80 5173 \
             --location $LOCATION \
             --os-type Linux \
             --cpu 1 \
             --memory 1.5 \
-            --restart-policy Always \
-          || az container update \
-            --resource-group $RESOURCE_GROUP \
-            --name $WEB_CONTAINER_NAME \
-            --image $WEB_IMAGE
+            --restart-policy Always
 
       - name: Show deployed container IPs
         run: |
