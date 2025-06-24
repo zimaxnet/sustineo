@@ -55,6 +55,8 @@ jobs:
             --ports 80 8000 \
             --location $LOCATION \
             --os-type Linux \
+            --cpu 1 \
+            --memory 1.5 \
             --restart-policy Always \
             # --environment-variables KEY=VALUE # Uncomment and edit for env vars
           || az container update \
@@ -75,6 +77,8 @@ jobs:
             --ports 80 5173 \
             --location $LOCATION \
             --os-type Linux \
+            --cpu 1 \
+            --memory 1.5 \
             --restart-policy Always \
             # --environment-variables KEY=VALUE # Uncomment and edit for env vars
           || az container update \
