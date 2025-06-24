@@ -23,4 +23,12 @@ COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY --from=build-env /app/build /app/build
 WORKDIR /app
 RUN npm install -g npm@11.3.0
-CMD ["npm", "run", "start"]
+
+# Install a static file server for production
+RUN npm install -g serve
+
+# Expose port 80 for the web server
+EXPOSE 80
+
+# Start the static file server to serve the build directory
+CMD ["serve", "-s", "build", "-l", "80"]
