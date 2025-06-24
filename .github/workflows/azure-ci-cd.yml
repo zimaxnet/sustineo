@@ -54,6 +54,7 @@ jobs:
             --dns-name-label $API_CONTAINER_NAME-${{ github.run_number }} \
             --ports 80 8000 \
             --location $LOCATION \
+            --os-type Linux \
             --restart-policy Always \
             # --environment-variables KEY=VALUE # Uncomment and edit for env vars
           || az container update \
@@ -73,6 +74,7 @@ jobs:
             --dns-name-label $WEB_CONTAINER_NAME-${{ github.run_number }} \
             --ports 80 5173 \
             --location $LOCATION \
+            --os-type Linux \
             --restart-policy Always \
             # --environment-variables KEY=VALUE # Uncomment and edit for env vars
           || az container update \
