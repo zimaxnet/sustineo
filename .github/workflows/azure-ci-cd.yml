@@ -44,6 +44,7 @@ jobs:
 
       - name: Deploy API to Azure Container Instance
         run: |
+          # Uncomment and edit for env vars
           az container create \
             --resource-group $RESOURCE_GROUP \
             --name $API_CONTAINER_NAME \
@@ -58,13 +59,14 @@ jobs:
             --cpu 1 \
             --memory 1.5 \
             --restart-policy Always \
-            # --environment-variables KEY=VALUE # Uncomment and edit for env vars || az container update \
+          || az container update \
             --resource-group $RESOURCE_GROUP \
             --name $API_CONTAINER_NAME \
             --image $API_IMAGE
 
       - name: Deploy Web to Azure Container Instance
         run: |
+          # Uncomment and edit for env vars
           az container create \
             --resource-group $RESOURCE_GROUP \
             --name $WEB_CONTAINER_NAME \
@@ -79,7 +81,7 @@ jobs:
             --cpu 1 \
             --memory 1.5 \
             --restart-policy Always \
-            # --environment-variables KEY=VALUE # Uncomment and edit for env vars || az container update \
+          || az container update \
             --resource-group $RESOURCE_GROUP \
             --name $WEB_CONTAINER_NAME \
             --image $WEB_IMAGE
