@@ -1,0 +1,88 @@
+name: Build, Push, and Deploy to Azure Container Instances
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ${{ secrets.REGISTRY_URL }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+      RESOURCE_GROUP: zimax-container-rg
+      SUBSCRIPTION_ID: 490a597e-95d5-454c-bd0c-3e7b349f1e87
+      API_IMAGE: zimax.azurecr.io/sustineo-api:latest
+      WEB_IMAGE: zimax.azurecr.io/sustineo-web:latest
+      API_CONTAINER_NAME: sustineo-api
+      WEB_CONTAINER_NAME: sustineo-web
+      LOCATION: eastus
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to ACR
+        run: echo $REGISTRY_PASSWORD | docker login $REGISTRY -u $REGISTRY_USERNAME --password-stdin
+
+      - name: Build and push API image
+        run: |
+          docker build -t $API_IMAGE ./api
+          docker push $API_IMAGE
+
+      - name: Build and push Web image
+        run: |
+          docker build -t $WEB_IMAGE ./web
+          docker push $WEB_IMAGE
+
+      - name: Deploy API to Azure Container Instance
+        run: |
+          az container create \
+            --resource-group $RESOURCE_GROUP \
+            --name $API_CONTAINER_NAME \
+            --image $API_IMAGE \
+            --registry-login-server $REGISTRY \
+            --registry-username $REGISTRY_USERNAME \
+            --registry-password $REGISTRY_PASSWORD \
+            --dns-name-label $API_CONTAINER_NAME-${{ github.run_number }} \
+            --ports 80 8000 \
+            --location $LOCATION \
+            --restart-policy Always \
+            # --environment-variables KEY=VALUE # Uncomment and edit for env vars
+          || az container update \
+            --resource-group $RESOURCE_GROUP \
+            --name $API_CONTAINER_NAME \
+            --image $API_IMAGE
+
+      - name: Deploy Web to Azure Container Instance
+        run: |
+          az container create \
+            --resource-group $RESOURCE_GROUP \
+            --name $WEB_CONTAINER_NAME \
+            --image $WEB_IMAGE \
+            --registry-login-server $REGISTRY \
+            --registry-username $REGISTRY_USERNAME \
+            --registry-password $REGISTRY_PASSWORD \
+            --dns-name-label $WEB_CONTAINER_NAME-${{ github.run_number }} \
+            --ports 80 5173 \
+            --location $LOCATION \
+            --restart-policy Always \
+            # --environment-variables KEY=VALUE # Uncomment and edit for env vars
+          || az container update \
+            --resource-group $RESOURCE_GROUP \
+            --name $WEB_CONTAINER_NAME \
+            --image $WEB_IMAGE
+
+      - name: Show deployed container IPs
+        run: |
+          echo "API Container IP:"
+          az container show --resource-group $RESOURCE_GROUP --name $API_CONTAINER_NAME --query ipAddress.fqdn -o tsv
+          echo "Web Container IP:"
+          az container show --resource-group $RESOURCE_GROUP --name $WEB_CONTAINER_NAME --query ipAddress.fqdn -o tsv 

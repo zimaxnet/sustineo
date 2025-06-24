@@ -5,7 +5,7 @@ BuildEvents by Contoso is a website that allows people to capture ideas about ev
 
 ## Roles and Responsibilities
 These are the experts on the evently team where issues should be assigned to for triaging
- - Showing how GitHub Copilot’s agentic feature can help speed up development: @jldeen
+ - Showing how GitHub Copilot's agentic feature can help speed up development: @jldeen
  - Migrating legacy Java code @jldeen
  - Show how to take advantage of the latest models @sethjuarez
  - Build with LLMs locally to add my own Agentic Features to my BuildEvents app @martinwoodward
@@ -51,3 +51,25 @@ These commands are useful if you need to reset your environment or restart servi
 ### Additional Information
 - magic function calling mapping for generic local function calls (A)
 - figure out backchannel with utility function calls (A+S)*
+
+## Automated Testing and Deployment by Zimax Networks
+
+Zimax Networks is actively managing the testing and deployment of this project using a modern CI/CD pipeline:
+
+- **Continuous Integration & Deployment:**
+  - Every push to the `main` branch triggers a GitHub Actions workflow.
+  - The workflow builds Docker images for both the API and web frontend.
+  - Images are pushed to the Azure Container Registry (`zimax.azurecr.io`).
+  - The latest images are deployed to Azure Container Instances (ACI) with public endpoints for both services.
+
+- **Testing:**
+  - Automated tests are run as part of the workflow to ensure code quality and reliability.
+
+- **Managed by Zimax Networks:**
+  - Zimax Networks oversees the entire process, ensuring rapid iteration, robust testing, and reliable deployment to Azure infrastructure.
+
+For more information or support, contact Zimax Networks.
+
+---
+
+_Deployment triggered by Zimax Networks on $(date)_
